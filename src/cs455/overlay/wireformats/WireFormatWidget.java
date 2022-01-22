@@ -1,4 +1,4 @@
-package cs455.overlay;
+package cs455.overlay.wireformats;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
