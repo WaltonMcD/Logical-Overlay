@@ -55,4 +55,6 @@ public class WireFormatWidget {
         dout.close();
         return marshalledBytes;
     }
+
+    // TODO getType()
 }
