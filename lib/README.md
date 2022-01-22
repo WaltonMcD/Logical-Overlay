@@ -1,1 +1,1 @@
-## Created to control imports and versioning.
+## Created to control dependencies and versioning.
