@@ -16,20 +16,15 @@ public class Server {
         int count = 0;
         count++;
         Socket incomingConnectionSocket = serverSocket.accept();
-        System.out.println("Received a connection. Currently " + count +"client connected");
+        System.out.println("Received a connection. Currently " + count +" client(s) are connected");
         
-
         TCPReciever inputStream = new TCPReciever(incomingConnectionSocket);
-        TCPSender outputStream = new TCPSender(incomingConnectionSocket);
+        String input = "";
 
-        byte[] msgToClient = new String("Is anybody there?").getBytes();
-        outputStream.sendData(msgToClient);
+        while(!input.equals("Exit")){
+            inputStream.run();
+        }
 
-        System.out.println("Message Sent... ");
-
-        inputStream.run();
-
-        outputStream.close();
         inputStream.close();
         incomingConnectionSocket.close();
         serverSocket.close();
