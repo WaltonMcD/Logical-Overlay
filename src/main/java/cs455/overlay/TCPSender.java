@@ -1,4 +1,4 @@
-package cs455.overlay.util;
+package cs455.overlay;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,5 +18,9 @@ public class TCPSender {
         dout.writeInt(dataLength);
         dout.write(dataToSend, 0, dataLength);
         dout.flush();
+    }
+
+    public void close() throws IOException {
+        dout.close();
     }
 }
