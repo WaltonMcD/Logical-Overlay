@@ -1,11 +1,9 @@
 package cs455.overlay;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import cs455.overlay.TCPReciever;
-import cs455.overlay.TCPSender;
 
 public class Server {
     
@@ -18,12 +16,22 @@ public class Server {
         Socket incomingConnectionSocket = serverSocket.accept();
         System.out.println("Received a connection. Currently " + count +" client(s) are connected");
         
-        TCPReciever inputStream = new TCPReciever(incomingConnectionSocket);
+        DataInputStream inputStream = new DataInputStream(incomingConnectionSocket.getInputStream());
         String input = "";
 
         while(!input.equals("Exit")){
-            inputStream.run();
+            Integer dataLength = inputStream.readInt();
+            System.out.println("Received a message of length: " + dataLength);
+
+            byte[] data = new byte[dataLength];
+            inputStream.readFully(data, 0, dataLength);
+
+            String msg_str = new String(data);
+            System.out.println("Received message: " + msg_str);
+
+            input = msg_str;
         }
+
 
         inputStream.close();
         incomingConnectionSocket.close();

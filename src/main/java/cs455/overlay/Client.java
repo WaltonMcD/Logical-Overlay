@@ -1,43 +1,43 @@
 package cs455.overlay;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Random;
-import java.lang.Math;
 
-import cs455.overlay.TCPReciever;
-import cs455.overlay.TCPSender;
-
-public class Client{
-    private Socket socketToServer;
+public class Client extends Thread {
     private Integer identifier;
-    private Scanner input;
+    private Socket socketToServer;
     
-    public Client(String address, Integer port) throws IOException {
-        try{
-            Random random = new Random();
-            this.identifier = port;
+    public Client(Socket socketToServer, Integer identifier) {
+        this.identifier = identifier;
+        this.socketToServer = socketToServer;
+        System.out.println("Connection Created With Client: " + identifier); 
+    }
 
-            this.input = new Scanner(System.in);
-            this.socketToServer = new Socket(address, port);
-            System.out.println("Connection Created With Client: " + identifier);
-
-            TCPSender outputStream = new TCPSender(socketToServer);
-
+    public void run() {
+        Scanner input = new Scanner(System.in);
+        System.out.println("Enter your message: ");
+        try {
+            DataOutputStream outputStream = new DataOutputStream(socketToServer.getOutputStream());
             String line = "";
-            while(!line.equals("Exit")){
-                line = this.input.nextLine();
-                outputStream.sendData(line.getBytes());
-            }
 
+            while(!line.equals("Exit")){
+                line = input.nextLine();
+                int dataLength = line.length();
+                outputStream.writeInt(dataLength);
+                outputStream.write(line.getBytes(), 0, dataLength);
+                outputStream.flush();
+            }
+            input.close();
             outputStream.close();
-            this.socketToServer.close();
-        } catch (UnknownHostException un){
-            System.out.println(un.getMessage());
+            socketToServer.close();
+
+        } catch (IOException ioe) {
+            ioe.getMessage();
         }
+        
+
+        
     }
 }
