@@ -27,7 +27,7 @@ public class Registry {
                 
                 
             }else{
-                System.out.println("Error: Possible inputs include {client [HOST] [PORT]}");
+                System.out.println("Error: Possible inputs include 'client [HOST] [PORT]' or 'server [PORT]'");
             }
         }
 }
