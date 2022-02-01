@@ -1,13 +1,11 @@
-package cs455.overlay.server;
+package cs455.overlay.routing;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 import cs455.overlay.node.Node;
-import cs455.overlay.server.Server.NodeThread;
-import cs455.overlay.server.Server.ServerThread;
+import cs455.overlay.routing.Server.ServerThread;
 
 public class Registry {
     public static void main(String[] args) {
