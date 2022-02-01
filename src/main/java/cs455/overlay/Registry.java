@@ -1,10 +1,11 @@
-package cs455.overlay.routing;
+package cs455.overlay;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
 import cs455.overlay.node.Node;
+import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
 
 public class Registry {
@@ -28,7 +29,7 @@ public class Registry {
                     new Thread(serverThread).start();
                     setupComplete = true;
                 }
-                else if(command.equals("list-messaging-nodes")){
+                else if(command.equals("list-messaging-nodes") && setupComplete == true){
                     for(Server.NodeThread node : server.getNodes()){
                         System.out.println("Node #" + node.clientNum + " is connected from Host: " + node.nodeSocket.getInetAddress() + " Port: " + node.nodeSocket.getLocalPort());
                     }
@@ -42,8 +43,8 @@ public class Registry {
                     System.exit(0);
                 }
                 else {
-                    System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}");
-                    System.out.println("To start you must setup-overlay first.");
+                    System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
+                    System.out.println("Note: To start or list-messaging-nodes you must setup-overlay first.");
                 }
             }
         }
