@@ -20,7 +20,7 @@ public class Registry {
                 int serverPort = Integer.parseInt(args[3]);
                 try{
                     Socket nodeSocket = new Socket(serverHost, serverPort);
-                    Node node = new Node(nodeSocket, serverPort);
+                    Node node = new Node(nodeSocket);
                     node.run();
                 }catch (UnknownHostException un){
                     System.out.println(un.getMessage());

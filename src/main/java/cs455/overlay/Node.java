@@ -9,8 +9,8 @@ public class Node extends Thread {
     private Integer identifier;
     private Socket socketToServer;
     
-    public Node(Socket socketToServer, Integer identifier) {
-        this.identifier = identifier;
+    public Node(Socket socketToServer) {
+        this.identifier = socketToServer.getLocalPort();
         this.socketToServer = socketToServer;
         System.out.println("Connection Created With Node: " + identifier); 
     }
