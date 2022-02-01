@@ -5,20 +5,21 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.net.Socket;
 
-public class Client extends Thread {
+public class Node extends Thread {
     private Integer identifier;
     private Socket socketToServer;
     
-    public Client(Socket socketToServer, Integer identifier) {
+    public Node(Socket socketToServer, Integer identifier) {
         this.identifier = identifier;
         this.socketToServer = socketToServer;
-        System.out.println("Connection Created With Client: " + identifier); 
+        System.out.println("Connection Created With Node: " + identifier); 
     }
 
     public void run() {
-        Scanner input = new Scanner(System.in);
-        System.out.println("Enter your message: ");
         try {
+            Scanner input = new Scanner(System.in);
+            System.out.println("Enter your message: ");
+
             DataOutputStream outputStream = new DataOutputStream(socketToServer.getOutputStream());
             String line = "";
 
@@ -29,12 +30,13 @@ public class Client extends Thread {
                 outputStream.write(line.getBytes(), 0, dataLength);
                 outputStream.flush();
             }
+            System.out.println("Closing Connection with Server... ");
             input.close();
             outputStream.close();
             socketToServer.close();
 
         } catch (IOException ioe) {
-            ioe.getMessage();
+            System.out.println(ioe.getMessage());
         }
         
 
