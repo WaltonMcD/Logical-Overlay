@@ -17,7 +17,7 @@ ___
 - `setup-overlay` : This will start the server allowing nodes to connect.
 - `list-messaging-nodes` : This will list all nodes connected showing id, port, and host.
 - `start [NUMBER_OF_MESSAGES]` : this will start the client process of sending the specified amount of messages to its neighbor.
-- `exit-overlay`
+- `exit-overlay` : Exits the program gracefully.
 ___
 ### Node
 #### `java -jar build/libs/Homework-1.jar cs455.overlay.Registry node [YOUR_SERVER_ADDRESS] [YOUR_SERVER_PORT]`
