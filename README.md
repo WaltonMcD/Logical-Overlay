@@ -10,9 +10,15 @@ ___
 
 #### After a successful build an executable jar will be placed in gradle's `build` folder under `libs`.
 ___
-### Execution
+### Server
 - To use the executable you must first start the sever to host nodes.
 #### `java -jar build/libs/Homework-1.jar cs455.overlay.Registry server [YOUR_PORT] [NUMBER_OF_CONNECTIONS]`
-- After starting the server you then may connect as many nodes as you have chosen. The true max would be dependent on how many logical processors the machine hosting the server has available.
+- You will be prompted to enter a command from the registry. The commands are as follows...
+- `setup-overlay` : This will start the server allowing nodes to connect.
+- `list-messaging-nodes` : This will list all nodes connected showing id, port, and host.
+- `start [NUMBER_OF_MESSAGES]` : this will start the client process of sending the specified amount of messages to its neighbor.
+- `exit-overlay`
+___
+### Node
 #### `java -jar build/libs/Homework-1.jar cs455.overlay.Registry node [YOUR_SERVER_ADDRESS] [YOUR_SERVER_PORT]`
 - The current rendition allows the nodes to send a message to the server and be displayed by the server. Termination command is `exit-overlay`.
