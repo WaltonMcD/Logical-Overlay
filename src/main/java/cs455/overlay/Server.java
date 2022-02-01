@@ -60,7 +60,7 @@ public class Server {
                 String line = "";
 
                 //constantly excepting input until termination string is provided.
-                while(!line.equals("Exit")){
+                while(!line.equals("exit-overlay")){
                     try{
                         Integer msgLength = inputStream.readInt();
                         byte[] msg = new byte[msgLength];

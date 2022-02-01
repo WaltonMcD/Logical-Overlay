@@ -14,8 +14,8 @@ public class Registry {
                 Integer port = Integer.parseInt(args[2]);
                 Integer numOfConnections = Integer.parseInt(args[3]);
                 Server server = new Server(port, numOfConnections);
-    
-            }else if(args[1].equals("node")){
+            }
+            else if(args[1].equals("node")){
                 String serverHost = args[2];
                 int serverPort = Integer.parseInt(args[3]);
                 try{
@@ -24,10 +24,9 @@ public class Registry {
                     node.run();
                 }catch (UnknownHostException un){
                     System.out.println(un.getMessage());
-                }
-                
-                
-            }else{
+                } 
+            }
+            else{
                 System.out.println("Error: Possible inputs include 'node [HOST] [PORT]' or 'server [PORT] [NUMBER_OF_CONNECTIONS]'");
             }
         }

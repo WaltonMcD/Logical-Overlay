@@ -23,7 +23,7 @@ public class Node extends Thread {
             DataOutputStream outputStream = new DataOutputStream(socketToServer.getOutputStream());
             String line = "";
 
-            while(!line.equals("Exit")){
+            while(!line.equals("exit-overlay")){
                 line = input.nextLine();
                 int dataLength = line.length();
                 outputStream.writeInt(dataLength);
