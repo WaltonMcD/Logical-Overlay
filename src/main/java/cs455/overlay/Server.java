@@ -9,34 +9,36 @@ import java.util.ArrayList;
 
 public class Server {
     
-    public Server(Integer port, Integer numOfConnections) throws IOException {
+    public Server(Integer port, Integer numOfConnections) {
         ServerSocket serverSocket = null;
         ArrayList<NodeThread> nodes = new ArrayList<NodeThread>();
 
         try {
             serverSocket = new ServerSocket(port);
             System.out.println("Created Server Socket... ");
-            int count = 0;
             while(true) {
                 Socket incomingConnectionSocket = serverSocket.accept();
                 incomingConnectionSocket.setReuseAddress(true);
-                count++;
-                System.out.println("Received a connection. Node: " + incomingConnectionSocket.getLocalPort() + " " + incomingConnectionSocket.getInetAddress());
-                NodeThread nodeSock = new NodeThread(incomingConnectionSocket, count, nodes);
+                System.out.println("Received a connection. Node: " + incomingConnectionSocket.getPort() + " " + incomingConnectionSocket.getInetAddress());
+
+                NodeThread nodeSock = new NodeThread(incomingConnectionSocket, incomingConnectionSocket.getPort(), nodes);
                 nodes.add(nodeSock);
+                System.out.println("Currently " + nodes.size() + " node(s) connected.");
+
                 if(nodes.size() == numOfConnections){
                     System.out.println("Maximum number of clients connected.");
                 }
                 else if(nodes.size() > numOfConnections){
                     System.out.println("Maximum number of connections exceeded. Max: " + numOfConnections);
+                    serverSocket.close();
                     break;
                 }
+
                 new Thread(nodeSock).start();
             }
         }
         catch (IOException ioe) {
             System.out.print(ioe.getMessage());
-            serverSocket.close();
         }
     }
 
