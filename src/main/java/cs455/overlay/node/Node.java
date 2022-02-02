@@ -8,8 +8,6 @@ import java.net.Socket;
 public class Node extends Thread {
     public Integer identifier;
     public Socket socketToServer;
-    private Node frontNode;
-    private Node backNode;
     
     public Node(Socket socketToServer) {
         this.identifier = socketToServer.getLocalPort();
@@ -40,13 +38,5 @@ public class Node extends Thread {
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }   
-    }
-
-    public void setFrontNode(Node node){
-        this.frontNode = node;
-    }
-
-    public void setBackNode(Node node){
-        this.backNode = node;
     }
 }

@@ -45,12 +45,19 @@ public class Server{
                     incomingConnectionSocket.setReuseAddress(true);
                     System.out.println("Received a connection. Node: " + incomingConnectionSocket.getPort() + " " + incomingConnectionSocket.getInetAddress());
     
-                    NodeThread nodeSock = new NodeThread(incomingConnectionSocket, incomingConnectionSocket.getPort(), nodes);
+                    NodeThread nodeSock = new NodeThread(incomingConnectionSocket);
                     nodes.add(nodeSock);
+                    Registry.nodesList.add(nodeSock);
                     System.out.println("Currently " + nodes.size() + " node(s) connected.");
     
-                    if(nodes.size() == server.numOfConnections){
-                        System.out.println("Maximum number of clients connected.");
+                    // Once all nodes are connected this will assign nodes to connect to.
+                    if(Registry.nodesList.size() == server.numOfConnections){
+                        System.out.println("Maximum number of nodes connected.");
+                        for(int i = 0; i < server.numOfConnections; i++){
+                            NodeThread currentNode = Registry.nodesList.get(i);
+                            currentNode.setFrontNode(Registry.nodesList.get( (i + 1) % server.numOfConnections).nodeSocket);
+                            currentNode.setBackNode(Registry.nodesList.get( (i + 9) % server.numOfConnections).nodeSocket);
+                        }
                     }
                     else if(nodes.size() > server.numOfConnections){
                         System.out.println("Maximum number of connections exceeded. Max: " + server.numOfConnections);
@@ -71,12 +78,12 @@ public class Server{
     public static class NodeThread implements Runnable {
         public final Socket nodeSocket;
         public final Integer nodeNum;
-        private ArrayList<NodeThread> neighborNodes;
+        private NodeThread frontNode;
+        private NodeThread backNode;
 
-        public NodeThread(Socket nodeSocket, Integer nodeNum, ArrayList<NodeThread> neighborNodes) {
+        public NodeThread(Socket nodeSocket) {
             this.nodeSocket = nodeSocket;
-            this.nodeNum = nodeNum;
-            this.neighborNodes = neighborNodes;
+            this.nodeNum = nodeSocket.getPort();
         }
 
         @Override
@@ -102,12 +109,7 @@ public class Server{
                 }
 
                 System.out.println("Closing Connection with Node: #" + nodeNum);
-                getNeighborNodes().remove(this);
-                for(Node node : Registry.nodesList){
-                    if(node.identifier == this.nodeNum){
-                        Registry.nodesList.remove(node);
-                    }
-                }
+                Registry.nodesList.remove(this);
                 inputStream.close();
                 nodeSocket.close();
             }
@@ -116,8 +118,20 @@ public class Server{
             }
         }
 
-        public synchronized ArrayList<NodeThread> getNeighborNodes() {
-            return this.neighborNodes;
+        public synchronized void setFrontNode(Socket frontNodeSocket){
+            for(NodeThread node: Registry.nodesList){
+                if(node.nodeSocket == frontNodeSocket){
+                    this.frontNode = node;
+                }
+            }
+        }
+
+        public synchronized void setBackNode(Socket backNodeSocket){
+            for(NodeThread node: Registry.nodesList){
+                if(node.nodeSocket == backNodeSocket){
+                    this.backNode = node;
+                }
+            }
         }
 
     }

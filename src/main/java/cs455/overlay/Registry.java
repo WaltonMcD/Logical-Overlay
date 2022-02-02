@@ -10,9 +10,9 @@ import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
 
 public class Registry {
-    public static ArrayList<Node> nodesList = null;
+    public static ArrayList<Server.NodeThread> nodesList = null;
     public static void main(String[] args) {
-        nodesList = new ArrayList<Node>();
+        nodesList = new ArrayList<Server.NodeThread>();
 
         if(args[1].equals("server")){
             Scanner input = new Scanner(System.in);
@@ -23,6 +23,7 @@ public class Registry {
             Integer numOfConnections = Integer.parseInt(args[3]);
 
             while(true){
+
                 System.out.println("Enter a command: ");
                 command = input.next();
 
@@ -41,9 +42,6 @@ public class Registry {
                     Integer numberOfMessages = input.nextInt();
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
                 }
-                else if(nodesList.size() == numOfConnections ){
-                    System.out.println("Maximum number of nodes connected.");
-                }
                 else if(command.equals("exit-overlay")){
                     System.out.println("Closing All Connections... ");
                     System.exit(0);
@@ -56,15 +54,14 @@ public class Registry {
         }
         else if(args[1].equals("node")){
             String serverHost = args[2];
-                int serverPort = Integer.parseInt(args[3]);
-                try{
-                    Socket nodeSocket = new Socket(serverHost, serverPort);
-                    Node node = new Node(nodeSocket);
-                    nodesList.add(node);
-                    node.run();
-                }catch (IOException ioe){
-                    System.out.println(ioe.getMessage());
-                } 
+            int serverPort = Integer.parseInt(args[3]);
+            try{
+                Socket nodeSocket = new Socket(serverHost, serverPort);
+                Node node = new Node(nodeSocket);
+                node.run();
+            }catch (IOException ioe){
+                System.out.println(ioe.getMessage());
+            } 
         }
     }
     
