@@ -1,11 +1,16 @@
 package cs455.overlay.routing;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import cs455.overlay.Registry;
+import cs455.overlay.node.Node;
 
 public class Server{
     private static ArrayList<NodeThread> nodes = null;
@@ -21,9 +26,9 @@ public class Server{
         catch (IOException ioe) {
             System.out.print(ioe.getMessage());
         }
-        
     }
 
+    // Spawns a server thread
     public static class ServerThread implements Runnable{
         private Server server = null;
 
@@ -59,20 +64,18 @@ public class Server{
             catch (IOException ioe) {
                 System.out.print(ioe.getMessage());
             }
-            
         }
-        
     }
 
-    // Thread Handler
+    // Thread to handle Node socket 
     public static class NodeThread implements Runnable {
         public final Socket nodeSocket;
-        public final Integer clientNum;
+        public final Integer nodeNum;
         private ArrayList<NodeThread> neighborNodes;
 
-        public NodeThread(Socket nodeSocket, Integer clientNum, ArrayList<NodeThread> neighborNodes) {
+        public NodeThread(Socket nodeSocket, Integer nodeNum, ArrayList<NodeThread> neighborNodes) {
             this.nodeSocket = nodeSocket;
-            this.clientNum = clientNum;
+            this.nodeNum = nodeNum;
             this.neighborNodes = neighborNodes;
         }
 
@@ -80,6 +83,7 @@ public class Server{
         public void run(){
             try{
                 DataInputStream inputStream = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
+                DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
                 String line = "";
 
                 //constantly excepting input until termination string is provided.
@@ -90,15 +94,20 @@ public class Server{
                         inputStream.readFully(msg, 0, msgLength);
                         String str = new String(msg);
                         line = str;
-                        System.out.println("Node #" + clientNum + " says: " + line);
+                        System.out.println("Node #" + nodeNum + " says: " + line);
                     }
                     catch(IOException ioe){
                         System.out.println(ioe.getMessage());
                     }
                 }
 
-                System.out.println("Closing Connection with Node: #" + clientNum);
+                System.out.println("Closing Connection with Node: #" + nodeNum);
                 getNeighborNodes().remove(this);
+                for(Node node : Registry.nodesList){
+                    if(node.identifier == this.nodeNum){
+                        Registry.nodesList.remove(node);
+                    }
+                }
                 inputStream.close();
                 nodeSocket.close();
             }
