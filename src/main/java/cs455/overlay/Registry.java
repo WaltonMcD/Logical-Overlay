@@ -42,7 +42,7 @@ public class Registry {
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
                 }
                 else if(nodesList.size() == numOfConnections ){
-                    continue;
+                    System.out.println("Maximum number of nodes connected.");
                 }
                 else if(command.equals("exit-overlay")){
                     System.out.println("Closing All Connections... ");
