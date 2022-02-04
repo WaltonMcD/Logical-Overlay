@@ -89,7 +89,7 @@ public class Server{
                     Integer port = inputStream.readInt();
                     
                     Message registrationRequest = new Message(messageType, ip, port);
-                    Registry.nodesList.add(new Node(ip, port, port));
+                    Registry.nodesList.add(new Node(ip, identifier, port));
                     System.out.println("\nRegistration Request From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
