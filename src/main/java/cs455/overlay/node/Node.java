@@ -1,42 +1,80 @@
 package cs455.overlay.node;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Scanner;
+import java.net.InetAddress;
 import java.net.Socket;
+
+import cs455.overlay.protocols.Message;
 
 public class Node extends Thread {
     public Integer identifier;
     public Socket socketToServer;
+    private String ipAddress;
+    private Integer port;
+    private String ip;
+    private Node frontNode;
+    private Node backNode;
+
+    public Node(String ipAddress, Integer port, Integer identifier){
+        this.ip = ipAddress;
+        this.port = port;
+        this.identifier = identifier;
+    }
     
     public Node(Socket socketToServer) {
-        this.identifier = socketToServer.getLocalPort();
         this.socketToServer = socketToServer;
-        System.out.println("Connection Created With Node: " + identifier); 
+        InetAddress ipAddress = socketToServer.getInetAddress();
+        this.ip = ipAddress.getHostAddress();
+        this.port = socketToServer.getLocalPort();
     }
 
     public void run() {
         try {
-            Scanner input = new Scanner(System.in);
-            System.out.println("Enter your message: ");
+            DataOutputStream outputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
+            DataInputStream inputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
 
-            DataOutputStream outputStream = new DataOutputStream(socketToServer.getOutputStream());
-            String line = "";
+            //Send Register Request
+            Integer messageType = 0;
+            Message registrationRequest = new Message(messageType, ip, port);
+            outputStream.writeInt(registrationRequest.messageType);
+            outputStream.writeUTF(registrationRequest.ipAddress); 
+            outputStream.writeInt(registrationRequest.port); 
+            outputStream.flush();
 
-            while(!line.equals("exit-overlay")){
-                line = input.nextLine();
-                int dataLength = line.length();
-                outputStream.writeInt(dataLength);
-                outputStream.write(line.getBytes(), 0, dataLength);
-                outputStream.flush();
-            }
-            System.out.println("Closing Connection with Server... ");
-            input.close();
+            //Receive Register Response
+            messageType = inputStream.readInt();
+            Integer statusCode = inputStream.readInt();
+            Integer identifier = inputStream.readInt();
+            this.identifier = identifier;
+            String additionalInfo = inputStream.readUTF();
+
+            Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
+            System.out.println("Registration Response Received Status Code: " + registrationResponse.statusCode);
+            
             outputStream.close();
-            socketToServer.close();
 
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }   
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setBackNode(Node backNode) {
+        this.backNode = backNode;
+    }
+
+    public void setFrontNode(Node frontNode) {
+        this.frontNode = frontNode;
     }
 }

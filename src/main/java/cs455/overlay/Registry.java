@@ -2,6 +2,7 @@ package cs455.overlay;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -10,9 +11,9 @@ import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
 
 public class Registry {
-    public static ArrayList<Server.NodeThread> nodesList = null;
+    public static ArrayList<Node> nodesList = null;
     public static void main(String[] args) {
-        nodesList = new ArrayList<Server.NodeThread>();
+        nodesList = new ArrayList<Node>();
 
         if(args[1].equals("server")){
             Scanner input = new Scanner(System.in);
@@ -22,9 +23,9 @@ public class Registry {
             Integer port = Integer.parseInt(args[2]);
             Integer numOfConnections = Integer.parseInt(args[3]);
 
-            while(true){
+            while(!command.equals("exit-overlay")){
 
-                System.out.println("Enter a command: ");
+                System.out.print("Enter a command: ");
                 command = input.next();
 
                 if(command.equals("setup-overlay")){
@@ -34,36 +35,44 @@ public class Registry {
                     setupComplete = true;
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
-                    for(Server.NodeThread node : server.getNodes()){
-                        System.out.println("Node #" + node.nodeNum + " is connected from Host: " + node.nodeSocket.getInetAddress() + " Port: " + node.nodeSocket.getLocalPort());
+                    for(Node node : nodesList){
+                        System.out.println("Node #" + node.identifier + " is connected from Host: " + node.getIp() + " Port: " + node.getPort());
                     }
                 }
                 else if(command.equals("start") && setupComplete == true){
                     Integer numberOfMessages = input.nextInt();
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
                 }
-                else if(command.equals("exit-overlay")){
-                    System.out.println("Closing All Connections... ");
-                    System.exit(0);
-                }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
                     System.out.println("Note: To start or list-messaging-nodes you must setup-overlay first.");
                 }
             }
+            System.out.println("Closing All Connections... ");
+            System.exit(0);
         }
         else if(args[1].equals("node")){
+            Scanner input = new Scanner(System.in);
             String serverHost = args[2];
             int serverPort = Integer.parseInt(args[3]);
-            try{
-                Socket nodeSocket = new Socket(serverHost, serverPort);
-                Node node = new Node(nodeSocket);
+            String command = "";
+
+            try {
+                Socket sock = new Socket(serverHost, serverPort);
+                Node node = new Node(sock);
                 node.run();
-            }catch (IOException ioe){
-                System.out.println(ioe.getMessage());
-            } 
+
+                while(!command.equals("exit-overlay")){
+                    System.out.print("Enter exit-overlay to exit: ");
+                    command = input.next();
+                }
+
+                sock.close();
+            } catch (UnknownHostException un) {
+                System.out.println("Error Node: " + un.getMessage());
+            } catch (IOException e) {
+                System.out.println("Error Node: " + e.getMessage());
+            }
         }
-    }
-    
-    
+    }  
 }

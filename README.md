@@ -21,4 +21,4 @@ ___
 ___
 ### Node
 #### `java -jar build/libs/Homework-1.jar cs455.overlay.Registry node [YOUR_SERVER_ADDRESS] [YOUR_SERVER_PORT]`
-- The current rendition allows the nodes to send a message to the server and be displayed by the server. Termination command is `exit-overlay`.
+- The current rendition sends a registration request and accepts a registration response `exit-overlay`.
