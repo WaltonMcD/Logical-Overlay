@@ -13,9 +13,8 @@ import cs455.overlay.protocols.Message;
 public class Node extends Thread {
     public Integer identifier;
     public Socket socketToServer;
-    private String ipAddress;
-    private Integer port;
-    private String ip;
+    public Integer port;
+    public String ip;
     private Node frontNode;
     private Node backNode;
 
@@ -62,14 +61,6 @@ public class Node extends Thread {
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }   
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public Integer getPort() {
-        return port;
     }
 
     public void setBackNode(Node backNode) {

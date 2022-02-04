@@ -36,7 +36,7 @@ public class Registry {
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
                     for(Node node : nodesList){
-                        System.out.println("Node #" + node.identifier + " is connected from Host: " + node.getIp() + " Port: " + node.getPort());
+                        System.out.println("Node #" + node.identifier + " is connected from Host: " + node.ip + " Port: " + node.port);
                     }
                 }
                 else if(command.equals("start") && setupComplete == true){
