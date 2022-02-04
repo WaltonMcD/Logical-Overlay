@@ -70,7 +70,6 @@ public class Server{
     public static class NodeThread implements Runnable {
         public final Socket nodeSocket;
         public final Integer identifier;
-        public Node connectedNode;
 
         public NodeThread(Socket nodeSocket) {
             this.nodeSocket = nodeSocket;
@@ -89,10 +88,8 @@ public class Server{
                     String ip = inputStream.readUTF();
                     Integer port = inputStream.readInt();
                     
-                    Node node = new Node(ip, port, port);
                     Message registrationRequest = new Message(messageType, ip, port);
-                    connectedNode = node;
-                    Registry.nodesList.add(node);
+                    Registry.nodesList.add(new Node(ip, port, port));
                     System.out.println("\nRegistration Request From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
