@@ -53,7 +53,7 @@ public class Node extends Thread {
             String additionalInfo = inputStream.readUTF();
 
             Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
-            System.out.println("Registration Response Received Status Code: " + registrationResponse.statusCode);
+            System.out.println("Registration Response Received From Node: " + identifier + " Status Code: " + registrationResponse.statusCode);
             
             outputStream.close();
 

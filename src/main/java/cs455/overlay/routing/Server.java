@@ -93,7 +93,7 @@ public class Server{
                     System.out.println("\nRegistration Request From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
-                    Message registrationResponse = new Message(1, 200, 20, "Welcome");
+                    Message registrationResponse = new Message(1, 200, identifier, "Welcome");
                     
                     outputStream.writeInt(registrationResponse.messageType);
                     outputStream.writeInt(registrationResponse.statusCode);
