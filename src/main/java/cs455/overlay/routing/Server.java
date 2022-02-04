@@ -107,6 +107,7 @@ public class Server{
                 }
                 
                 inputStream.close();
+                outputStream.close();
                 nodeSocket.close();
             }
             catch(IOException ioe){

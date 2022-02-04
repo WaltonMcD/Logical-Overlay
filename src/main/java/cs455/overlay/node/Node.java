@@ -57,6 +57,7 @@ public class Node extends Thread {
             "\nAdditional Info: " + registrationResponse.additionalInfo);
             
             outputStream.close();
+            inputStream.close();
 
         } catch (IOException ioe) {
             System.out.println(ioe.getMessage());
