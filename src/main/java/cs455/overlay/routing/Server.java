@@ -30,7 +30,7 @@ public class Server{
     }
 
     // Spawns a server thread
-    public static class ServerThread implements Runnable{
+    public static class ServerThread implements Runnable {
         private Server server = null;
 
         public ServerThread(Server server){
@@ -90,10 +90,10 @@ public class Server{
                     
                     Message registrationRequest = new Message(messageType, ip, port);
                     Registry.nodesList.add(new Node(ip, identifier, port));
-                    System.out.println("\nRegistration Request From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
+                    System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
-                    Message registrationResponse = new Message(1, 200, identifier, "Welcome");
+                    Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
                     
                     outputStream.writeInt(registrationResponse.messageType);
                     outputStream.writeInt(registrationResponse.statusCode);

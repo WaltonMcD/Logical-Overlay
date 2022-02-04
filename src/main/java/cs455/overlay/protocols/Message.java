@@ -12,14 +12,14 @@ public class Message {
     public Integer backNodePort;
     public Integer backNodeIp;
 
-    //Registration Request / Deregistration Request
+    //Registration Request : Type = 0 / Deregistration Request : Type = 1
     public Message(Integer messageType, String ipAddress, Integer port){
         this.messageType = messageType;
         this.ipAddress = ipAddress;
         this.port = port;
     }
 
-    //Registration Response
+    //Registration Response : Type = 2
     public Message(Integer messageType, Integer statusCode, Integer identifier, String additionalInfo){
         this.messageType = messageType;
         this.statusCode = statusCode;
@@ -27,13 +27,27 @@ public class Message {
         this.additionalInfo = additionalInfo;
     }
 
-    //Connection Directive
+    //Connection Directive : Type = 3
     public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, Integer backNodeIp){
         this.messageType = messageType;
         this.frontNodePort = frontNodePort;
         this.frontNodeIp = frontNodeIp;
         this.backNodeIp = backNodeIp;
         this.backNodePort = backNodePort;
+    }
+
+    public String getType(){
+        switch(this.messageType){
+            case 0:
+                return "Registration_Request";
+            case 1:
+                return "Deregistration_Request";
+            case 2:
+                return "Registration_Response";
+            case 3:
+                return "Connection_Directive";
+        }
+        return null; 
     }
 
 }
