@@ -11,6 +11,13 @@ public class Message {
     public String frontNodeIp;
     public Integer backNodePort;
     public Integer backNodeIp;
+    public Integer payload;
+    public Integer startNodeId;
+    public Integer messagesToSend;
+    public Integer numMessagesSent;
+    public Integer numMessagesReceived;
+    public Integer sumOfSentMessages;
+    public Integer sumOfReceivedMessages;
 
     //Registration Request : Type = 0 / Deregistration Request : Type = 1
     public Message(Integer messageType, String ipAddress, Integer port){
@@ -36,6 +43,46 @@ public class Message {
         this.backNodePort = backNodePort;
     }
 
+    //Task Initiate : Type = 4
+    public Message(Integer messageType, Integer messagesToSend){
+        this.messageType = messageType;
+        this.messagesToSend = messagesToSend;
+    }
+    
+    //Data Traffic : Type = 5
+    public Message(Integer messageType, Integer startNodeId, Integer payload){
+        this.messageType = messageType;
+        this.startNodeId = startNodeId;
+        this.payload = payload;
+    }
+
+    //Task Complete : Type = 6
+    public Message(Integer messageType, Integer identifier, String ipAddress, Integer port){
+        this.messageType = messageType;
+        this.identifier = identifier;
+        this.ipAddress = ipAddress;
+        this.port = port;
+    }
+
+    //Pull Traffic Summary : Type = 7
+    public Message(Integer messageType){
+        this.messageType = messageType;
+
+    }
+
+    //Traffic Summary : Type = 8
+    public Message(Integer messageType, String ipAddress, Integer port, Integer numMessagesSent, 
+        Integer numMessagesReceived, Integer sumOfSentMessages, Integer sumOfReceivedMessages){
+        this.messageType = messageType;
+        this.ipAddress = ipAddress;
+        this.port = port;
+        this.numMessagesSent = numMessagesSent;
+        this.numMessagesReceived = numMessagesReceived;
+        this.sumOfSentMessages = sumOfSentMessages;
+        this.sumOfReceivedMessages = sumOfReceivedMessages;
+    }
+
+    
     public String getType(){
         switch(this.messageType){
             case 0:
@@ -46,6 +93,16 @@ public class Message {
                 return "Registration_Response";
             case 3:
                 return "Connection_Directive";
+            case 4:
+                return "Task_Initiate";
+            case 5:
+                return "Data_Traffic";
+            case 6:
+                return "Task_Complete";
+            case 7: 
+                return "Pull_Traffic_Summary";
+            case 8:
+                return "Traffic_Summary";
         }
         return null; 
     }
