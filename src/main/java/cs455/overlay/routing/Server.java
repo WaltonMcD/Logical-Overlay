@@ -8,21 +8,22 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import cs455.overlay.Registry;
 import cs455.overlay.node.Node;
 import cs455.overlay.protocols.Message;
 
-public class Server{
-    private static ArrayList<NodeThread> nodes = null;
+public class Server extends Thread{
+    public static ArrayList<Message> directives = null;
     private ServerSocket serverSocket = null;
-    private Integer numOfConnections; 
+    public static Integer numOfConnections; 
 
     public Server(Integer port, Integer numOfConnections){
         try{
             serverSocket = new ServerSocket(port);
-            nodes = new ArrayList<NodeThread>();
-            this.numOfConnections = numOfConnections;
+            directives = new ArrayList<Message>();
+            Server.numOfConnections = numOfConnections;
         }
         catch (IOException ioe) {
             System.out.print(ioe.getMessage());
@@ -37,6 +38,20 @@ public class Server{
             this.server = server;
         }
 
+        public synchronized void waitNodeRegistration(){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        // we need a synchronized class to be concurrent
+        public synchronized void notifyRegistration(){
+            notify();
+        }
+
         @Override
         public void run() {
             try {
@@ -44,19 +59,33 @@ public class Server{
                     Socket incomingConnectionSocket = server.serverSocket.accept();
                     incomingConnectionSocket.setReuseAddress(true);
     
-                    NodeThread nodeSock = new NodeThread(incomingConnectionSocket);
-                    nodes.add(nodeSock);
+                    NodeThread nodeSock = new NodeThread(incomingConnectionSocket, this);
+                    new Thread(nodeSock).start();
+                    waitNodeRegistration(); //We need to wait for the node to register before doing checks
     
                     // Once all nodes are connected this will assign nodes to connect to.
-                    if(nodes.size() == server.numOfConnections){
+                    if(Registry.nodesList.size() == numOfConnections){
                         System.out.println("Maximum number of nodes connected.");
+                        // Uses arraylist to assign a ring structure if first node is i = 0 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 9
+                        // next rendition i = 1 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 0
+                        for(int i = 0; i < numOfConnections; i++){
+                            Integer messageType = 9;
+                            Integer identifier = Registry.nodesList.get(i).identifier;
+                            System.out.println("BackNode: " + (i + numOfConnections-1) % numOfConnections + " Middle: " + (i) + " FrontNode: " + ((i+1) % numOfConnections));
+                            Integer frontPort = Registry.nodesList.get((i + 1) % numOfConnections).port;
+                            String frontIp = Registry.nodesList.get((i + 1) % numOfConnections).ip;
+                            Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).port;
+                            String backIp = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).ip;
+                            Message connDirective = new Message(messageType, identifier, frontPort, frontIp, backPort, backIp);
+                            directives.add(connDirective);
+                        }
                     }
-                    else if(nodes.size() > server.numOfConnections){
-                        System.out.println("Maximum number of connections exceeded. Max: " + server.numOfConnections);
+                    else if(Registry.nodesList.size() > numOfConnections){
+                        System.out.println("Maximum number of connections exceeded. Max: " + numOfConnections);
                         server.serverSocket.close();
                         break;
                     }
-                    new Thread(nodeSock).start();
+                    
                 }
                 System.out.println("Closing Server Socket... ");
             }
@@ -70,10 +99,12 @@ public class Server{
     public static class NodeThread implements Runnable {
         public final Socket nodeSocket;
         public final Integer identifier;
+        public ServerThread server;
 
-        public NodeThread(Socket nodeSocket) {
+        public NodeThread(Socket nodeSocket, ServerThread server) {
             this.nodeSocket = nodeSocket;
             this.identifier = nodeSocket.getPort();
+            this.server = server;
         }
 
         @Override
@@ -90,6 +121,8 @@ public class Server{
                     
                     Message registrationRequest = new Message(messageType, ip, port);
                     Registry.nodesList.add(new Node(ip, identifier, port));
+                    server.notifyRegistration();
+    
                     System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
@@ -115,10 +148,4 @@ public class Server{
             }
         }
     }
-
-    //Getters and Setters
-    public ArrayList<NodeThread> getNodes(){
-        return nodes;
-    }
-
 }

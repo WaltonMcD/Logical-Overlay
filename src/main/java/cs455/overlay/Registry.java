@@ -10,7 +10,7 @@ import cs455.overlay.node.Node;
 import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
 
-public class Registry {
+public class Registry extends Thread{
     public static ArrayList<Node> nodesList = null;
     public static void main(String[] args) {
         nodesList = new ArrayList<Node>();
@@ -74,5 +74,5 @@ public class Registry {
                 System.out.println("Error Node: " + e.getMessage());
             }
         }
-    }  
+    }
 }
