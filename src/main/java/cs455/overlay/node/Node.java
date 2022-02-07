@@ -44,16 +44,20 @@ public class Node extends Thread {
             outputStream.writeInt(registrationRequest.port); 
             outputStream.flush();
 
-            //Receive Register Response
+            
             messageType = inputStream.readInt();
-            Integer statusCode = inputStream.readInt();
-            Integer identifier = inputStream.readInt();
-            this.identifier = identifier;
-            String additionalInfo = inputStream.readUTF();
+            
+            //Receive Register Response
+            if (messageType == 2){
+                Integer statusCode = inputStream.readInt();
+                Integer identifier = inputStream.readInt();
+                this.identifier = identifier;
+                String additionalInfo = inputStream.readUTF();
 
-            Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
-            System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
-            "\nAdditional Info: " + registrationResponse.additionalInfo);
+                Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
+                System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
+                "\nAdditional Info: " + registrationResponse.additionalInfo);
+            }
             
             outputStream.close();
             inputStream.close();
