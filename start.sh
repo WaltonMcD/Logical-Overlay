@@ -6,10 +6,10 @@ NODE_DELAY='sleep 10;'     # editable. How long you have to setup-overlay before
 JAR_FILE="Homework-1/build/libs/Homework-1.jar"
 SERVER=''
 PORT='64001'
-REGISTRY_SCRIPT='java -jar "$JAR_FILE" cs455.overlay.Registry server $PORT $MAX_CONN'
+REGISTRY_SCRIPT='java -jar '"$JAR_FILE"' cs455.overlay.Registry server '"$PORT"' '"$MAX_CONN"''
 NODE_SCRIPT=''
 
-command='gnome-terminal'
+COMMAND='gnome-terminal'
 counter=0
 
 for i in `cat machines.txt`
@@ -28,8 +28,9 @@ do
 	    option='--tab --title="'$i'" --command="ssh -t '$USERNAME'@'$i'.cs.colostate.edu '$NODE_SCRIPT' '$SHELL'"'
 	fi
 
-	command+=" $option"
+	COMMAND+=" $option"
 	((counter++))
 done
 
-eval $command
+
+eval $COMMAND
