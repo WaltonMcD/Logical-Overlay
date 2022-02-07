@@ -10,7 +10,7 @@ public class Message {
     public Integer frontNodePort;
     public String frontNodeIp;
     public Integer backNodePort;
-    public Integer backNodeIp;
+    public String backNodeIp;
     public Integer payload;
     public Integer startNodeId;
     public Integer messagesToSend;
@@ -35,7 +35,7 @@ public class Message {
     }
 
     //Connection Directive : Type = 3
-    public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, Integer backNodeIp){
+    public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, String backNodeIp){
         this.messageType = messageType;
         this.frontNodePort = frontNodePort;
         this.frontNodeIp = frontNodeIp;
@@ -80,6 +80,16 @@ public class Message {
         this.numMessagesReceived = numMessagesReceived;
         this.sumOfSentMessages = sumOfSentMessages;
         this.sumOfReceivedMessages = sumOfReceivedMessages;
+    }
+
+    //Connection Directive helper, needed identifier for array storage : Type = 9
+    public Message(Integer messageType, Integer identifier, Integer frontNodePort, String frontNodeIp, Integer backNodePort, String backNodeIp){
+        this.messageType = messageType;
+        this.identifier = identifier;
+        this.frontNodePort = frontNodePort;
+        this.frontNodeIp = frontNodeIp;
+        this.backNodeIp = backNodeIp;
+        this.backNodePort = backNodePort;
     }
 
     
