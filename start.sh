@@ -20,7 +20,7 @@ do
 
     echo "Logging into $i."
 
-	if [ $counter == 0 ]; then
+	if [ $counter -eq 0 ]; then
 	    SERVER="$i"
 	    option='--window --title="'$i'" --command="ssh -t '$USERNAME'@'$SERVER'.cs.colostate.edu '$REGISTRY_SCRIPT' '$SHELL'"'
 	else
@@ -31,6 +31,5 @@ do
 	COMMAND+=" $option"
 	((counter++))
 done
-
 
 eval $COMMAND
