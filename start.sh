@@ -5,8 +5,7 @@ USERNAME=$2    # editable
 NODE_DELAY='sleep 10;'     # editable. How long you have to setup-overlay before nodes attempt to connect to Registry.
 LIB_DIR="$PWD/build/libs/"
 SERVER=""
-PORT='64001'
-REGISTRY_SCRIPT='java -jar Homework-1/build/libs/Homework-1.jar cs455.overlay.Registry server $PORT $MAX_CONN'
+REGISTRY_SCRIPT='java -jar Homework-1/build/libs/Homework-1.jar cs455.overlay.Registry server 64001 $MAX_CONN'
 NODE_SCRIPT=''
 
 if [ -d "$LIB_DIR" ]; then
@@ -25,7 +24,7 @@ if [ -d "$LIB_DIR" ]; then
 		    SERVER="$i"
 		    option='--window --title="'$i'" --command="ssh -t '$USERNAME'@'$SERVER'.cs.colostate.edu '$REGISTRY_SCRIPT' '$SHELL'"'
 		else
-		    NODE_SCRIPT="$NODE_DELAY java -jar Homework-1/build/libs/Homework-1.jar cs455.overlay.Registry node $SERVER.cs.colostate.edu $PORT"
+		    NODE_SCRIPT="$NODE_DELAY java -jar Homework-1/build/libs/Homework-1.jar cs455.overlay.Registry node $SERVER.cs.colostate.edu 64001"
 		    option='--tab --title="'$i'" --command="ssh -t '$USERNAME'@'$i'.cs.colostate.edu '$NODE_SCRIPT' '$SHELL'"'
 		fi
 
