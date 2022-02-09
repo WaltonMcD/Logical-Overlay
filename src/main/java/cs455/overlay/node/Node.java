@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 import cs455.overlay.protocols.Message;
+import cs455.overlay.node.FrontNodeThread;
+import cs455.overlay.node.BackNodeThread;
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -76,6 +78,12 @@ public class Node implements Runnable {
             String backIP = inputStream.readUTF();
 
             System.out.println("Connecttion Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
+            
+            FrontNodeThread frontNode = new FrontNodeThread(frontIP, frontPort);
+            new Thread(frontNode).start();
+
+            BackNodeThread backNode = new BackNodeThread(backIP, backPort);
+            new Thread(backNode).start();
     
             outputStream.close();
             inputStream.close();
