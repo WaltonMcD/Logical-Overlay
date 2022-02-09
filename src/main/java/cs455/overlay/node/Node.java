@@ -10,7 +10,7 @@ import java.net.Socket;
 
 import cs455.overlay.protocols.Message;
 
-public class Node extends Thread {
+public class Node implements Runnable {
     public Integer identifier;
     public Socket socketToServer;
     public Integer port;
@@ -26,9 +26,21 @@ public class Node extends Thread {
     
     public Node(Socket socketToServer) {
         this.socketToServer = socketToServer;
-        InetAddress ipAddress = socketToServer.getInetAddress();
-        this.ip = ipAddress.getHostAddress();
+        InetAddress ipAddress = socketToServer.getLocalAddress();
+        this.ip = ipAddress.getHostName();
         this.port = socketToServer.getLocalPort();
+    }
+
+    public synchronized void waitNode(){
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void notifyNode(){
+        notify();
     }
 
     public void run() {
@@ -43,22 +55,28 @@ public class Node extends Thread {
             outputStream.writeUTF(registrationRequest.ipAddress); 
             outputStream.writeInt(registrationRequest.port); 
             outputStream.flush();
-
-            
-            messageType = inputStream.readInt();
             
             //Receive Register Response
-            if (messageType == 2){
-                Integer statusCode = inputStream.readInt();
-                Integer identifier = inputStream.readInt();
-                this.identifier = identifier;
-                String additionalInfo = inputStream.readUTF();
+            messageType = inputStream.readInt();
+            Integer statusCode = inputStream.readInt();
+            Integer identifier = inputStream.readInt();
+            this.identifier = identifier;
+            String additionalInfo = inputStream.readUTF();
 
-                Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
-                System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
-                "\nAdditional Info: " + registrationResponse.additionalInfo);
-            }
+            Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
+            System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
+            "\nAdditional Info: " + registrationResponse.additionalInfo);
             
+
+            //Receive Connection Directive
+            messageType = inputStream.readInt();
+            Integer frontPort = inputStream.readInt();
+            String frontIP = inputStream.readUTF();
+            Integer backPort = inputStream.readInt();
+            String backIP = inputStream.readUTF();
+
+            System.out.println("Connecttion Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
+    
             outputStream.close();
             inputStream.close();
 

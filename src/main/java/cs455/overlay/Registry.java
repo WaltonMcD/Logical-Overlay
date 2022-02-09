@@ -60,10 +60,9 @@ public class Registry extends Thread{
             try {
                 Socket sock = new Socket(serverHost, serverPort);
                 Node node = new Node(sock);
-                node.run();
+                new Thread(node).start();
 
                 while(!command.equals("exit-overlay")){
-                    System.out.print("Enter exit-overlay to exit: ");
                     command = input.next();
                 }
 
