@@ -14,8 +14,11 @@ import java.net.UnknownHostException;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
-import cs455.overlay.node.FrontNodeThread;
-import cs455.overlay.node.BackNodeThread;
+import cs455.overlay.node.FrontNodeThread.FrontNodeReceiver;
+import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
+import cs455.overlay.node.BackNodeThread.BackNodeReceiver;
+import cs455.overlay.node.BackNodeThread.BackNodeSender;
+
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -50,25 +53,25 @@ public class Node implements Runnable {
 
     public void run() {
         try {
-            DataOutputStream outputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
-            DataInputStream inputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
+            DataOutputStream serverOutputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
+            DataInputStream serverInputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
 
 
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequest = new Message(messageType, ip, port);
-            outputStream.writeInt(registrationRequest.messageType);
-            outputStream.writeUTF(registrationRequest.ipAddress); 
-            outputStream.writeInt(registrationRequest.port); 
-            outputStream.flush();
+            serverOutputStream.writeInt(registrationRequest.messageType);
+            serverOutputStream.writeUTF(registrationRequest.ipAddress); 
+            serverOutputStream.writeInt(registrationRequest.port); 
+            serverOutputStream.flush();
 
             
             //Receive Register Response
-            messageType = inputStream.readInt();
-            Integer statusCode = inputStream.readInt();
-            Integer identifier = inputStream.readInt();
+            messageType = serverInputStream.readInt();
+            Integer statusCode = serverInputStream.readInt();
+            Integer identifier = serverInputStream.readInt();
             this.identifier = identifier;
-            String additionalInfo = inputStream.readUTF();
+            String additionalInfo = serverInputStream.readUTF();
 
             Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
             System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
@@ -76,28 +79,33 @@ public class Node implements Runnable {
             
 
             //Receive Connection Directive
-            messageType = inputStream.readInt();
-            Integer frontPort = inputStream.readInt();
-            String frontIP = inputStream.readUTF();
-            Integer backPort = inputStream.readInt();
-            String backIP = inputStream.readUTF();
+            messageType = serverInputStream.readInt();
+            Integer frontPort = serverInputStream.readInt();
+            String frontIP = serverInputStream.readUTF();
+            Integer backPort = serverInputStream.readInt();
+            String backIP = serverInputStream.readUTF();
 
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 2);
 
-            FrontNodeThread frontNode = new FrontNodeThread(frontIP, frontPort, nodeServerPort);
+            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
             new Thread(frontNode).start();
             
-            BackNodeThread backNode = new BackNodeThread(backIP, backPort, nodeServerPort);
+            BackNodeSender backNode = new BackNodeSender(backIP, backPort, nodeServerPort);
             new Thread(backNode).start();
             
             Socket frontSocket = nodeServer.accept();
             Socket backSocket = nodeServer.accept();
+
+            FrontNodeReceiver frontNodeReceiver = new FrontNodeReceiver(frontSocket);
+            BackNodeReceiver backNodeReceiver = new BackNodeReceiver(backSocket);
+            new Thread(frontNodeReceiver).start();
+            new Thread(backNodeReceiver).start();
     
-            outputStream.close();
-            inputStream.close();
+            serverOutputStream.close();
+            serverInputStream.close();
 
         } 
         catch (IOException ioe) {
