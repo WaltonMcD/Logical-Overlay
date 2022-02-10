@@ -29,7 +29,7 @@ public class FrontNodeThread {
 
                 DataOutputStream frontOutputStream = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
 
-                frontOutputStream.writeUTF("Hello front node.");
+                frontOutputStream.writeUTF("Hello from front node.");
                 frontOutputStream.flush();
             }
             catch(UnknownHostException un){

@@ -28,7 +28,7 @@ public class BackNodeThread {
 
                 DataOutputStream backOutputStream = new DataOutputStream( new BufferedOutputStream(backSocket.getOutputStream()));
 
-                backOutputStream.writeUTF("Hello back node.");
+                backOutputStream.writeUTF("Hello from back node.");
                 backOutputStream.flush();
             }
             catch(UnknownHostException un){
