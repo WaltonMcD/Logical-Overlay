@@ -1,5 +1,10 @@
 package cs455.overlay.protocols;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public class Message {
     public Integer messageType;
     public String ipAddress;
@@ -18,6 +23,9 @@ public class Message {
     public Integer numMessagesReceived;
     public Integer sumOfSentMessages;
     public Integer sumOfReceivedMessages;
+
+    // Default constructor for when you're receiving a message and don't know the message type yet
+    public Message(){}
 
     //Registration Request : Type = 0 / Deregistration Request : Type = 1
     public Message(Integer messageType, String ipAddress, Integer port){
@@ -88,11 +96,184 @@ public class Message {
         this.identifier = identifier;
         this.frontNodePort = frontNodePort;
         this.frontNodeIp = frontNodeIp;
-        this.backNodeIp = backNodeIp;
         this.backNodePort = backNodePort;
+        this.backNodeIp = backNodeIp;
     }
 
     
+    public String packMessage(DataOutputStream outputStream){
+        try {
+            outputStream.writeInt(this.messageType);
+
+            switch(this.messageType){
+                case 0:
+                    outputStream.writeUTF(this.ipAddress);
+                    outputStream.writeInt(this.port);
+                    
+            
+
+                case 1:
+                    outputStream.writeUTF(this.ipAddress);
+                    outputStream.writeInt(this.port);
+
+                case 2:
+                    outputStream.writeInt(this.statusCode);
+                    outputStream.writeInt(this.identifier);
+                    outputStream.writeUTF(this.additionalInfo);
+
+                case 3:
+                    outputStream.writeInt(this.frontNodePort);
+                    outputStream.writeUTF(this.frontNodeIp);
+                    outputStream.writeInt(this.backNodePort);
+                    outputStream.writeUTF(this.backNodeIp);
+
+                    
+                case 4:
+                    outputStream.writeInt(this.messagesToSend);
+
+                case 5:
+                    outputStream.writeInt(this.startNodeId);
+                    outputStream.writeInt(this.payload);    
+
+                case 6:
+                    outputStream.writeInt(this.identifier);
+                    outputStream.writeUTF(this.ipAddress);
+                    outputStream.writeInt(this.port);
+
+                case 7: 
+                    ;
+                case 8:
+                    outputStream.writeUTF(this.ipAddress);
+                    outputStream.writeInt(this.port);
+                    outputStream.writeInt(this.numMessagesSent);
+                    outputStream.writeInt(this.numMessagesReceived);
+                    outputStream.writeInt(this.sumOfSentMessages);
+                    outputStream.writeInt(this.sumOfReceivedMessages);
+
+
+                case 9:
+                    outputStream.writeInt(this.identifier);
+                    outputStream.writeInt(this.frontNodePort);
+                    outputStream.writeUTF(this.frontNodeIp);
+                    outputStream.writeInt(this.backNodePort);
+                    outputStream.writeUTF(this.backNodeIp);
+
+            }
+
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; 
+    }
+
+
+    // outputStream.writeInt(registrationResponse.identifier);
+    // outputStream.writeUTF(registrationResponse.additionalInfo);
+
+    // Integer statusCode = inputStream.readInt();
+    // String additionalInfo = inputStream.readUTF();
+
+    public ArrayList<Object> unpackMessage(DataInputStream inputStream){
+        ArrayList<Object> messageContents = new ArrayList<Object>();
+        try {
+            this.messageType = inputStream.readInt();
+            messageContents.add(messageType);
+
+            switch(this.messageType){
+                case 0:
+                    this.ipAddress = inputStream.readUTF();
+                    this.port = inputStream.readInt();
+                    
+                    messageContents.add(ipAddress);
+                    messageContents.add(port);
+
+                case 1:
+                    this.ipAddress = inputStream.readUTF();
+                    this.port = inputStream.readInt();
+                    
+                    messageContents.add(ipAddress);
+                    messageContents.add(port);
+
+                case 2:
+                    this.statusCode = inputStream.readInt();
+                    this.identifier = inputStream.readInt();
+                    this.additionalInfo = inputStream.readUTF();
+
+                    messageContents.add(statusCode);
+                    messageContents.add(identifier);
+                    messageContents.add(additionalInfo);
+
+                case 3:
+                    this.frontNodePort = inputStream.readInt();
+                    this.frontNodeIp = inputStream.readUTF();
+                    this.backNodePort = inputStream.readInt();
+                    this.backNodeIp = inputStream.readUTF();
+
+                    messageContents.add(frontNodePort);
+                    messageContents.add(frontNodeIp);
+                    messageContents.add(backNodePort);
+                    messageContents.add(backNodeIp);
+
+                case 4:
+                    this.messagesToSend = inputStream.readInt();
+
+                    messageContents.add(messagesToSend);
+
+                case 5:
+                    this.startNodeId = inputStream.readInt();
+                    this.payload = inputStream.readInt();    
+
+                    messageContents.add(startNodeId);
+                    messageContents.add(payload);
+
+                case 6:
+                    this.identifier = inputStream.readInt();
+                    this.ipAddress = inputStream.readUTF();
+                    this.port = inputStream.readInt();
+
+                    messageContents.add(identifier);
+                    messageContents.add(ipAddress);
+                    messageContents.add(port);
+
+                case 7: 
+                    ;
+                case 8:
+                    this.ipAddress = inputStream.readUTF();
+                    this.port = inputStream.readInt();
+                    this.numMessagesSent = inputStream.readInt();
+                    this.numMessagesReceived = inputStream.readInt();
+                    this.sumOfSentMessages = inputStream.readInt();
+                    this.sumOfReceivedMessages = inputStream.readInt();
+
+                    messageContents.add(ipAddress);
+                    messageContents.add(port);
+                    messageContents.add(numMessagesSent);
+                    messageContents.add(numMessagesReceived);
+                    messageContents.add(sumOfSentMessages);
+                    messageContents.add(sumOfReceivedMessages);
+
+                case 9:
+                    this.identifier = inputStream.readInt();
+                    this.frontNodePort = inputStream.readInt();
+                    this.frontNodeIp = inputStream.readUTF();
+                    this.backNodePort = inputStream.readInt();
+                    this.backNodeIp = inputStream.readUTF();
+
+                    messageContents.add(identifier);
+                    messageContents.add(frontNodePort);
+                    messageContents.add(frontNodeIp);
+                    messageContents.add(backNodePort);
+                    messageContents.add(backNodeIp);
+
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return messageContents; 
+    }
+
     public String getType(){
         switch(this.messageType){
             case 0:
@@ -113,6 +294,8 @@ public class Message {
                 return "Pull_Traffic_Summary";
             case 8:
                 return "Traffic_Summary";
+            case 9:
+                return "Connection_Directive_Helper";
         }
         return null; 
     }
