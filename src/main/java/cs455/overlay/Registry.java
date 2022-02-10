@@ -12,6 +12,7 @@ import cs455.overlay.routing.Server.ServerThread;
 
 public class Registry extends Thread{
     public static ArrayList<Node> nodesList = null;
+    public static Integer serverPort = 0;
     public static void main(String[] args) {
         nodesList = new ArrayList<Node>();
 
@@ -20,7 +21,8 @@ public class Registry extends Thread{
             Server server = null;
             Boolean setupComplete = false;
             String command = "";
-            Integer port = Integer.parseInt(args[2]);
+            serverPort = Integer.parseInt(args[2]);
+            
             Integer numOfConnections = Integer.parseInt(args[3]);
 
             while(!command.equals("exit-overlay")){
@@ -29,7 +31,7 @@ public class Registry extends Thread{
                 command = input.next();
 
                 if(command.equals("setup-overlay")){
-                    server = new Server(port, numOfConnections);
+                    server = new Server(serverPort, numOfConnections);
                     ServerThread serverThread = new ServerThread(server);
                     new Thread(serverThread).start();
                     setupComplete = true;
@@ -54,7 +56,7 @@ public class Registry extends Thread{
         else if(args[1].equals("node")){
             Scanner input = new Scanner(System.in);
             String serverHost = args[2];
-            int serverPort = Integer.parseInt(args[3]);
+            serverPort = Integer.parseInt(args[3]);
             String command = "";
 
             try {

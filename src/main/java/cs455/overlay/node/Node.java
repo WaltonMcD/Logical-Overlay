@@ -6,8 +6,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
 
+import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
 import cs455.overlay.node.FrontNodeThread;
 import cs455.overlay.node.BackNodeThread;
@@ -17,8 +22,6 @@ public class Node implements Runnable {
     public Socket socketToServer;
     public Integer port;
     public String ip;
-    private Node frontNode;
-    private Node backNode;
 
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -50,6 +53,7 @@ public class Node implements Runnable {
             DataOutputStream outputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
             DataInputStream inputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
 
+
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequest = new Message(messageType, ip, port);
@@ -57,6 +61,7 @@ public class Node implements Runnable {
             outputStream.writeUTF(registrationRequest.ipAddress); 
             outputStream.writeInt(registrationRequest.port); 
             outputStream.flush();
+
             
             //Receive Register Response
             messageType = inputStream.readInt();
@@ -77,27 +82,25 @@ public class Node implements Runnable {
             Integer backPort = inputStream.readInt();
             String backIP = inputStream.readUTF();
 
-            System.out.println("Connecttion Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
-            
-            FrontNodeThread frontNode = new FrontNodeThread(frontIP, frontPort);
-            new Thread(frontNode).start();
+            System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
-            BackNodeThread backNode = new BackNodeThread(backIP, backPort);
+            Integer nodeServerPort = Registry.serverPort + 1;
+            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 2);
+
+            FrontNodeThread frontNode = new FrontNodeThread(frontIP, frontPort, nodeServerPort);
+            new Thread(frontNode).start();
+            Socket frontSocket = nodeServer.accept();
+
+            BackNodeThread backNode = new BackNodeThread(backIP, backPort, nodeServerPort);
             new Thread(backNode).start();
+            Socket backSocket = nodeServer.accept();
     
             outputStream.close();
             inputStream.close();
 
-        } catch (IOException ioe) {
+        } 
+        catch (IOException ioe) {
             System.out.println(ioe.getMessage());
-        }   
-    }
-
-    public void setBackNode(Node backNode) {
-        this.backNode = backNode;
-    }
-
-    public void setFrontNode(Node frontNode) {
-        this.frontNode = frontNode;
+        }
     }
 }

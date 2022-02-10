@@ -7,21 +7,20 @@ import java.net.*;
 public class FrontNodeThread implements Runnable{
     public String ip;
     public Integer port;
-    public Socket socket;
+    public Integer serverPort;
 
-    public FrontNodeThread(String ip, Integer port){
+    public FrontNodeThread(String ip, Integer port, Integer serverPort){
         this.ip = ip;
         this.port = port;
-        this.socket = new Socket();
+        this.serverPort = serverPort;
     }
 
     @Override
     public void run(){
         try{
-            Socket socket = new Socket();
-            InetAddress inetAddress = InetAddress.getByName(ip);
-            SocketAddress socketAddress = new InetSocketAddress(inetAddress, port); 
-            socket.connect(socketAddress);
+            Socket frontSocket = new Socket(ip, serverPort);
+
+            System.out.println("Connected to front node: " + frontSocket.getInetAddress());
         }
         catch(UnknownHostException un){
             un.getMessage();

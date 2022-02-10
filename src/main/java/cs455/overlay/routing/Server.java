@@ -132,6 +132,7 @@ public class Server {
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
 
                 try{
+
                     // Receive Registration Request
                     Integer messageType = inputStream.readInt();
                     String ip = inputStream.readUTF();
@@ -143,6 +144,7 @@ public class Server {
     
                     System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
+
                     // Send Registration Response
                     Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
                     
@@ -151,6 +153,7 @@ public class Server {
                     outputStream.writeInt(registrationResponse.identifier);
                     outputStream.writeUTF(registrationResponse.additionalInfo);
                     outputStream.flush();
+
 
                     // Send Connection Directive
                     if(Server.directives.size() != numOfConnections){
