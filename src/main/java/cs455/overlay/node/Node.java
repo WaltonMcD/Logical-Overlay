@@ -89,10 +89,11 @@ public class Node implements Runnable {
 
             FrontNodeThread frontNode = new FrontNodeThread(frontIP, frontPort, nodeServerPort);
             new Thread(frontNode).start();
-            Socket frontSocket = nodeServer.accept();
-
+            
             BackNodeThread backNode = new BackNodeThread(backIP, backPort, nodeServerPort);
             new Thread(backNode).start();
+            
+            Socket frontSocket = nodeServer.accept();
             Socket backSocket = nodeServer.accept();
     
             outputStream.close();
