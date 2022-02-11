@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
 import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
+import cs455.overlay.node.FrontNodeThread.FrontNodeReader;
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -90,17 +91,19 @@ public class Node implements Runnable {
             new Thread(frontNode).start();
             
             Socket frontSocket = nodeServer.accept();
-            DataInputStream frontInputStream = new DataInputStream(new BufferedInputStream(frontSocket.getInputStream()));
+            FrontNodeReader frontNodeReader = new FrontNodeReader(frontSocket);
+            new Thread(frontNodeReader).start();
             
-            String msg = frontInputStream.readUTF();
-            System.out.println(msg);
-
             //Receive Task Initiate
             messageType = serverInputStream.readInt();
             Integer numberOfMessages = serverInputStream.readInt();
             Message taskInitiate = new Message(messageType, numberOfMessages);
 
             System.out.println("Starting task to send " + taskInitiate.messagesToSend + " messages");
+            FrontNodeThread.numberOfMessages = numberOfMessages;
+
+            frontNode.notifyNodeSender();
+            frontNodeReader.notifyNodeReader();
     
             serverOutputStream.close();
             serverInputStream.close();
