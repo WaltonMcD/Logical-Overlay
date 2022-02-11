@@ -14,21 +14,22 @@ import cs455.overlay.Registry;
 import cs455.overlay.node.Node;
 import cs455.overlay.protocols.Message;
 
-public class Server extends Thread{
-    public static ArrayList<Message> directives = null;
+public class Server {
+    public static ArrayList<Message> directives = new ArrayList<Message>();
+    public static ArrayList<NodeThread> nodeThreads = new ArrayList<NodeThread>();
     private ServerSocket serverSocket = null;
     public static Integer numOfConnections; 
 
     public Server(Integer port, Integer numOfConnections){
         try{
             serverSocket = new ServerSocket(port);
-            directives = new ArrayList<Message>();
             Server.numOfConnections = numOfConnections;
         }
         catch (IOException ioe) {
             System.out.print(ioe.getMessage());
         }
     }
+
 
     // Spawns a server thread
     public static class ServerThread implements Runnable {
@@ -38,17 +39,16 @@ public class Server extends Thread{
             this.server = server;
         }
 
-        public synchronized void waitNodeRegistration(){
+        public synchronized void waitServer(){
             try {
                 wait();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
         
         // we need a synchronized class to be concurrent
-        public synchronized void notifyRegistration(){
+        public synchronized void notifyServer(){
             notify();
         }
 
@@ -60,8 +60,9 @@ public class Server extends Thread{
                     incomingConnectionSocket.setReuseAddress(true);
     
                     NodeThread nodeSock = new NodeThread(incomingConnectionSocket, this);
+                    nodeThreads.add(nodeSock);
                     new Thread(nodeSock).start();
-                    waitNodeRegistration(); //We need to wait for the node to register before doing checks
+                    waitServer(); //We need to wait for the node to register before doing checks
     
                     // Once all nodes are connected this will assign nodes to connect to.
                     if(Registry.nodesList.size() == numOfConnections){
@@ -78,6 +79,10 @@ public class Server extends Thread{
                             String backIp = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).ip;
                             Message connDirective = new Message(messageType, identifier, frontPort, frontIp, backPort, backIp);
                             directives.add(connDirective);
+                            
+                        }
+                        for(NodeThread node: nodeThreads){
+                            node.notifyNodeThread();
                         }
                     }
                     else if(Registry.nodesList.size() > numOfConnections){
@@ -94,6 +99,7 @@ public class Server extends Thread{
             }
         }
     }
+    
 
     // Thread to handle Node socket 
     public static class NodeThread implements Runnable {
@@ -107,6 +113,18 @@ public class Server extends Thread{
             this.server = server;
         }
 
+        public synchronized void waitNodeThread(){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public synchronized void notifyNodeThread(){
+            notify();
+        }
+
         @Override
         public void run(){
             try{
@@ -114,6 +132,7 @@ public class Server extends Thread{
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
 
                 try{
+
                     // Receive Registration Request
                     Integer messageType = inputStream.readInt();
                     String ip = inputStream.readUTF();
@@ -121,9 +140,10 @@ public class Server extends Thread{
                     
                     Message registrationRequest = new Message(messageType, ip, port);
                     Registry.nodesList.add(new Node(ip, identifier, port));
-                    server.notifyRegistration();
+                    server.notifyServer();
     
                     System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
+
 
                     // Send Registration Response
                     Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
@@ -133,7 +153,26 @@ public class Server extends Thread{
                     outputStream.writeInt(registrationResponse.identifier);
                     outputStream.writeUTF(registrationResponse.additionalInfo);
                     outputStream.flush();
-                    
+
+
+                    // Send Connection Directive
+                    if(Server.directives.size() != numOfConnections){
+                        waitNodeThread();
+                    }
+
+                    Message connectionDirective = null;
+                    for(int i = 0; i < directives.size(); i++){
+                        if(directives.get(i).identifier.equals(this.identifier)){
+                            connectionDirective = new Message(3, directives.get(i).frontNodePort, directives.get(i).frontNodeIp, directives.get(i).backNodePort, directives.get(i).backNodeIp);
+
+                            outputStream.writeInt(connectionDirective.messageType);
+                            outputStream.writeInt(connectionDirective.frontNodePort);
+                            outputStream.writeUTF(connectionDirective.frontNodeIp);
+                            outputStream.writeInt(connectionDirective.backNodePort);
+                            outputStream.writeUTF(connectionDirective.backNodeIp);
+                            outputStream.flush();
+                        }
+                    }
                 }
                 catch(IOException ioe){
                     System.out.println(ioe.getMessage());
