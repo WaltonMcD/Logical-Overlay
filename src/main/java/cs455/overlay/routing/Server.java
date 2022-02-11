@@ -19,6 +19,8 @@ public class Server {
     public static ArrayList<NodeThread> nodeThreads = new ArrayList<NodeThread>();
     private ServerSocket serverSocket = null;
     public static Integer numOfConnections; 
+    private static Integer numberOfMessages;
+    private static boolean startFlag = false;
 
     public Server(Integer port, Integer numOfConnections){
         try{
@@ -173,6 +175,13 @@ public class Server {
                             outputStream.flush();
                         }
                     }
+
+                    this.waitNodeThread();
+
+                    Message taskInitiate = new Message(4, numberOfMessages);
+                    outputStream.writeInt(taskInitiate.messageType);
+                    outputStream.writeInt(taskInitiate.messagesToSend);
+                    outputStream.flush();
                 }
                 catch(IOException ioe){
                     System.out.println(ioe.getMessage());
@@ -186,5 +195,9 @@ public class Server {
                 System.out.println(ioe.getMessage());
             }
         }
+    }
+
+    public static void setNumberOfMessages(Integer number) {
+        numberOfMessages = number;
     }
 }

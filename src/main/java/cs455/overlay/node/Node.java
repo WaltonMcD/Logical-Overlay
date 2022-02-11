@@ -103,6 +103,13 @@ public class Node implements Runnable {
             BackNodeReceiver backNodeReceiver = new BackNodeReceiver(backSocket);
             new Thread(frontNodeReceiver).start();
             new Thread(backNodeReceiver).start();
+
+            //Receive Task Initiate
+            messageType = serverInputStream.readInt();
+            Integer numberOfMessages = serverInputStream.readInt();
+            Message taskInitiate = new Message(messageType, numberOfMessages);
+
+            System.out.println("Starting task to send " + taskInitiate.messagesToSend + " messages");
     
             serverOutputStream.close();
             serverInputStream.close();
