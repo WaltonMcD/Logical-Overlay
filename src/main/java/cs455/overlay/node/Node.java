@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
-import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
-import cs455.overlay.node.FrontNodeThread.FrontNodeReader;
+import cs455.overlay.node.NodeThread.FrontNodeSender;
+import cs455.overlay.node.NodeThread.BackNodeReader;
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -87,12 +87,13 @@ public class Node implements Runnable {
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
+            System.out.println("current: " + ip + " Connecting :" + frontIP);
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
             new Thread(frontNode).start();
             
-            Socket frontSocket = nodeServer.accept();
-            FrontNodeReader frontNodeReader = new FrontNodeReader(frontSocket);
-            new Thread(frontNodeReader).start();
+            Socket backSocket = nodeServer.accept();
+            BackNodeReader backNodeReader = new BackNodeReader(backSocket);
+            new Thread(backNodeReader).start();
             
             //Receive Task Initiate
             messageType = serverInputStream.readInt();
@@ -100,10 +101,10 @@ public class Node implements Runnable {
             Message taskInitiate = new Message(messageType, numberOfMessages);
 
             System.out.println("Starting task to send " + taskInitiate.messagesToSend + " messages");
-            FrontNodeThread.numberOfMessages = numberOfMessages;
+            NodeThread.numberOfMessages = numberOfMessages;
 
             frontNode.notifyNodeSender();
-            frontNodeReader.notifyNodeReader();
+            backNodeReader.notifyNodeReader();
     
             serverOutputStream.close();
             serverInputStream.close();

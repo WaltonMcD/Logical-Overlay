@@ -74,9 +74,9 @@ public class Server {
                         for(int i = 0; i < numOfConnections; i++){
                             Integer messageType = 9;
                             Integer identifier = Registry.nodesList.get(i).identifier;
-                            Integer frontPort = Registry.nodesList.get((i + 1) % numOfConnections).port;
+                            Integer frontPort = Registry.nodesList.get((i + 1) % numOfConnections).identifier;
                             String frontIp = Registry.nodesList.get((i + 1) % numOfConnections).ip;
-                            Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).port;
+                            Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).identifier;
                             String backIp = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).ip;
                             Message connDirective = new Message(messageType, identifier, frontPort, frontIp, backPort, backIp);
                             directives.add(connDirective);
