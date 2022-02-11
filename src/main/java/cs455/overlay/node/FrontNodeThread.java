@@ -3,6 +3,8 @@ package cs455.overlay.node;
 import java.io.*;
 import java.net.*;
 
+import cs455.overlay.protocols.Message;
+
 // Handles front node socket / message sending and receiving
 public class FrontNodeThread {
     public static Integer numberOfMessages;
@@ -46,10 +48,15 @@ public class FrontNodeThread {
                 waitNodeSender();
 
                 for(int i = 0; i < numberOfMessages; i++){
-                    frontOutputStream.writeInt(5);
+                    Message dataTraffic = new Message(5, port, 5);
+                    frontOutputStream.writeInt(dataTraffic.messageType);
+                    frontOutputStream.writeInt(dataTraffic.startNodeId);
+                    frontOutputStream.writeInt(dataTraffic.payload);
+                    frontOutputStream.flush();
+                    System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
                 }
                 
-                frontOutputStream.flush();
+                
             }
             catch(UnknownHostException un){
                 un.getMessage();
@@ -88,8 +95,14 @@ public class FrontNodeThread {
 
                 Integer total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                    Integer num = frontInputStream.readInt();
-                    total += num;
+                    Integer messageType = frontInputStream.readInt();
+                    Integer startNodeId = frontInputStream.readInt();
+                    Integer payload = frontInputStream.readInt();
+                    total += payload;
+
+                    Message dataTraffic = new Message(messageType, startNodeId, payload);
+                    System.out.println("Receiving data traffic from Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
+                    
                 }
                 
 

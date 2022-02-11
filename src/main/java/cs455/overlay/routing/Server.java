@@ -74,7 +74,6 @@ public class Server {
                         for(int i = 0; i < numOfConnections; i++){
                             Integer messageType = 9;
                             Integer identifier = Registry.nodesList.get(i).identifier;
-                            System.out.println("BackNode: " + (i + numOfConnections-1) % numOfConnections + " Middle: " + (i) + " FrontNode: " + ((i+1) % numOfConnections));
                             Integer frontPort = Registry.nodesList.get((i + 1) % numOfConnections).port;
                             String frontIp = Registry.nodesList.get((i + 1) % numOfConnections).ip;
                             Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).port;
