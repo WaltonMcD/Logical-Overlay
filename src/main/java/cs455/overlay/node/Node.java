@@ -14,11 +14,8 @@ import java.net.UnknownHostException;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
-import cs455.overlay.node.FrontNodeThread.FrontNodeReceiver;
 import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
-import cs455.overlay.node.BackNodeThread.BackNodeReceiver;
-import cs455.overlay.node.BackNodeThread.BackNodeSender;
-
+import cs455.overlay.node.FrontNodeThread.FrontNodeReader;
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -88,21 +85,25 @@ public class Node implements Runnable {
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
             Integer nodeServerPort = Registry.serverPort + 1;
-            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 2);
+            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
             new Thread(frontNode).start();
             
-            BackNodeSender backNode = new BackNodeSender(backIP, backPort, nodeServerPort);
-            new Thread(backNode).start();
-            
             Socket frontSocket = nodeServer.accept();
-            Socket backSocket = nodeServer.accept();
+            FrontNodeReader frontNodeReader = new FrontNodeReader(frontSocket);
+            new Thread(frontNodeReader).start();
+            
+            //Receive Task Initiate
+            messageType = serverInputStream.readInt();
+            Integer numberOfMessages = serverInputStream.readInt();
+            Message taskInitiate = new Message(messageType, numberOfMessages);
 
-            FrontNodeReceiver frontNodeReceiver = new FrontNodeReceiver(frontSocket);
-            BackNodeReceiver backNodeReceiver = new BackNodeReceiver(backSocket);
-            new Thread(frontNodeReceiver).start();
-            new Thread(backNodeReceiver).start();
+            System.out.println("Starting task to send " + taskInitiate.messagesToSend + " messages");
+            FrontNodeThread.numberOfMessages = numberOfMessages;
+
+            frontNode.notifyNodeSender();
+            frontNodeReader.notifyNodeReader();
     
             serverOutputStream.close();
             serverInputStream.close();
