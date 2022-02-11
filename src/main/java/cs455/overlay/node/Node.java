@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -22,6 +23,8 @@ public class Node implements Runnable {
     public Socket socketToServer;
     public Integer port;
     public String ip;
+    public Integer payloadReceivedTotal;
+    public Integer payloadSentTotal;
 
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -87,24 +90,28 @@ public class Node implements Runnable {
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
-            System.out.println("current: " + ip + " Connecting :" + frontIP);
-            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
+            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
             new Thread(frontNode).start();
             
             Socket backSocket = nodeServer.accept();
-            BackNodeReader backNodeReader = new BackNodeReader(backSocket);
+            BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
             new Thread(backNodeReader).start();
             
             //Receive Task Initiate
             messageType = serverInputStream.readInt();
             Integer numberOfMessages = serverInputStream.readInt();
             Message taskInitiate = new Message(messageType, numberOfMessages);
-
-            System.out.println("Starting task to send " + taskInitiate.messagesToSend + " messages");
             NodeThread.numberOfMessages = numberOfMessages;
 
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
+
+            // Send Task Complete to registry
+            Message taskComplete = new Message(6,identifier, ip, port);
+            serverOutputStream.writeInt(taskComplete.messageType);
+            serverOutputStream.writeInt(taskComplete.identifier);
+            serverOutputStream.writeUTF(taskComplete.ipAddress);
+            serverOutputStream.writeInt(taskComplete.port);
     
             serverOutputStream.close();
             serverInputStream.close();

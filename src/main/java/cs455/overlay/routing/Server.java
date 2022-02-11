@@ -68,7 +68,6 @@ public class Server {
     
                     // Once all nodes are connected this will assign nodes to connect to.
                     if(Registry.nodesList.size() == numOfConnections){
-                        System.out.println("Maximum number of nodes connected.");
                         // Uses arraylist to assign a ring structure if first node is i = 0 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 9
                         // next rendition i = 1 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 0
                         for(int i = 0; i < numOfConnections; i++){
@@ -85,15 +84,8 @@ public class Server {
                         for(NodeThread node: nodeThreads){
                             node.notifyNodeThread();
                         }
-                    }
-                    else if(Registry.nodesList.size() > numOfConnections){
-                        System.out.println("Maximum number of connections exceeded. Max: " + numOfConnections);
-                        server.serverSocket.close();
-                        break;
-                    }
-                    
+                    }   
                 }
-                System.out.println("Closing Server Socket... ");
             }
             catch (IOException ioe) {
                 System.out.print(ioe.getMessage());
@@ -177,10 +169,23 @@ public class Server {
 
                     this.waitNodeThread();
 
+
+                    // Send Task Initiate
                     Message taskInitiate = new Message(4, numberOfMessages);
                     outputStream.writeInt(taskInitiate.messageType);
                     outputStream.writeInt(taskInitiate.messagesToSend);
                     outputStream.flush();
+
+
+                    //Receive Task Complete
+                    messageType = inputStream.readInt();
+                    Integer identifier = inputStream.readInt();
+                    ip = inputStream.readUTF();
+                    port = inputStream.readInt();
+
+                    Message taskComplete = new Message(messageType, identifier, ip, port);
+                    System.out.println("Received Task Complete From Node: " + taskComplete.identifier + " @ " + ip);
+
                 }
                 catch(IOException ioe){
                     System.out.println(ioe.getMessage());

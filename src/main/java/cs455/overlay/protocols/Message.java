@@ -80,7 +80,7 @@ public class Message {
 
     //Traffic Summary : Type = 8
     public Message(Integer messageType, String ipAddress, Integer port, Integer numMessagesSent, 
-        Integer numMessagesReceived, Integer sumOfSentMessages, Integer sumOfReceivedMessages){
+        Integer sumOfSentMessages, Integer numMessagesReceived, Integer sumOfReceivedMessages){
         this.messageType = messageType;
         this.ipAddress = ipAddress;
         this.port = port;

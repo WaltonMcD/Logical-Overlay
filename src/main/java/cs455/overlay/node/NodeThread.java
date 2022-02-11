@@ -18,11 +18,13 @@ public class NodeThread {
         public String frontIp;
         public Integer port;
         public Integer serverPort;
+        public Node node;
 
-        public FrontNodeSender(String ip, Integer port, Integer serverPort){
+        public FrontNodeSender(String ip, Integer port, Integer serverPort, Node node){
             this.frontIp = ip;
             this.port = port;
             this.serverPort = serverPort;
+            this.node = node;
         }
 
         public synchronized void waitNodeSender(){
@@ -53,14 +55,18 @@ public class NodeThread {
 
                 waitNodeSender();
 
+                int total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
                     Message dataTraffic = new Message(5, port, getRandomNumberUsingNextInt());
                     frontOutputStream.writeInt(dataTraffic.messageType);
                     frontOutputStream.writeInt(dataTraffic.startNodeId);
                     frontOutputStream.writeInt(dataTraffic.payload);
                     frontOutputStream.flush();
+                    total += dataTraffic.payload;
                     System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
                 }
+
+
             }
             catch(UnknownHostException un){
                 un.getMessage();
@@ -73,9 +79,11 @@ public class NodeThread {
 
     public static class BackNodeReader implements Runnable {
         public Socket backSocket;
+        public Node node;
 
-        public BackNodeReader(Socket backSocket){
+        public BackNodeReader(Socket backSocket, Node node){
             this.backSocket = backSocket;
+            this.node = node;
         }
 
         public synchronized void waitNodeReader(){
@@ -110,6 +118,8 @@ public class NodeThread {
                 }
                 
                 System.out.println("Received a total payload: " + total);
+                node.payloadReceivedTotal = total;
+
             }
             catch (IOException ioe) {
                 System.out.println(ioe.getMessage());
