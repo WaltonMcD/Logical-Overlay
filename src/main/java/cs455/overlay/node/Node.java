@@ -14,11 +14,7 @@ import java.net.UnknownHostException;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
-import cs455.overlay.node.FrontNodeThread.FrontNodeReceiver;
 import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
-import cs455.overlay.node.BackNodeThread.BackNodeReceiver;
-import cs455.overlay.node.BackNodeThread.BackNodeSender;
-
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -88,21 +84,16 @@ public class Node implements Runnable {
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
             Integer nodeServerPort = Registry.serverPort + 1;
-            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 2);
+            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
             new Thread(frontNode).start();
             
-            BackNodeSender backNode = new BackNodeSender(backIP, backPort, nodeServerPort);
-            new Thread(backNode).start();
-            
             Socket frontSocket = nodeServer.accept();
-            Socket backSocket = nodeServer.accept();
-
-            FrontNodeReceiver frontNodeReceiver = new FrontNodeReceiver(frontSocket);
-            BackNodeReceiver backNodeReceiver = new BackNodeReceiver(backSocket);
-            new Thread(frontNodeReceiver).start();
-            new Thread(backNodeReceiver).start();
+            DataInputStream frontInputStream = new DataInputStream(new BufferedInputStream(frontSocket.getInputStream()));
+            
+            String msg = frontInputStream.readUTF();
+            System.out.println(msg);
 
             //Receive Task Initiate
             messageType = serverInputStream.readInt();

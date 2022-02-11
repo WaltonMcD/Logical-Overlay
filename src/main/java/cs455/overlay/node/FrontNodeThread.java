@@ -40,26 +40,4 @@ public class FrontNodeThread {
             }
         }
     }
-
-    public static class FrontNodeReceiver implements Runnable {
-        public final Socket frontNodeSock;
-
-        public FrontNodeReceiver(Socket frontNodeSock){
-            this.frontNodeSock = frontNodeSock;
-        }
-
-        @Override
-        public void run(){
-            try{
-                DataInputStream frontInputStream = new DataInputStream(new BufferedInputStream(frontNodeSock.getInputStream()));
-                String msg = frontInputStream.readUTF();
-
-                System.out.println(msg);
-            }
-            catch(IOException ioe){
-                ioe.getMessage();
-            }
-        }
-    }
-    
 }
