@@ -89,6 +89,7 @@ public class Node implements Runnable {
             
             //Receive Task Initiate
             Message recvTaskInitMsg = new Message();
+            recvTaskInitMsg.unpackMessage(serverInputStream);
             NodeThread.numberOfMessages = recvTaskInitMsg.getMessagesToSend();
 
             //Notify worker threads of task initiate.
