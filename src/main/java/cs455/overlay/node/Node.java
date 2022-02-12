@@ -55,37 +55,31 @@ public class Node implements Runnable {
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequest = new Message(messageType, ip, port);
-            serverOutputStream.writeInt(registrationRequest.messageType);
-            serverOutputStream.writeUTF(registrationRequest.ipAddress); 
-            serverOutputStream.writeInt(registrationRequest.port); 
-            serverOutputStream.flush();
+            registrationRequest.packMessage(serverOutputStream);
 
             //Receive Register Response
-            messageType = serverInputStream.readInt();
-            Integer statusCode = serverInputStream.readInt();
-            Integer identifier = serverInputStream.readInt();
-            this.identifier = identifier;
-            String additionalInfo = serverInputStream.readUTF();
+            Message registrationResponse = new Message();
+            registrationResponse.unpackMessage(serverInputStream);
+            this.identifier = registrationResponse.getIdentifier();
 
-            Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
-            System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
-            "\nAdditional Info: " + registrationResponse.additionalInfo);
+            System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + 
+            					" Status Code: " + registrationResponse.getStatusCode() + 
+            					"\nAdditional Info: " + registrationResponse.getAdditionalInfo());
             
             //Receive Connection Directive
-            messageType = serverInputStream.readInt();
-            Integer frontPort = serverInputStream.readInt();
-            String frontIP = serverInputStream.readUTF();
-            Integer backPort = serverInputStream.readInt();
-            String backIP = serverInputStream.readUTF();
+            Message recvConnDirMsg = new Message();
+            recvConnDirMsg.unpackMessage(serverInputStream);
 
-            System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
+            System.out.println("Connection Directive Front: " + recvConnDirMsg.getFrontNodePort() + " " + 
+            					recvConnDirMsg.getFrontNodeIp() + " Back: " + recvConnDirMsg.getBackNodePort() + " " + 
+            					recvConnDirMsg.getBackNodeIp());
 
             //Start server socket for neighbor nodes to connect to.
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             //Start thread to connect to front nodes server socket.
-            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
+            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this);
             new Thread(frontNode).start();
             
             //Accept back nodes connection.
@@ -94,21 +88,16 @@ public class Node implements Runnable {
             new Thread(backNodeReader).start();
             
             //Receive Task Initiate
-            messageType = serverInputStream.readInt();
-            Integer numberOfMessages = serverInputStream.readInt();
-            Message taskInitiate = new Message(messageType, numberOfMessages);
-            NodeThread.numberOfMessages = numberOfMessages;
+            Message recvTaskInitMsg = new Message();
+            NodeThread.numberOfMessages = recvTaskInitMsg.getMessagesToSend();
 
             //Notify worker threads of task initiate.
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
             // Send Task Complete to registry
-            Message taskComplete = new Message(6,identifier, ip, port);
-            serverOutputStream.writeInt(taskComplete.messageType);
-            serverOutputStream.writeInt(taskComplete.identifier);
-            serverOutputStream.writeUTF(taskComplete.ipAddress);
-            serverOutputStream.writeInt(taskComplete.port);
+            Message taskCompleteMsg = new Message(6, identifier, ip, port);
+            taskCompleteMsg.packMessage(serverOutputStream);
     
             serverOutputStream.close();
             serverInputStream.close();
