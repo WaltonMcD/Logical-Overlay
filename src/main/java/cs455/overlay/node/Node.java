@@ -5,19 +5,14 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 import cs455.overlay.Registry;
-import cs455.overlay.protocols.Message;
-import cs455.overlay.node.NodeThread.FrontNodeSender;
 import cs455.overlay.node.NodeThread.BackNodeReader;
+import cs455.overlay.node.NodeThread.FrontNodeSender;
+import cs455.overlay.protocols.Message;
 
 public class Node implements Runnable {
     public Integer identifier;
@@ -26,8 +21,7 @@ public class Node implements Runnable {
     public String ip;
     public Integer payloadReceivedTotal;
     public Integer payloadSentTotal;
-    private ArrayList<String> uniqueMessages;
-
+    
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
         this.port = port;
@@ -58,7 +52,6 @@ public class Node implements Runnable {
             DataOutputStream serverOutputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
             DataInputStream serverInputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
 
-
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequest = new Message(messageType, ip, port);
@@ -67,7 +60,6 @@ public class Node implements Runnable {
             serverOutputStream.writeInt(registrationRequest.port); 
             serverOutputStream.flush();
 
-            
             //Receive Register Response
             messageType = serverInputStream.readInt();
             Integer statusCode = serverInputStream.readInt();
@@ -88,12 +80,15 @@ public class Node implements Runnable {
 
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
+            //Start server socket for neighbor nodes to connect to.
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
+            //Start thread to connect to front nodes server socket.
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
             new Thread(frontNode).start();
             
+            //Accept back nodes connection.
             Socket backSocket = nodeServer.accept();
             BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
             new Thread(backNodeReader).start();
@@ -104,6 +99,7 @@ public class Node implements Runnable {
             Message taskInitiate = new Message(messageType, numberOfMessages);
             NodeThread.numberOfMessages = numberOfMessages;
 
+            //Notify worker threads of task initiate.
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
@@ -123,19 +119,4 @@ public class Node implements Runnable {
         }
     }
     
-    public ArrayList<String> createUniqueMessages(Integer nMessages) {
-    	ArrayList<String> createUniqueMessages = new ArrayList<>();
-    	for (int i = 0; i < nMessages; i++) {
-    		createUniqueMessages.add("I am the #" + i + " unique but not so creative message.");
-    	}
-    	return createUniqueMessages;
-    }
-
-	public ArrayList<String> getUniqueMessages() {
-		return uniqueMessages;
-	}
-
-	public void setUniqueMessages(ArrayList<String> uniqueMessages) {
-		this.uniqueMessages = uniqueMessages;
-	}
 }
