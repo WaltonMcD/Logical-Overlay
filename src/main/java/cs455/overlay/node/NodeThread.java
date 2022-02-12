@@ -53,6 +53,7 @@ public class NodeThread {
 
                 DataOutputStream frontOutputStream = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
 
+                //Waiting for task initiate.
                 waitNodeSender();
 
                 int total = 0;
@@ -103,6 +104,7 @@ public class NodeThread {
             try{
                 DataInputStream backInputStream = new DataInputStream(new BufferedInputStream(backSocket.getInputStream()));
 
+                //Waiting for task initiate.
                 waitNodeReader();
 
                 Integer total = 0;
