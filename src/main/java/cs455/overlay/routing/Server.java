@@ -137,7 +137,6 @@ public class Server {
     
                     System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
-
                     // Send Registration Response
                     Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
                     
@@ -146,7 +145,6 @@ public class Server {
                     outputStream.writeInt(registrationResponse.identifier);
                     outputStream.writeUTF(registrationResponse.additionalInfo);
                     outputStream.flush();
-
 
                     // Send Connection Directive
                     if(Server.directives.size() != numOfConnections){
@@ -169,13 +167,11 @@ public class Server {
 
                     this.waitNodeThread();
 
-
                     // Send Task Initiate
                     Message taskInitiate = new Message(4, numberOfMessages);
                     outputStream.writeInt(taskInitiate.messageType);
                     outputStream.writeInt(taskInitiate.messagesToSend);
                     outputStream.flush();
-
 
                     //Receive Task Complete
                     messageType = inputStream.readInt();

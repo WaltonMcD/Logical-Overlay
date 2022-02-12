@@ -52,7 +52,6 @@ public class Node implements Runnable {
             DataOutputStream serverOutputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
             DataInputStream serverInputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
 
-
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequest = new Message(messageType, ip, port);
@@ -61,7 +60,6 @@ public class Node implements Runnable {
             serverOutputStream.writeInt(registrationRequest.port); 
             serverOutputStream.flush();
 
-            
             //Receive Register Response
             messageType = serverInputStream.readInt();
             Integer statusCode = serverInputStream.readInt();
@@ -82,12 +80,15 @@ public class Node implements Runnable {
 
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
+            //Start server socket for neighbor nodes to connect to.
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
+            //Start thread to connect to front nodes server socket.
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
             new Thread(frontNode).start();
             
+            //Accept back nodes connection.
             Socket backSocket = nodeServer.accept();
             BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
             new Thread(backNodeReader).start();
@@ -98,6 +99,7 @@ public class Node implements Runnable {
             Message taskInitiate = new Message(messageType, numberOfMessages);
             NodeThread.numberOfMessages = numberOfMessages;
 
+            //Notify worker threads of task initiate.
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
