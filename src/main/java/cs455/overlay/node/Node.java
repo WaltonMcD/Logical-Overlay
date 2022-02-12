@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
@@ -25,6 +26,7 @@ public class Node implements Runnable {
     public String ip;
     public Integer payloadReceivedTotal;
     public Integer payloadSentTotal;
+    private ArrayList<String> uniqueMessages;
 
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -77,7 +79,6 @@ public class Node implements Runnable {
             System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
             "\nAdditional Info: " + registrationResponse.additionalInfo);
             
-
             //Receive Connection Directive
             messageType = serverInputStream.readInt();
             Integer frontPort = serverInputStream.readInt();
@@ -121,4 +122,20 @@ public class Node implements Runnable {
             System.out.println(ioe.getMessage());
         }
     }
+    
+    public ArrayList<String> createUniqueMessages(Integer nMessages) {
+    	ArrayList<String> createUniqueMessages = new ArrayList<>();
+    	for (int i = 0; i < nMessages; i++) {
+    		createUniqueMessages.add("I am the #" + i + " unique but not so creative message.");
+    	}
+    	return createUniqueMessages;
+    }
+
+	public ArrayList<String> getUniqueMessages() {
+		return uniqueMessages;
+	}
+
+	public void setUniqueMessages(ArrayList<String> uniqueMessages) {
+		this.uniqueMessages = uniqueMessages;
+	}
 }
