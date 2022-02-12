@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -14,17 +15,16 @@ import java.net.UnknownHostException;
 
 import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
-import cs455.overlay.node.FrontNodeThread.FrontNodeReceiver;
-import cs455.overlay.node.FrontNodeThread.FrontNodeSender;
-import cs455.overlay.node.BackNodeThread.BackNodeReceiver;
-import cs455.overlay.node.BackNodeThread.BackNodeSender;
-
+import cs455.overlay.node.NodeThread.FrontNodeSender;
+import cs455.overlay.node.NodeThread.BackNodeReader;
 
 public class Node implements Runnable {
     public Integer identifier;
     public Socket socketToServer;
     public Integer port;
     public String ip;
+    public Integer payloadReceivedTotal;
+    public Integer payloadSentTotal;
 
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -88,21 +88,30 @@ public class Node implements Runnable {
             System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
 
             Integer nodeServerPort = Registry.serverPort + 1;
-            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 2);
+            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
-            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort);
+            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
             new Thread(frontNode).start();
             
-            BackNodeSender backNode = new BackNodeSender(backIP, backPort, nodeServerPort);
-            new Thread(backNode).start();
-            
-            Socket frontSocket = nodeServer.accept();
             Socket backSocket = nodeServer.accept();
+            BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
+            new Thread(backNodeReader).start();
+            
+            //Receive Task Initiate
+            messageType = serverInputStream.readInt();
+            Integer numberOfMessages = serverInputStream.readInt();
+            Message taskInitiate = new Message(messageType, numberOfMessages);
+            NodeThread.numberOfMessages = numberOfMessages;
 
-            FrontNodeReceiver frontNodeReceiver = new FrontNodeReceiver(frontSocket);
-            BackNodeReceiver backNodeReceiver = new BackNodeReceiver(backSocket);
-            new Thread(frontNodeReceiver).start();
-            new Thread(backNodeReceiver).start();
+            frontNode.notifyNodeSender();
+            backNodeReader.notifyNodeReader();
+
+            // Send Task Complete to registry
+            Message taskComplete = new Message(6,identifier, ip, port);
+            serverOutputStream.writeInt(taskComplete.messageType);
+            serverOutputStream.writeInt(taskComplete.identifier);
+            serverOutputStream.writeUTF(taskComplete.ipAddress);
+            serverOutputStream.writeInt(taskComplete.port);
     
             serverOutputStream.close();
             serverInputStream.close();

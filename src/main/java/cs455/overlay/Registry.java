@@ -9,6 +9,7 @@ import java.util.Scanner;
 import cs455.overlay.node.Node;
 import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
+import cs455.overlay.routing.Server.NodeThread;
 
 public class Registry extends Thread{
     public static ArrayList<Node> nodesList = null;
@@ -44,6 +45,11 @@ public class Registry extends Thread{
                 else if(command.equals("start") && setupComplete == true){
                     Integer numberOfMessages = input.nextInt();
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
+                    Server.setNumberOfMessages(numberOfMessages);
+
+                    for(NodeThread node: Server.nodeThreads){
+                        node.notifyNodeThread();
+                    }
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
