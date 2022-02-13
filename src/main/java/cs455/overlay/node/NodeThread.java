@@ -59,8 +59,12 @@ public class NodeThread {
                 int total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
                     Message dataTraffic = new Message(5, port, getRandomNumberUsingNextInt());
-                    total += dataTraffic.getPayload();
-                    System.out.println("Sending traffic to Node: " + dataTraffic.getStartNodeId() + " Payload: " + dataTraffic.getPayload());
+                    frontOutputStream.writeInt(dataTraffic.messageType);
+                    frontOutputStream.writeInt(dataTraffic.startNodeId);
+                    frontOutputStream.writeInt(dataTraffic.payload);
+                    frontOutputStream.flush();
+                    total += dataTraffic.payload;
+                    System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
                 }
 
 
@@ -105,11 +109,13 @@ public class NodeThread {
 
                 Integer total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                	Message dataTraffic = new Message();
-                	dataTraffic.unpackMessage(backInputStream);
-                    total += dataTraffic.getPayload();
+                    Integer messageType = backInputStream.readInt();
+                    Integer startNodeId = backInputStream.readInt();
+                    Integer payload = backInputStream.readInt();
+                    total += payload;
 
-                    System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
+                    Message dataTraffic = new Message(messageType, startNodeId, payload);
+                    System.out.println("Receiving data traffic from Node: " + dataTraffic.startNodeId);
                     
                 }
                 

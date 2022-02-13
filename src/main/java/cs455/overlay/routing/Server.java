@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import cs455.overlay.Registry;
 import cs455.overlay.node.Node;
@@ -134,12 +135,17 @@ public class Server {
                     Registry.nodesList.add(new Node(ip, identifier, port));
                     server.notifyServer();
     
-                    System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.getIpAddress() + "  Port: " + registrationRequest.getPort());
+                    System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
 
                     // Send Registration Response
                     Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
-                    registrationResponse.packMessage(outputStream);
-             
+                    
+                    outputStream.writeInt(registrationResponse.messageType);
+                    outputStream.writeInt(registrationResponse.statusCode);
+                    outputStream.writeInt(registrationResponse.identifier);
+                    outputStream.writeUTF(registrationResponse.additionalInfo);
+                    outputStream.flush();
+
                     // Send Connection Directive
                     if(Server.directives.size() != numOfConnections){
                         waitNodeThread();
@@ -147,13 +153,15 @@ public class Server {
 
                     Message connectionDirective = null;
                     for(int i = 0; i < directives.size(); i++){
-                        if(directives.get(i).getIdentifier().equals(this.identifier)){
-                            connectionDirective = new Message(3, directives.get(i).getFrontNodePort(), 
-                            								  directives.get(i).getFrontNodeIp(), 
-                            								  directives.get(i).getFrontNodePort(), 
-                            								  directives.get(i).getBackNodeIp());
+                        if(directives.get(i).identifier.equals(this.identifier)){
+                            connectionDirective = new Message(3, directives.get(i).frontNodePort, directives.get(i).frontNodeIp, directives.get(i).backNodePort, directives.get(i).backNodeIp);
 
-                            connectionDirective.packMessage(outputStream);
+                            outputStream.writeInt(connectionDirective.messageType);
+                            outputStream.writeInt(connectionDirective.frontNodePort);
+                            outputStream.writeUTF(connectionDirective.frontNodeIp);
+                            outputStream.writeInt(connectionDirective.backNodePort);
+                            outputStream.writeUTF(connectionDirective.backNodeIp);
+                            outputStream.flush();
                         }
                     }
 
@@ -161,7 +169,9 @@ public class Server {
 
                     // Send Task Initiate
                     Message taskInitiate = new Message(4, numberOfMessages);
-                    taskInitiate.packMessage(outputStream);
+                    outputStream.writeInt(taskInitiate.messageType);
+                    outputStream.writeInt(taskInitiate.messagesToSend);
+                    outputStream.flush();
 
                     //Receive Task Complete
                     messageType = inputStream.readInt();
@@ -170,7 +180,7 @@ public class Server {
                     port = inputStream.readInt();
 
                     Message taskComplete = new Message(messageType, identifier, ip, port);
-                    System.out.println("Received Task Complete From Node: " + taskComplete.getIdentifier() + " @ " + ip);
+                    System.out.println("Received Task Complete From Node: " + taskComplete.identifier + " @ " + ip);
 
                 }
                 catch(IOException ioe){
