@@ -85,14 +85,17 @@ public class Node implements Runnable {
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
+            //Spawns a thread to connect to front nodes server socket
             FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
             new Thread(frontNode).start();
             
+            //Accepts back nodes connection.
             Socket backSocket = nodeServer.accept();
             BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
             new Thread(backNodeReader).start();
             
             //Receive Task Initiate
+            //The read call will block until start sequence is initiated.
             messageType = serverInputStream.readInt();
             Integer numberOfMessages = serverInputStream.readInt();
             Message taskInitiate = new Message(messageType, numberOfMessages);
@@ -100,10 +103,11 @@ public class Node implements Runnable {
 
             System.out.println("Received Task Initiate Messages to send: " + numberOfMessages);
 
+            //Notify worker threads to start message passing.
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
-            waitNode();
+            waitNode(); //Wait for message sending to complete.
 
             // Send Task Complete to registry
             Message taskComplete = new Message(6,identifier, ip, port);
