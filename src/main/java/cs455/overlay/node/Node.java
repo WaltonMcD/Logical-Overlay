@@ -115,7 +115,9 @@ public class Node implements Runnable {
             serverOutputStream.writeInt(taskComplete.identifier);
             serverOutputStream.writeUTF(taskComplete.ipAddress);
             serverOutputStream.writeInt(taskComplete.port);
-    
+            serverOutputStream.flush();
+            
+            
             serverOutputStream.close();
             serverInputStream.close();
             
