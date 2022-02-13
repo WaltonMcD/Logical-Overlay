@@ -181,7 +181,7 @@ public class Server {
 
                     Message taskComplete = new Message(messageType, identifier, ip, port);
                     System.out.println("Received Task Complete From Node: " + taskComplete.identifier + " @ " + ip);
-
+                    
                 }
                 catch(IOException ioe){
                     System.out.println(ioe.getMessage());

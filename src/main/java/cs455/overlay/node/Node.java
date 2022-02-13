@@ -66,8 +66,8 @@ public class Node implements Runnable {
             messageType = serverInputStream.readInt();
             Integer statusCode = serverInputStream.readInt();
             Integer identifier = serverInputStream.readInt();
-            this.identifier = identifier;
             String additionalInfo = serverInputStream.readUTF();
+            this.identifier = identifier;
 
             Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
             System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
@@ -98,8 +98,12 @@ public class Node implements Runnable {
             Message taskInitiate = new Message(messageType, numberOfMessages);
             NodeThread.numberOfMessages = numberOfMessages;
 
+            System.out.println("Received Task Initiate Messages to send: " + numberOfMessages);
+
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
+
+            waitNode();
 
             // Send Task Complete to registry
             Message taskComplete = new Message(6,identifier, ip, port);
@@ -110,7 +114,7 @@ public class Node implements Runnable {
     
             serverOutputStream.close();
             serverInputStream.close();
-
+            
         } 
         catch (IOException ioe) {
             System.out.println(ioe.getMessage());

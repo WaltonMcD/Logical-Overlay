@@ -67,6 +67,8 @@ public class NodeThread {
                     System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
                 }
 
+                node.notifyNode();
+
 
             }
             catch(UnknownHostException un){
