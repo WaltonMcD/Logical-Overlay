@@ -116,7 +116,11 @@ public class Node implements Runnable {
             serverOutputStream.writeUTF(taskComplete.ipAddress);
             serverOutputStream.writeInt(taskComplete.port);
             serverOutputStream.flush();
-            
+
+            //Receive Traffic Summary Request.
+            Message trafficSummaryReq = new Message(serverInputStream.readInt());
+            System.out.println(trafficSummaryReq.getType());
+
             
             serverOutputStream.close();
             serverInputStream.close();

@@ -66,9 +66,7 @@ public class NodeThread {
                     total += dataTraffic.payload;
                     System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
                 }
-
-                node.notifyNode();
-
+                node.payloadSentTotal = total;
 
             }
             catch(UnknownHostException un){
@@ -123,6 +121,7 @@ public class NodeThread {
                 
                 System.out.println("Received a total payload: " + total);
                 node.payloadReceivedTotal = total;
+                node.notifyNode();
 
             }
             catch (IOException ioe) {
