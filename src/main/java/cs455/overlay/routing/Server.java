@@ -56,9 +56,17 @@ public class Server {
 
         @Override
         public void run() {
+        	
+        	
             try {
                 while(true) {
                     Socket incomingConnectionSocket = server.serverSocket.accept();
+                    if (Thread.currentThread().isInterrupted()) {
+                        System.out.println(Thread.currentThread().getName() + " detected interruption, exiting...");
+                        incomingConnectionSocket.close();
+                        return;
+                    }
+                    
                     incomingConnectionSocket.setReuseAddress(true);
     
                     NodeThread nodeSock = new NodeThread(incomingConnectionSocket, this);
@@ -120,77 +128,60 @@ public class Server {
 
         @Override
         public void run(){
+        	
+        	
             try{
                 DataInputStream inputStream = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
-
-                try{
-
-                    // Receive Registration Request
-                    Integer messageType = inputStream.readInt();
-                    String ip = inputStream.readUTF();
-                    Integer port = inputStream.readInt();
-                    
-                    Message registrationRequest = new Message(messageType, ip, port);
-                    Registry.nodesList.add(new Node(ip, identifier, port));
-                    server.notifyServer();
-    
-                    System.out.println("\n" + registrationRequest.getType() + " From Host: " + registrationRequest.ipAddress + "  Port: " + registrationRequest.port);
-
-                    // Send Registration Response
-                    Message registrationResponse = new Message(2, 200, identifier, "\'Welcome\'");
-                    
-                    outputStream.writeInt(registrationResponse.messageType);
-                    outputStream.writeInt(registrationResponse.statusCode);
-                    outputStream.writeInt(registrationResponse.identifier);
-                    outputStream.writeUTF(registrationResponse.additionalInfo);
-                    outputStream.flush();
-
-                    // Send Connection Directive
-                    if(Server.directives.size() != numOfConnections){
-                        waitNodeThread();
-                    }
-
-                    Message connectionDirective = null;
-                    for(int i = 0; i < directives.size(); i++){
-                        if(directives.get(i).identifier.equals(this.identifier)){
-                            connectionDirective = new Message(3, directives.get(i).frontNodePort, directives.get(i).frontNodeIp, directives.get(i).backNodePort, directives.get(i).backNodeIp);
-
-                            outputStream.writeInt(connectionDirective.messageType);
-                            outputStream.writeInt(connectionDirective.frontNodePort);
-                            outputStream.writeUTF(connectionDirective.frontNodeIp);
-                            outputStream.writeInt(connectionDirective.backNodePort);
-                            outputStream.writeUTF(connectionDirective.backNodeIp);
-                            outputStream.flush();
-                        }
-                    }
-
-                    this.waitNodeThread();
-
-                    // Send Task Initiate
-                    Message taskInitiate = new Message(4, numberOfMessages);
-                    outputStream.writeInt(taskInitiate.messageType);
-                    outputStream.writeInt(taskInitiate.messagesToSend);
-                    outputStream.flush();
-
-                    //Receive Task Complete
-                    messageType = inputStream.readInt();
-                    Integer identifier = inputStream.readInt();
-                    ip = inputStream.readUTF();
-                    port = inputStream.readInt();
-
-                    Message taskComplete = new Message(messageType, identifier, ip, port);
-                    System.out.println("Received Task Complete From Node: " + taskComplete.identifier + " @ " + ip);
-
-                    //Send Traffic Summary Request.
-                    outputStream.writeInt(7);
-                    outputStream.flush();
-
-                    
+                
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting...");
+                    inputStream.close();
+                    outputStream.close();
+                    nodeSocket.close();
+                    return;
                 }
-                catch(IOException ioe){
-                    System.out.println(ioe.getMessage());
-                }
+
+                // Receive Registration Request
+				Message registrationRequestMsg = new Message();
+				registrationRequestMsg.unpackMessage(inputStream);
+				Registry.nodesList.add(new Node(registrationRequestMsg.getIpAddress(), identifier, registrationRequestMsg.getPort()));
+				server.notifyServer();
+   
+				System.out.println("\n" + registrationRequestMsg.getType() + " From Host: " + registrationRequestMsg.getIpAddress() + "  Port: " + registrationRequestMsg.getPort());
+
+				// Send Registration Response
+				Message registrationResponseMsg = new Message(2, 200, identifier, "\'Welcome\'");
+				registrationResponseMsg.packMessage(outputStream);
+
+				// Send Connection Directive
+				if(Server.directives.size() != numOfConnections){
+				    waitNodeThread();
+				}
+
+				Message connectionDirectiveMsg = null;
+				for(int i = 0; i < directives.size(); i++){
+				    if(directives.get(i).getIdentifier().equals(this.identifier)){
+				        connectionDirectiveMsg = new Message(3, directives.get(i).getFrontNodePort(), directives.get(i).getFrontNodeIp(), directives.get(i).getBackNodePort(), directives.get(i).getBackNodeIp());
+				        connectionDirectiveMsg.packMessage(outputStream);
+				    }
+				}
+
+				this.waitNodeThread();
+
+				// Send Task Initiate
+				Message taskInitiateMsg = new Message(4, numberOfMessages);
+				taskInitiateMsg.packMessage(outputStream);
+
+				//Receive Task Complete
+				Message taskCompleteMsg = new Message();
+				taskCompleteMsg.unpackMessage(inputStream);
+				System.out.println("Received Task Complete From Node: " + taskCompleteMsg.getIdentifier() + " @ " + taskCompleteMsg.getIpAddress());
+
+				//Send Traffic Summary Request.
+				Integer trafficSummReqType = 7;
+				Message trafficSummReqMsg = new Message(trafficSummReqType);
+				trafficSummReqMsg.packMessage(outputStream);
                 
                 inputStream.close();
                 outputStream.close();
