@@ -104,7 +104,7 @@ public class Message {
 		this.backNodeIp = backNodeIp;
 	}
 
-	public String packMessage(DataOutputStream outputStream) {
+	public synchronized String packMessage(DataOutputStream outputStream) {
 		try {
 			outputStream.writeInt(this.messageType);
 
@@ -180,7 +180,7 @@ public class Message {
 		return null;
 	}
 
-	public ArrayList<Object> unpackMessage(DataInputStream inputStream) {
+	public synchronized ArrayList<Object> unpackMessage(DataInputStream inputStream) {
 		ArrayList<Object> messageContents = new ArrayList<Object>();
 		
 		try {

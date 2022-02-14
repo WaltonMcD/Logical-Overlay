@@ -132,8 +132,6 @@ public class NodeThread {
                 	Message dataTraffic = new Message();
                     dataTraffic.unpackMessage(backInputStream);
                     total += dataTraffic.getPayload();
-
-                    
                     System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
                     
                 }
@@ -141,13 +139,11 @@ public class NodeThread {
                 System.out.println("Received a total payload: " + total);
                 node.numMessagesReceived = numberOfMessages;
                 node.payloadReceivedTotal = total;
-                node.notifyNode();
-
             }
             catch (IOException ioe) {
                 System.out.println(ioe.getMessage());
             }
-            
+            node.notifyNode();
         }
     }
 }

@@ -163,6 +163,15 @@ public class Node implements Runnable {
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
+            if(numMessagesSent == null || payloadSentTotal ==  null || numMessagesReceived == null || payloadReceivedTotal == null){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
             //Send Traffic Summary
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
             trafficSummary.packMessage(serverOutputStream);
