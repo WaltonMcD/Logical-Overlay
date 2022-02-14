@@ -21,8 +21,6 @@ public class Node implements Runnable {
     public String  ip;
     public Integer payloadReceivedTotal;
     public Integer payloadSentTotal;
-    public Integer numMessagesSent;
-    public Integer numMessagesReceived;
     
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -163,9 +161,6 @@ public class Node implements Runnable {
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
-            //Send Traffic Summary
-            Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
-            trafficSummary.packMessage(serverOutputStream);
             
             serverOutputStream.close();
             serverInputStream.close();
