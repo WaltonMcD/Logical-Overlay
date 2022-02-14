@@ -129,6 +129,7 @@ public class NodeThread {
                 Integer total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
                 	Message dataTraffic = new Message();
+                    dataTraffic.unpackMessage(backInputStream);
                     total += dataTraffic.getPayload();
 
                     

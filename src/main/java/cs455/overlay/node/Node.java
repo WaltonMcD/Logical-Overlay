@@ -133,9 +133,10 @@ public class Node implements Runnable {
             //Receive Task Initiate
             //The read call will block until start sequence is initiated.
             Message taskInitiateMsg = new Message();
-            NodeThread.numberOfMessages = taskInitiateMsg.getNumMessagesReceived();
+            taskInitiateMsg.unpackMessage(serverInputStream);
+            NodeThread.numberOfMessages = taskInitiateMsg.getMessagesToSend();
 
-            System.out.println("Received Task Initiate Messages to send: " + taskInitiateMsg.getNumMessagesReceived());
+            System.out.println("Received Task Initiate Messages to send: " + taskInitiateMsg.getMessagesToSend());
 
             //Notify worker threads to start message passing.
             frontNode.notifyNodeSender();
@@ -149,7 +150,7 @@ public class Node implements Runnable {
 
             //Receive Traffic Summary Request.
             Message trafficSummaryReqMsg = new Message();
-            trafficSummaryReqMsg.packMessage(serverOutputStream);
+            trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
             
