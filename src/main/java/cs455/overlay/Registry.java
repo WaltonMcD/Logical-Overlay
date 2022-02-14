@@ -7,13 +7,35 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import cs455.overlay.node.Node;
+import cs455.overlay.protocols.Message;
 import cs455.overlay.routing.Server;
 import cs455.overlay.routing.Server.ServerThread;
 import cs455.overlay.routing.Server.NodeThread;
 
 public class Registry extends Thread{
+    public static ArrayList<Message> trafficSummaryMessages = new ArrayList<Message>();
     public static ArrayList<Node> nodesList = null;
     public static Integer serverPort = 0;
+    public static Integer numOfConnections = 0;
+
+    public static synchronized void startSequenceCompletion(){
+        if(trafficSummaryMessages.size() == numOfConnections){
+            Integer totalMessagesSent = 0;
+            Integer totalMessagesReceived = 0;
+            Integer totalPayloadSent = 0;
+            Integer totalPayloadReceived = 0;
+            for(Message msg : trafficSummaryMessages){
+                totalMessagesSent += msg.getNumMessagesSent();
+                totalMessagesReceived += msg.getNumMessagesReceived();
+                totalPayloadSent += msg.getSumOfSentMessages();
+                totalPayloadReceived += msg.getSumOfReceivedMessages();
+            }
+            System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
+                            " Received a total of " + totalMessagesReceived + " Messages" +
+                            " Total sent payload " + totalPayloadSent +
+                            " Total received payload " + totalPayloadReceived);
+        }
+    }
     public static void main(String[] args) {
         nodesList = new ArrayList<Node>();
 
@@ -25,7 +47,7 @@ public class Registry extends Thread{
             serverPort = Integer.parseInt(args[2]);
             Thread overlayThread = null;
             
-            Integer numOfConnections = Integer.parseInt(args[3]);
+            numOfConnections = Integer.parseInt(args[3]);
 
             while(!command.equals("exit-overlay")){
 
