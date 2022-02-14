@@ -182,6 +182,11 @@ public class Server {
 				Integer trafficSummReqType = 7;
 				Message trafficSummReqMsg = new Message(trafficSummReqType);
 				trafficSummReqMsg.packMessage(outputStream);
+
+                //Receive Traffic Summary
+                Message trafficSummary = new Message();
+                trafficSummary.unpackMessage(inputStream);
+                System.out.println(trafficSummary.getType() + " From: " + trafficSummary.getIpAddress());
                 
                 inputStream.close();
                 outputStream.close();
