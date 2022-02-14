@@ -64,16 +64,19 @@ public class Registry extends Thread{
             String serverHost = args[2];
             serverPort = Integer.parseInt(args[3]);
             String command = "";
+            Socket sock = null;
 
             try {
-                Socket sock = new Socket(serverHost, serverPort);
+                sock = new Socket(serverHost, serverPort);
                 Node node = new Node(sock);
-                new Thread(node).start();
+                Thread thread = new Thread(node);
+                thread.start();
 
                 while(!command.equals("exit-overlay")){
                     command = input.next();
                 }
-
+                
+                thread.interrupt();
                 sock.close();
             } catch (UnknownHostException un) {
                 System.out.println("Error Node: " + un.getMessage());

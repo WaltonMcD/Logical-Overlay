@@ -16,9 +16,9 @@ import cs455.overlay.protocols.Message;
 
 public class Node implements Runnable {
     public Integer identifier;
-    public Socket socketToServer;
+    public Socket  socketToServer;
     public Integer port;
-    public String ip;
+    public String  ip;
     public Integer payloadReceivedTotal;
     public Integer payloadSentTotal;
     
@@ -48,60 +48,94 @@ public class Node implements Runnable {
     }
 
     public void run() {
+    	
         try {
             DataOutputStream serverOutputStream = new DataOutputStream( new BufferedOutputStream(socketToServer.getOutputStream()));
             DataInputStream serverInputStream = new DataInputStream(new BufferedInputStream(socketToServer.getInputStream()));
-
-
+            
             //Send Register Request
             Integer messageType = 0;
-            Message registrationRequest = new Message(messageType, ip, port);
-            serverOutputStream.writeInt(registrationRequest.messageType);
-            serverOutputStream.writeUTF(registrationRequest.ipAddress);
-            serverOutputStream.writeInt(registrationRequest.port);
-            serverOutputStream.flush();
-
+            Message registrationRequestMsg = new Message(messageType, ip, port);
             
-            //Receive Register Response
-            messageType = serverInputStream.readInt();
-            Integer statusCode = serverInputStream.readInt();
-            Integer identifier = serverInputStream.readInt();
-            String additionalInfo = serverInputStream.readUTF();
-            this.identifier = identifier;
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-1...");
+                serverOutputStream.close();
+                serverInputStream.close();
+                socketToServer.close();
+                return;
+            }
+            
+            registrationRequestMsg.packMessage(serverOutputStream);
 
-            Message registrationResponse = new Message(messageType, statusCode, identifier, additionalInfo);
-            System.out.println(registrationResponse.getType() + " Received From Node: " + this.identifier + " Status Code: " + registrationResponse.statusCode + 
-            "\nAdditional Info: " + registrationResponse.additionalInfo);
+            //Receive Register Response
+            Message registrationResponseMsg = new Message();
+            
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-2...");
+                serverOutputStream.close();
+                serverInputStream.close();
+                socketToServer.close();
+                return;
+            }
+            
+            registrationResponseMsg.unpackMessage(serverInputStream);
+            this.identifier = registrationResponseMsg.getIdentifier();
+
+            System.out.println(registrationResponseMsg.getType() + " Received From Node: " + this.identifier + " Status Code: " + 
+            				   registrationResponseMsg.getStatusCode() + "\nAdditional Info: " + 
+            				   registrationResponseMsg.getAdditionalInfo());
+            
+            
             
             //Receive Connection Directive
-            messageType = serverInputStream.readInt();
-            Integer frontPort = serverInputStream.readInt();
-            String frontIP = serverInputStream.readUTF();
-            Integer backPort = serverInputStream.readInt();
-            String backIP = serverInputStream.readUTF();
-
-            System.out.println("Connection Directive Front: " + frontPort + " " + frontIP + " Back: " + backPort + " " + backIP);
+            Message recvConnDirMsg = new Message();
+            
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-3...");
+                serverOutputStream.close();
+                serverInputStream.close();
+                socketToServer.close();
+                return;
+            }
+            
+            recvConnDirMsg.unpackMessage(serverInputStream);
+          
+            System.out.println("Connection Directive Front: " + recvConnDirMsg.getFrontNodePort() + " " + recvConnDirMsg.getFrontNodeIp() + 
+            				   " Back: " + recvConnDirMsg.getBackNodePort() + " " + recvConnDirMsg.getBackNodeIp());
 
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             //Spawns a thread to connect to front nodes server socket
-            FrontNodeSender frontNode = new FrontNodeSender(frontIP, frontPort, nodeServerPort, this);
-            new Thread(frontNode).start();
+            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this);
+            Thread frontNodeThread = new Thread(frontNode);
+            frontNodeThread.start();
             
             //Accepts back nodes connection.
             Socket backSocket = nodeServer.accept();
             BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
-            new Thread(backNodeReader).start();
+            Thread backNodeReaderThread = new Thread(backNodeReader);
+            backNodeReaderThread.start();
+            
+            
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-2...");
+                backNodeReaderThread.interrupt();
+                frontNodeThread.interrupt();
+                serverOutputStream.close();
+                serverInputStream.close();
+                backSocket.close();
+                nodeServer.close();
+                socketToServer.close();
+                return;
+            }
             
             //Receive Task Initiate
             //The read call will block until start sequence is initiated.
-            messageType = serverInputStream.readInt();
-            Integer numberOfMessages = serverInputStream.readInt();
-            Message taskInitiate = new Message(messageType, numberOfMessages);
-            NodeThread.numberOfMessages = numberOfMessages;
+            Message taskInitiateMsg = new Message();
+            NodeThread.numberOfMessages = taskInitiateMsg.getNumMessagesReceived();
 
-            System.out.println("Received Task Initiate Messages to send: " + numberOfMessages);
+            System.out.println("Received Task Initiate Messages to send: " + taskInitiateMsg.getNumMessagesReceived());
 
             //Notify worker threads to start message passing.
             frontNode.notifyNodeSender();
@@ -110,16 +144,13 @@ public class Node implements Runnable {
             waitNode(); //Wait for message sending to complete.
 
             // Send Task Complete to registry
-            Message taskComplete = new Message(6,identifier, ip, port);
-            serverOutputStream.writeInt(taskComplete.messageType);
-            serverOutputStream.writeInt(taskComplete.identifier);
-            serverOutputStream.writeUTF(taskComplete.ipAddress);
-            serverOutputStream.writeInt(taskComplete.port);
-            serverOutputStream.flush();
+            Message taskCompleteMsg = new Message(6,identifier, ip, port);
+            taskCompleteMsg.packMessage(serverOutputStream);
 
             //Receive Traffic Summary Request.
-            Message trafficSummaryReq = new Message(serverInputStream.readInt());
-            System.out.println(trafficSummaryReq.getType());
+            Message trafficSummaryReqMsg = new Message();
+            trafficSummaryReqMsg.packMessage(serverOutputStream);
+            System.out.println(trafficSummaryReqMsg.getType());
 
             
             serverOutputStream.close();

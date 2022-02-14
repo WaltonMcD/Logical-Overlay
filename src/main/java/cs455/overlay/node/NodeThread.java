@@ -8,7 +8,7 @@ import cs455.overlay.protocols.Message;
 
 // Handles front node socket / message sending and receiving
 public class NodeThread {
-    public static Integer numberOfMessages;
+    public static Integer numberOfMessages = 5;
 
     public NodeThread(){
         // need default constructor to construct inner classes
@@ -31,7 +31,7 @@ public class NodeThread {
             try {
                 wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     
@@ -48,23 +48,35 @@ public class NodeThread {
         @Override
         public void run(){
             try{
+            	
                 Socket frontSocket = new Socket(frontIp, serverPort);
                 System.out.println("Connected to node: " + frontSocket.getInetAddress());
 
                 DataOutputStream frontOutputStream = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
+                
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting NodeThread frontSocket 1-1...");
+                    frontOutputStream.close();
+                    frontSocket.close();
+                    return;
+                }
 
                 //Waiting for task initiate.
                 waitNodeSender();
+                
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting NodeThread frontSocket 1-2...");
+                    frontOutputStream.close();
+                    frontSocket.close();
+                    return;
+                }
 
                 int total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                    Message dataTraffic = new Message(5, port, getRandomNumberUsingNextInt());
-                    frontOutputStream.writeInt(dataTraffic.messageType);
-                    frontOutputStream.writeInt(dataTraffic.startNodeId);
-                    frontOutputStream.writeInt(dataTraffic.payload);
-                    frontOutputStream.flush();
-                    total += dataTraffic.payload;
-                    System.out.println("Sending traffic to Node: " + dataTraffic.startNodeId + " Payload: " + dataTraffic.payload);
+                    Message dataTrafficMsg = new Message(5, port, getRandomNumberUsingNextInt());
+                    dataTrafficMsg.packMessage(frontOutputStream);
+                    total += dataTrafficMsg.getPayload();
+                    System.out.println("Sending traffic to Node: " + dataTrafficMsg.getStartNodeId() + " Payload: " + dataTrafficMsg.getPayload());
                 }
                 node.payloadSentTotal = total;
 
@@ -103,19 +115,24 @@ public class NodeThread {
         public void run(){
             try{
                 DataInputStream backInputStream = new DataInputStream(new BufferedInputStream(backSocket.getInputStream()));
+                
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting BackNodeReader...");
+                    backInputStream.close();
+                    backSocket.close();
+                    return;
+                }
 
                 //Waiting for task initiate.
                 waitNodeReader();
 
                 Integer total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                    Integer messageType = backInputStream.readInt();
-                    Integer startNodeId = backInputStream.readInt();
-                    Integer payload = backInputStream.readInt();
-                    total += payload;
+                	Message dataTraffic = new Message();
+                    total += dataTraffic.getPayload();
 
-                    Message dataTraffic = new Message(messageType, startNodeId, payload);
-                    System.out.println("Receiving data traffic from Node: " + dataTraffic.startNodeId);
+                    
+                    System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
                     
                 }
                 
