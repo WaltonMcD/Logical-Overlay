@@ -128,8 +128,6 @@ public class Server {
 
         @Override
         public void run(){
-        	
-        	
             try{
                 DataInputStream inputStream = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));

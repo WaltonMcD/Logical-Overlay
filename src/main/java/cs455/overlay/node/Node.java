@@ -99,6 +99,14 @@ public class Node implements Runnable {
             }
             
             recvConnDirMsg.unpackMessage(serverInputStream);
+            
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-4...");
+                serverOutputStream.close();
+                serverInputStream.close();
+                socketToServer.close();
+                return;
+            }
           
             System.out.println("Connection Directive Front: " + recvConnDirMsg.getFrontNodePort() + " " + recvConnDirMsg.getFrontNodeIp() + 
             				   " Back: " + recvConnDirMsg.getBackNodePort() + " " + recvConnDirMsg.getBackNodeIp());
