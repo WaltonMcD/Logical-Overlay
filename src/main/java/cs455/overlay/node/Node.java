@@ -127,7 +127,7 @@ public class Node implements Runnable {
             
             
             if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-4...");
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-5...");
                 backNodeReaderThread.interrupt();
                 frontNodeThread.interrupt();
                 serverOutputStream.close();
