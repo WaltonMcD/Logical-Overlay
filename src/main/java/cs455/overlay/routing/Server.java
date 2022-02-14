@@ -148,7 +148,6 @@ public class Server {
 				Registry.nodesList.add(new Node(registrationRequestMsg.getIpAddress(), registrationRequestMsg.getPort(), identifier));
 				server.notifyServer();
    
-				System.out.println(msgs);
 				System.out.println("\n" + registrationRequestMsg.getType() + " From Host: " + registrationRequestMsg.getIpAddress() + "  Port: " + registrationRequestMsg.getPort());
 
 				// Send Registration Response
