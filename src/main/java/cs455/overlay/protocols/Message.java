@@ -181,17 +181,9 @@ public class Message {
 	}
 
 	public ArrayList<Object> unpackMessage(DataInputStream inputStream) {
-		
-		
 		ArrayList<Object> messageContents = new ArrayList<Object>();
+		
 		try {
-			if (Thread.currentThread().isInterrupted()) {
-	            System.out.println(Thread.currentThread().getName() + " detected interruption, exiting...");
-	            inputStream.close();
-	            return null;
-	        }
-			
-			
 			this.messageType = inputStream.readInt();
 			messageContents.add(messageType);
 

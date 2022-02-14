@@ -23,6 +23,7 @@ public class Registry extends Thread{
             Boolean setupComplete = false;
             String command = "";
             serverPort = Integer.parseInt(args[2]);
+            Thread overlayThread = null;
             
             Integer numOfConnections = Integer.parseInt(args[3]);
 
@@ -32,10 +33,16 @@ public class Registry extends Thread{
                 command = input.next();
 
                 if(command.equals("setup-overlay")){
-                    server = new Server(serverPort, numOfConnections);
-                    ServerThread serverThread = new ServerThread(server);
-                    new Thread(serverThread).start();
-                    setupComplete = true;
+                	if(!setupComplete) {
+	                    server = new Server(serverPort, numOfConnections);
+	                    ServerThread serverThread = new ServerThread(server);
+	                    overlayThread = new Thread(serverThread);
+	                    overlayThread.start();
+	                    setupComplete = true;
+                	} else {
+                		System.out.println("Overlay is already setup.");
+                		continue;
+                	}
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
                     for(Node node : nodesList){
@@ -50,6 +57,9 @@ public class Registry extends Thread{
                     for(NodeThread node: Server.nodeThreads){
                         node.notifyNodeThread();
                     }
+                }
+                else if(command.equals("exit-overlay")) {
+                	overlayThread.interrupt();
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
