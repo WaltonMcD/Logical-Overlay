@@ -59,7 +59,8 @@ public class Registry extends Thread{
                     }
                 }
                 else if(command.equals("exit-overlay")) {
-                	overlayThread.interrupt();
+                	if(setupComplete)
+                		overlayThread.interrupt();
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
