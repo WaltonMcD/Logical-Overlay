@@ -128,8 +128,6 @@ public class Server {
 
         @Override
         public void run(){
-        	
-        	
             try{
                 DataInputStream inputStream = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
@@ -183,6 +181,7 @@ public class Server {
 				Message trafficSummReqMsg = new Message(trafficSummReqType);
 				trafficSummReqMsg.packMessage(outputStream);
 
+
                 //Receive Traffic Summary
                 Message trafficSummary = new Message();
                 trafficSummary.unpackMessage(inputStream);
@@ -190,6 +189,7 @@ public class Server {
                 Registry.trafficSummaryMessages.add(trafficSummary);
 
                 Registry.startSequenceCompletion();
+
                 
                 inputStream.close();
                 outputStream.close();

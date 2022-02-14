@@ -21,8 +21,6 @@ public class Node implements Runnable {
     public String  ip;
     public Integer payloadReceivedTotal;
     public Integer payloadSentTotal;
-    public Integer numMessagesSent;
-    public Integer numMessagesReceived;
     
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -101,6 +99,14 @@ public class Node implements Runnable {
             }
             
             recvConnDirMsg.unpackMessage(serverInputStream);
+            
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-4...");
+                serverOutputStream.close();
+                serverInputStream.close();
+                socketToServer.close();
+                return;
+            }
           
             System.out.println("Connection Directive Front: " + recvConnDirMsg.getFrontNodePort() + " " + recvConnDirMsg.getFrontNodeIp() + 
             				   " Back: " + recvConnDirMsg.getBackNodePort() + " " + recvConnDirMsg.getBackNodeIp());
@@ -121,7 +127,7 @@ public class Node implements Runnable {
             
             
             if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-4...");
+                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-5...");
                 backNodeReaderThread.interrupt();
                 frontNodeThread.interrupt();
                 serverOutputStream.close();
@@ -155,9 +161,6 @@ public class Node implements Runnable {
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
-            //Send Traffic Summary
-            Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
-            trafficSummary.packMessage(serverOutputStream);
             
             serverOutputStream.close();
             serverInputStream.close();

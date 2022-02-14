@@ -149,7 +149,6 @@ public class Message {
 				break;
 
 			case 7:
-				outputStream.writeInt(this.messageType);
 				break;
 
 			case 8:
