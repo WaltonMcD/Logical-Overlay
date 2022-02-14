@@ -78,6 +78,7 @@ public class NodeThread {
                     total += dataTrafficMsg.getPayload();
                     System.out.println("Sending traffic to Node: " + dataTrafficMsg.getStartNodeId() + " Payload: " + dataTrafficMsg.getPayload());
                 }
+                node.numMessagesSent = numberOfMessages;
                 node.payloadSentTotal = total;
 
             }
@@ -138,6 +139,7 @@ public class NodeThread {
                 }
                 
                 System.out.println("Received a total payload: " + total);
+                node.numMessagesReceived = numberOfMessages;
                 node.payloadReceivedTotal = total;
                 node.notifyNode();
 

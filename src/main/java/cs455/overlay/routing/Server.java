@@ -181,7 +181,6 @@ public class Server {
 				Message trafficSummReqMsg = new Message(trafficSummReqType);
 				trafficSummReqMsg.packMessage(outputStream);
 
-
                 //Receive Traffic Summary
                 Message trafficSummary = new Message();
                 trafficSummary.unpackMessage(inputStream);
@@ -189,7 +188,7 @@ public class Server {
                 Registry.trafficSummaryMessages.add(trafficSummary);
 
                 Registry.startSequenceCompletion();
-
+                
                 
                 inputStream.close();
                 outputStream.close();

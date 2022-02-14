@@ -149,6 +149,7 @@ public class Message {
 				break;
 
 			case 7:
+				outputStream.writeInt(this.messageType);
 				break;
 
 			case 8:
@@ -250,6 +251,7 @@ public class Message {
 				break;
 
 			case 7:
+				this.messageType = inputStream.readInt();
 				break;
 				
 			case 8:
