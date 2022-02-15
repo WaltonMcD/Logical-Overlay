@@ -163,12 +163,9 @@ public class Node implements Runnable {
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
-            if(numMessagesSent == null || payloadSentTotal ==  null || numMessagesReceived == null || payloadReceivedTotal == null){
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+            while(numMessagesSent == null || payloadSentTotal ==  null || numMessagesReceived == null || payloadReceivedTotal == null){
+                if(numMessagesSent != null && payloadSentTotal !=  null && numMessagesReceived != null && payloadReceivedTotal != null){
+                    break;
                 }
             }
 

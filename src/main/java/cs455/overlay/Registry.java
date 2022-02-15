@@ -14,6 +14,7 @@ import cs455.overlay.routing.Server.NodeThread;
 
 public class Registry extends Thread{
     public static ArrayList<Message> trafficSummaryMessages = new ArrayList<Message>();
+    public static ArrayList<Message> completedTasks = new ArrayList<Message>();
     public static ArrayList<Node> nodesList = null;
     public static Integer serverPort = 0;
     public static Integer numOfConnections = 0;

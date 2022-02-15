@@ -167,6 +167,12 @@ public class Server {
 
 				this.waitNodeThread();
 
+                while(numberOfMessages == null){
+                    if(numberOfMessages != null){
+                        break;
+                    }
+                }
+
 				// Send Task Initiate
 				Message taskInitiateMsg = new Message(4, numberOfMessages);
 				taskInitiateMsg.packMessage(outputStream);
@@ -175,6 +181,16 @@ public class Server {
 				Message taskCompleteMsg = new Message();
 				taskCompleteMsg.unpackMessage(inputStream);
 				System.out.println("Received Task Complete From Node: " + taskCompleteMsg.getIdentifier() + " @ " + taskCompleteMsg.getIpAddress());
+                Registry.completedTasks.add(taskCompleteMsg);
+
+                
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
 
 				//Send Traffic Summary Request.
 				Integer trafficSummReqType = 7;
