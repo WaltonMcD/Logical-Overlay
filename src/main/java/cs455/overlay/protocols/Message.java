@@ -134,6 +134,7 @@ public class Message {
 				break;
 
 			case 4:
+				outputStream.writeInt(this.messageType);
 				outputStream.writeInt(this.messagesToSend);
 				break;
 
@@ -227,8 +228,10 @@ public class Message {
 				break;
 
 			case 4:
+				this.messageType = inputStream.readInt();
 				this.messagesToSend = inputStream.readInt();
 
+				messageContents.add(messageType);
 				messageContents.add(messagesToSend);
 				break;
 
@@ -291,7 +294,7 @@ public class Message {
 		return messageContents;
 	}
 
-	public String getType() {
+	public synchronized String getType() {
 		switch (this.messageType) {
 		case 0:
 			return "Registration_Request";
@@ -317,139 +320,139 @@ public class Message {
 		return null;
 	}
 
-	public Integer getMessageType() {
+	public synchronized Integer getMessageType() {
 		return messageType;
 	}
 
-	public void setMessageType(Integer messageType) {
+	public synchronized void setMessageType(Integer messageType) {
 		this.messageType = messageType;
 	}
 
-	public String getIpAddress() {
+	public synchronized String getIpAddress() {
 		return ipAddress;
 	}
 
-	public void setIpAddress(String ipAddress) {
+	public synchronized void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 
-	public Integer getPort() {
+	public synchronized Integer getPort() {
 		return port;
 	}
 
-	public void setPort(Integer port) {
+	public synchronized void setPort(Integer port) {
 		this.port = port;
 	}
 
-	public Integer getStatusCode() {
+	public synchronized Integer getStatusCode() {
 		return statusCode;
 	}
 
-	public void setStatusCode(Integer statusCode) {
+	public synchronized void setStatusCode(Integer statusCode) {
 		this.statusCode = statusCode;
 	}
 
-	public String getAdditionalInfo() {
+	public synchronized String getAdditionalInfo() {
 		return additionalInfo;
 	}
 
-	public void setAdditionalInfo(String additionalInfo) {
+	public synchronized void setAdditionalInfo(String additionalInfo) {
 		this.additionalInfo = additionalInfo;
 	}
 
-	public Integer getIdentifier() {
+	public synchronized Integer getIdentifier() {
 		return identifier;
 	}
 
-	public void setIdentifier(Integer identifier) {
+	public synchronized void setIdentifier(Integer identifier) {
 		this.identifier = identifier;
 	}
 
-	public Integer getFrontNodePort() {
+	public synchronized Integer getFrontNodePort() {
 		return frontNodePort;
 	}
 
-	public void setFrontNodePort(Integer frontNodePort) {
+	public synchronized void setFrontNodePort(Integer frontNodePort) {
 		this.frontNodePort = frontNodePort;
 	}
 
-	public String getFrontNodeIp() {
+	public synchronized String getFrontNodeIp() {
 		return frontNodeIp;
 	}
 
-	public void setFrontNodeIp(String frontNodeIp) {
+	public synchronized void setFrontNodeIp(String frontNodeIp) {
 		this.frontNodeIp = frontNodeIp;
 	}
 
-	public Integer getBackNodePort() {
+	public synchronized Integer getBackNodePort() {
 		return backNodePort;
 	}
 
-	public void setBackNodePort(Integer backNodePort) {
+	public synchronized void setBackNodePort(Integer backNodePort) {
 		this.backNodePort = backNodePort;
 	}
 
-	public String getBackNodeIp() {
+	public synchronized String getBackNodeIp() {
 		return backNodeIp;
 	}
 
-	public void setBackNodeIp(String backNodeIp) {
+	public synchronized void setBackNodeIp(String backNodeIp) {
 		this.backNodeIp = backNodeIp;
 	}
 
-	public Integer getPayload() {
+	public synchronized Integer getPayload() {
 		return payload;
 	}
 
-	public void setPayload(Integer payload) {
+	public synchronized void setPayload(Integer payload) {
 		this.payload = payload;
 	}
 
-	public Integer getStartNodeId() {
+	public synchronized Integer getStartNodeId() {
 		return startNodeId;
 	}
 
-	public void setStartNodeId(Integer startNodeId) {
+	public synchronized void setStartNodeId(Integer startNodeId) {
 		this.startNodeId = startNodeId;
 	}
 
-	public Integer getMessagesToSend() {
+	public synchronized Integer getMessagesToSend() {
 		return messagesToSend;
 	}
 
-	public void setMessagesToSend(Integer messagesToSend) {
+	public synchronized void setMessagesToSend(Integer messagesToSend) {
 		this.messagesToSend = messagesToSend;
 	}
 
-	public Integer getNumMessagesSent() {
+	public synchronized Integer getNumMessagesSent() {
 		return numMessagesSent;
 	}
 
-	public void setNumMessagesSent(Integer numMessagesSent) {
+	public synchronized void setNumMessagesSent(Integer numMessagesSent) {
 		this.numMessagesSent = numMessagesSent;
 	}
 
-	public Integer getNumMessagesReceived() {
+	public synchronized Integer getNumMessagesReceived() {
 		return numMessagesReceived;
 	}
 
-	public void setNumMessagesReceived(Integer numMessagesReceived) {
+	public synchronized void setNumMessagesReceived(Integer numMessagesReceived) {
 		this.numMessagesReceived = numMessagesReceived;
 	}
 
-	public Integer getSumOfSentMessages() {
+	public synchronized Integer getSumOfSentMessages() {
 		return sumOfSentMessages;
 	}
 
-	public void setSumOfSentMessages(Integer sumOfSentMessages) {
+	public synchronized void setSumOfSentMessages(Integer sumOfSentMessages) {
 		this.sumOfSentMessages = sumOfSentMessages;
 	}
 
-	public Integer getSumOfReceivedMessages() {
+	public synchronized Integer getSumOfReceivedMessages() {
 		return sumOfReceivedMessages;
 	}
 
-	public void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
+	public synchronized void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
 		this.sumOfReceivedMessages = sumOfReceivedMessages;
 	}
 	
