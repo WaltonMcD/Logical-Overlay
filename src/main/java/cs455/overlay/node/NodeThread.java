@@ -8,11 +8,7 @@ import cs455.overlay.protocols.Message;
 
 // Handles front node socket / message sending and receiving
 public class NodeThread {
-    public static Integer numberOfMessages = 5;
-
-    public NodeThread(){
-        // need default constructor to construct inner classes
-    }
+    public static Integer numberOfMessages = 0;
     
     public static class FrontNodeSender implements Runnable {
         public String frontIp;
