@@ -27,7 +27,7 @@ public class NodeThread {
             try {
                 wait();
             } catch (InterruptedException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
     
