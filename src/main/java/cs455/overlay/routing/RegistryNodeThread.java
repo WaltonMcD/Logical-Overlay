@@ -53,7 +53,7 @@ public class RegistryNodeThread extends Thread {
 
                     PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(payloadMsg);
                     this.registry.updatePayloadTotal(payloadMsgFormat.payload);
-                    //payloadMsgFormat.printContents();
+                    payloadMsgFormat.printContents();
                 }
                 else if(messageType == 3){
                     byte[] b = new byte[messageSize];

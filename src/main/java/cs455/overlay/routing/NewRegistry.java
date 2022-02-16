@@ -45,6 +45,8 @@ public class NewRegistry extends Thread{
             for (Thread node: nodesList){
                 node.join();
             }
+
+            Thread.sleep(1000);
         
             System.out.printf("Registry: Total count messages: %d, Total sum messages %d\n", this.totalMessages, this.totalPayload);
         }
