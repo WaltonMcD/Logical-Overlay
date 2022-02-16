@@ -2,15 +2,13 @@ package cs455.overlay;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Scanner;
 
 import cs455.overlay.node.MessagerNode;
-import cs455.overlay.node.Node;
 import cs455.overlay.routing.NewRegistry;
-import cs455.overlay.routing.RegistryNodeThread;
+
 
 public class Main {
     public static Boolean setupComplete = false;

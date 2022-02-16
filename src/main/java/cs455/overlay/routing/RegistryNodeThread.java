@@ -7,10 +7,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import javax.sound.midi.Receiver;
-
-import cs455.overlay.Main;
-import cs455.overlay.protocols.Message;
 import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
 

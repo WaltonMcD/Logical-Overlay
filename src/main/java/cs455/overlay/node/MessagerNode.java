@@ -1,16 +1,11 @@
 package cs455.overlay.node;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-import cs455.overlay.Main;
-import cs455.overlay.protocols.Message;
 import cs455.overlay.wireformats.DoneMessageFormat;
 import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
