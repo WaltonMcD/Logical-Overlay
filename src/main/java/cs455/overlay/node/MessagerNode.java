@@ -1,5 +1,7 @@
 package cs455.overlay.node;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -51,8 +53,8 @@ public class MessagerNode extends Thread{
         }
     }
 
-    public void sendDeregistrationRequest(DataOutputStream rout) throws IOException{
-        DoneMessageFormat msg = new DoneMessageFormat(this.identifier, -1);
+    public void sendDeregistrationRequest(DataOutputStream rout, int fromPort) throws IOException{
+        DoneMessageFormat msg = new DoneMessageFormat(this.identifier, fromPort);
         byte[] marshalledMsg = msg.getBytes();
         rout.writeInt(DoneMessageFormat.type);
         rout.writeInt(marshalledMsg.length);
@@ -65,17 +67,18 @@ public class MessagerNode extends Thread{
         try {
             regSocket = new Socket(this.hostIp, this.hostPort);
             DataOutputStream rout = new DataOutputStream(regSocket.getOutputStream());
+            DataInputStream rin = new DataInputStream(new BufferedInputStream(regSocket.getInputStream()));
 
             sendRegisterRequest(rout, regSocket.getLocalPort());
             
             sendPayload(rout, regSocket.getLocalPort());
 
-            sendDeregistrationRequest(rout);
+            sendDeregistrationRequest(rout, regSocket.getLocalPort());
 
             rout.close();
             regSocket.close();
 
-            System.out.printf("Node %s: count: %d, sum: %d\n", this.identifier, this.totalSentMessages, this.totalSentPayload);
+            System.out.printf("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
 
         } 
         catch (UnknownHostException e) {

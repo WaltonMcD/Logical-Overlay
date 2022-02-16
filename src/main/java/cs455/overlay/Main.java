@@ -8,6 +8,7 @@ import java.util.Scanner;
 
 import cs455.overlay.node.MessagerNode;
 import cs455.overlay.routing.NewRegistry;
+import cs455.overlay.routing.RegistryNodeThread;
 
 
 public class Main {
@@ -39,7 +40,8 @@ public class Main {
                 	}
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
-                    for(Thread node : registry.getNodesList()){
+                    for(RegistryNodeThread node : registry.getNodeThreads()){
+                        System.out.println("Node: " + node.ip + " is connected from Port: " + node.port);
                     }
                 }
                 else if(command.equals("start") && setupComplete == true){

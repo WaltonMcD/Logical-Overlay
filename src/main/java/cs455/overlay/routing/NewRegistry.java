@@ -5,22 +5,23 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import cs455.overlay.protocols.Message;
-
 public class NewRegistry extends Thread{
     final private int serverPort;
     private int numberOfConnections;
     private int connectedNodes = 0;
-    private ArrayList<Thread> nodesList;
     private boolean finish = false;
     private long totalPayload;
     private int totalMessages;
     private int numberOfMessagesToSend;
 
+    private ArrayList<Thread> nodesList;
+    private ArrayList<RegistryNodeThread> nodeThreads;
+
     public NewRegistry(Integer port, Integer numberOfConnections){
             this.serverPort = port;
             this.numberOfConnections = numberOfConnections;
             this.nodesList = new ArrayList<Thread>();
+            this.nodeThreads = new ArrayList<RegistryNodeThread>();
     }
 
     @Override
@@ -31,9 +32,11 @@ public class NewRegistry extends Thread{
                 Socket incomingConnectionSocket = serverSocket.accept();
                 incomingConnectionSocket.setReuseAddress(true);
 
-                Thread socketToNode = new RegistryNodeThread(incomingConnectionSocket, this);
-                nodesList.add(socketToNode);
-                socketToNode.start();
+                Thread regNodeThread = new RegistryNodeThread(incomingConnectionSocket, this);
+                RegistryNodeThread node = new RegistryNodeThread(incomingConnectionSocket, this);
+                nodesList.add(regNodeThread);
+                nodeThreads.add(node);
+                regNodeThread.start();
 
                 this.connectedNodes++;
                 this.finish = this.connectedNodes == this.numberOfConnections;
@@ -48,7 +51,7 @@ public class NewRegistry extends Thread{
 
             Thread.sleep(1000);
         
-            System.out.printf("Registry: Total count messages: %d, Total sum messages %d\n", this.totalMessages, this.totalPayload);
+            System.out.println("Registry: Total count of messages sent: "+this.totalMessages +" Sum of all sent messages: " + this.totalPayload);
         }
         catch (IOException ioe) {
             System.out.println("Registry: ");
@@ -71,7 +74,11 @@ public class NewRegistry extends Thread{
     }
 
     public int getNumberOfMessagesToSend() {
-        return numberOfMessagesToSend;
+        return this.numberOfMessagesToSend;
+    }
+
+    public ArrayList<RegistryNodeThread> getNodeThreads() {
+        return this.nodeThreads;
     }
 
     public ArrayList<Thread> getNodesList(){

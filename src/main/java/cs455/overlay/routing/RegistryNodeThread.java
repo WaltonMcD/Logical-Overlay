@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import cs455.overlay.wireformats.RegisterMessageFormat;
+import cs455.overlay.wireformats.DoneMessageFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
 
 public class RegistryNodeThread extends Thread {
@@ -27,21 +28,27 @@ public class RegistryNodeThread extends Thread {
         this.nodeIn = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
     }
 
+    public void sendTaskInitiate(){
+        
+    }
+
     @Override
     public void run(){
         try {
             int messageType = 0;
             int messageSize = 0;
+
             while(messageType != 3){
                 messageType = this.nodeIn.readInt();
                 messageSize = this.nodeIn.readInt();
 
                 if(messageType == 0){
-                    byte[] msg = new byte[messageSize];
-                    nodeIn.readFully(msg, 0, messageSize);
+                    byte[] reqMsg = new byte[messageSize];
+                    nodeIn.readFully(reqMsg, 0, messageSize);
 
-                    RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(msg);
+                    RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(reqMsg);
                     marshalledMsg.printContents();
+
                 }
                 else if(messageType == 2){
                     byte[] payloadMsg = new byte[messageSize];
@@ -52,8 +59,11 @@ public class RegistryNodeThread extends Thread {
                     payloadMsgFormat.printContents();
                 }
                 else if(messageType == 3){
-                    byte[] b = new byte[messageSize];
-                    nodeIn.readFully(b, 0, messageSize);
+                    byte[] deReq = new byte[messageSize];
+                    nodeIn.readFully(deReq, 0, messageSize);
+
+                    DoneMessageFormat deregistrationReq = new DoneMessageFormat(deReq);
+                    deregistrationReq.printContents();
                 }
             }
             
@@ -64,7 +74,6 @@ public class RegistryNodeThread extends Thread {
         catch(IOException ioe){
             System.out.println("Node: ");
             ioe.printStackTrace();
-        }
+        } 
     }
-
 }
