@@ -4,15 +4,12 @@ import java.io.*;
 import java.net.*;
 import java.util.Random;
 
+import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
 
 // Handles front node socket / message sending and receiving
 public class NodeThread {
-    public static Integer numberOfMessages = 5;
-
-    public NodeThread(){
-        // need default constructor to construct inner classes
-    }
+    public static Integer numberOfMessages = 0;
     
     public static class FrontNodeSender implements Runnable {
         public String frontIp;
@@ -31,7 +28,7 @@ public class NodeThread {
             try {
                 wait();
             } catch (InterruptedException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
     
@@ -128,16 +125,18 @@ public class NodeThread {
                 waitNodeReader();
 
                 Integer total = 0;
-                for(int i = 0; i < numberOfMessages; i++){
+                Integer messagesReceived = 0;
+                while(messagesReceived < numberOfMessages * Registry.numOfConnections){
                 	Message dataTraffic = new Message();
                     dataTraffic.unpackMessage(backInputStream);
                     total += dataTraffic.getPayload();
                     System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
+                    messagesReceived++;
                     
                 }
                 
                 System.out.println("Received a total payload: " + total);
-                node.numMessagesReceived = numberOfMessages;
+                node.numMessagesReceived = messagesReceived;
                 node.payloadReceivedTotal = total;
             }
             catch (IOException ioe) {
