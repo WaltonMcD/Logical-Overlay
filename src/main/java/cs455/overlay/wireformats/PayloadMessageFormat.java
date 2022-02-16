@@ -80,6 +80,6 @@ public class PayloadMessageFormat {
     }
 
     public void printContents(){
-        System.out.printf( this.fromHostname + " message: " + this.numberOfMessage + " payload: " + this.payload);
+        System.out.println( this.fromHostname + " message: " + this.numberOfMessage + " payload: " + this.payload);
     }
 }

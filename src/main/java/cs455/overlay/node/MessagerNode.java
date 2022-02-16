@@ -13,7 +13,6 @@ import cs455.overlay.Main;
 import cs455.overlay.protocols.Message;
 import cs455.overlay.wireformats.DoneMessageFormat;
 import cs455.overlay.wireformats.RegisterMessageFormat;
-import cs455.overlay.wireformats.TaskInitiateFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
 
 public class MessagerNode extends Thread{
@@ -25,10 +24,11 @@ public class MessagerNode extends Thread{
     private long totalSentMessages;
     private long totalSentPayload;
 
-    public MessagerNode(String hostIp, int hostPort, String identifier) throws IOException {
+    public MessagerNode(String hostIp, int hostPort, String identifier, int numberOfMessages) throws IOException {
         this.hostIp = hostIp;
         this.hostPort = hostPort;
         this.identifier = identifier;
+        this.numOfMessagesToSend = numberOfMessages;
     }
 
     public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
@@ -38,16 +38,6 @@ public class MessagerNode extends Thread{
         rout.writeInt(marshalledMsg.length);
         rout.write(marshalledMsg);
         rout.flush();
-    }
-
-    public void receiveTaskInitiate(DataInputStream rin) throws IOException{
-        int messageType = rin.readInt();
-        int messageSize = rin.readInt();
-        byte[] taskMsg = new byte[messageSize];
-        rin.readFully(taskMsg, 0, messageSize);
-        
-        TaskInitiateFormat taskMsgFormat = new TaskInitiateFormat(taskMsg);
-        taskMsgFormat.printContents();
     }
 
     public void sendPayload(DataOutputStream rout, int fromPort) throws IOException{
@@ -80,16 +70,17 @@ public class MessagerNode extends Thread{
         try {
             regSocket = new Socket(this.hostIp, this.hostPort);
             DataOutputStream rout = new DataOutputStream(regSocket.getOutputStream());
-            DataInputStream rin = new DataInputStream(regSocket.getInputStream());
 
             sendRegisterRequest(rout, regSocket.getLocalPort());
             
-            receiveTaskInitiate(rin);
-            
             sendPayload(rout, regSocket.getLocalPort());
+
+            sendDeregistrationRequest(rout);
 
             rout.close();
             regSocket.close();
+
+            System.out.printf("Node %s: count: %d, sum: %d\n", this.identifier, this.totalSentMessages, this.totalSentPayload);
 
         } 
         catch (UnknownHostException e) {
@@ -99,9 +90,5 @@ public class MessagerNode extends Thread{
             e.printStackTrace();
         }
 
-    }
-
-    public void setNumOfMessagesToSend(int numOfMessagesToSend) {
-        this.numOfMessagesToSend = numOfMessagesToSend;
     }
 }

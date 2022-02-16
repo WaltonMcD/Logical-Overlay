@@ -14,14 +14,7 @@ import cs455.overlay.routing.RegistryNodeThread;
 
 public class Main {
     public static Boolean setupComplete = false;
-    public static void main(String[] args) throws IOException {
-        if(args.length != 4){
-            System.out.println("Error: Incorrect Arguments");
-            System.out.println("Expected arguments for registry: java -jar build/libs/[YOUR_JAR_FILE] cs455.overlay.Registry registry [YOUR_PORT] [NUMBER_OF_NODES]");
-            System.out.println("Expected arguments for node: java -jar build/libs/[YOUR_JAR_FILE] cs455.overlay.node.Node node [REGISTRY_HOSTNAME] [REGISTRY_PORT]");
-            return;
-        }
-
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         if(args[1].equals("registry")){
             
@@ -48,21 +41,13 @@ public class Main {
                 	}
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
-                    for(RegistryNodeThread node : registry.getNodesList()){
-                        System.out.println("Node"+ " is connected from Host: " + node.getIp() + " Port: " + node.getPort());
+                    for(Thread node : registry.getNodesList()){
                     }
                 }
                 else if(command.equals("start") && setupComplete == true){
                     Integer numberOfMessages = input.nextInt();
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
                     registry.setNumberOfMessagesToSend(numberOfMessages);
-                    for(RegistryNodeThread node : registry.getNodesList()){
-                        node.notifyRegNodeThread();
-                    }
-                }
-                else if(command.equals("exit-overlay")) {
-                	if(setupComplete)
-                		registry.exitOverlay();
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
@@ -81,9 +66,10 @@ public class Main {
            
             Random random = new Random();
             String identifier = InetAddress.getLocalHost().getHostName();
+            int numberOfMessages = Integer.parseInt(args[4]);
 
             try {
-                MessagerNode node = new MessagerNode(regHost, regPort, identifier);
+                MessagerNode node = new MessagerNode(regHost, regPort, identifier, numberOfMessages);
                 Thread thread = new Thread(node);
                 thread.start();
 

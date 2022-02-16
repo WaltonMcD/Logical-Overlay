@@ -10,7 +10,8 @@ import cs455.overlay.protocols.Message;
 public class NewRegistry extends Thread{
     final private int serverPort;
     private int numberOfConnections;
-    private ArrayList<RegistryNodeThread> nodesList;
+    private int connectedNodes = 0;
+    private ArrayList<Thread> nodesList;
     private boolean finish = false;
     private long totalPayload;
     private int totalMessages;
@@ -19,31 +20,33 @@ public class NewRegistry extends Thread{
     public NewRegistry(Integer port, Integer numberOfConnections){
             this.serverPort = port;
             this.numberOfConnections = numberOfConnections;
-            this.nodesList = new ArrayList<RegistryNodeThread>();
-    }
-
-    public void exitOverlay(){
-        this.finish = true; 
-    }
-
-    public void openOverlay() throws InterruptedException, IOException{
-        ServerSocket serverSocket = new ServerSocket(this.serverPort, this.numberOfConnections);
-        while(!this.finish){
-            Socket incomingConnectionSocket = serverSocket.accept();
-            incomingConnectionSocket.setReuseAddress(true);
-
-            RegistryNodeThread socketToNode = new RegistryNodeThread(incomingConnectionSocket, this);
-            nodesList.add(socketToNode);
-            new Thread(socketToNode).start();
-
-        }
-        serverSocket.close();
+            this.nodesList = new ArrayList<Thread>();
     }
 
     @Override
     public void run(){
         try {
-            openOverlay();
+            ServerSocket serverSocket = new ServerSocket(this.serverPort, this.numberOfConnections);
+            while(!this.finish){
+                Socket incomingConnectionSocket = serverSocket.accept();
+                incomingConnectionSocket.setReuseAddress(true);
+
+                Thread socketToNode = new RegistryNodeThread(incomingConnectionSocket, this);
+                nodesList.add(socketToNode);
+                socketToNode.start();
+
+                this.connectedNodes++;
+                this.finish = this.connectedNodes == this.numberOfConnections;
+            }
+
+            serverSocket.close();
+
+            // wait for each thread to complete its execution by calling the join method on it. 
+            for (Thread node: nodesList){
+                node.join();
+            }
+        
+            System.out.printf("Registry: Total count messages: %d, Total sum messages %d\n", this.totalMessages, this.totalPayload);
         }
         catch (IOException ioe) {
             System.out.println("Registry: ");
@@ -69,7 +72,7 @@ public class NewRegistry extends Thread{
         return numberOfMessagesToSend;
     }
 
-    public ArrayList<RegistryNodeThread> getNodesList(){
+    public ArrayList<Thread> getNodesList(){
         return this.nodesList;
     }
 
