@@ -7,6 +7,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import javax.sound.midi.Receiver;
+
 import cs455.overlay.Main;
 import cs455.overlay.protocols.Message;
 import cs455.overlay.wireformats.RegisterMessageFormat;
@@ -30,54 +32,64 @@ public class RegistryNodeThread extends Thread {
         this.nodeIn = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
     }
 
+    public void receiveRegistration(int messageType, int messageSize) throws IOException{
+        // Register Request   
+        byte[] msg = new byte[messageSize];
+        nodeIn.readFully(msg, 0, messageSize);
+
+        RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(msg);
+        marshalledMsg.printContents();
+    }
+
+    public void sendTaskInitiate(String hostname) throws IOException{
+        //Send Task initiate
+        TaskInitiateFormat taskInitiate = new TaskInitiateFormat(hostname, registry.getNumberOfMessagesToSend());
+        byte[] marshalledMessage = taskInitiate.getBytes();
+        nodeOut.writeInt(TaskInitiateFormat.type);
+        nodeOut.writeInt(marshalledMessage.length);
+        nodeOut.write(marshalledMessage);
+        nodeOut.flush();
+    }
+
+    public void receivePayload(int messageType, int messageSize) throws IOException{
+        // Receive Payload
+        byte[] payloadMsg = new byte[messageSize];
+        nodeIn.readFully(payloadMsg, 0, messageSize);
+
+        PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(payloadMsg);
+        payloadMsgFormat.printContents();
+
+        this.registry.updatePayloadTotal(payloadMsgFormat.payload);
+    }
+
+    public void deregisterRequest(int messageType, int messageSize) throws IOException{
+        byte[] b = new byte[messageSize];
+        nodeIn.readFully(b, 0, messageSize);
+    }
+
     @Override
     public void run(){
-        int messageType = 0;
-        int messageSize = 0;
-
         try {
+            int messageType = this.nodeIn.readInt();
+            int messageSize = this.nodeIn.readInt(); 
             
-            // Register Request
-            messageType = this.nodeIn.readInt();
-            messageSize = this.nodeIn.readInt();    
-            byte[] msg = new byte[messageSize];
-            nodeIn.readFully(msg, 0, messageSize);
+            if(messageType == 0){
+                receiveRegistration(messageType, messageSize);
 
-            RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(msg);
-            marshalledMsg.printContents();
-
-            this.waitRegNodeThread();
-               
-            //Send Task initiate
-            TaskInitiateFormat taskInitiate = new TaskInitiateFormat(this.ip, registry.getNumberOfMessagesToSend());
-            byte[] marshalledMessage = taskInitiate.getBytes();
-            nodeOut.writeInt(TaskInitiateFormat.type);
-            nodeOut.writeInt(marshalledMessage.length);
-            nodeOut.write(marshalledMessage);
-            nodeOut.flush();
-
-
-            // // Receive Payload
-            // messageType = this.nodeIn.readInt();
-            // messageSize = this.nodeIn.readInt();
-            // byte[] payloadMsg = new byte[messageSize];
-            // nodeIn.readFully(payloadMsg, 0, messageSize);
-
-            // PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(msg);
-            // payloadMsgFormat.printContents();
-
-            // this.registry.updatePayloadTotal(payloadMsgFormat.payload);
+                //Waits for start command to designate number of nodes to send.
+                this.waitRegNodeThread(); 
+                sendTaskInitiate(this.nodeSocket.getLocalAddress().getHostName());
+            }
+            else if(messageType == 2){
+                receivePayload(messageType, messageSize);
+            }
+            else if(messageType == 3){
+                deregisterRequest(messageType, messageSize);
+            }
             
-
-            // // Deregister
-            // byte[] b = new byte[messageSize];
-            // nodeIn.readFully(b, 0, messageSize);
-            
-
-          
-        nodeOut.close();
-        nodeIn.close();
-        nodeSocket.close();
+            nodeOut.close();
+            nodeIn.close();
+            nodeSocket.close();
         }
         catch(IOException | InterruptedException ioe){
             System.out.println("Node: ");

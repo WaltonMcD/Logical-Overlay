@@ -31,6 +31,50 @@ public class MessagerNode extends Thread{
         this.identifier = identifier;
     }
 
+    public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
+        RegisterMessageFormat registrationRequest = new RegisterMessageFormat(this.identifier, port);
+        byte[] marshalledMsg = registrationRequest.getBytes();
+        rout.writeInt(RegisterMessageFormat.type);
+        rout.writeInt(marshalledMsg.length);
+        rout.write(marshalledMsg);
+        rout.flush();
+    }
+
+    public void receiveTaskInitiate(DataInputStream rin) throws IOException{
+        int messageType = rin.readInt();
+        int messageSize = rin.readInt();
+        byte[] taskMsg = new byte[messageSize];
+        rin.readFully(taskMsg, 0, messageSize);
+        
+        TaskInitiateFormat taskMsgFormat = new TaskInitiateFormat(taskMsg);
+        taskMsgFormat.printContents();
+    }
+
+    public void sendPayload(DataOutputStream rout, int fromPort) throws IOException{
+        Random random = new Random();
+        for (int i = 0; i < this.numOfMessagesToSend; i++) {
+            long payload = random.nextLong();
+            PayloadMessageFormat msg = new PayloadMessageFormat(i, i, payload, fromPort, this.identifier, this.hostPort, this.hostIp);
+            byte[] marshalledMsg = msg.getBytes();
+            rout.writeInt(PayloadMessageFormat.type);
+            rout.writeInt(marshalledMsg.length);
+            rout.write(marshalledMsg);
+            rout.flush();
+
+            this.totalSentMessages++;
+            this.totalSentPayload += payload;
+        }
+    }
+
+    public void sendDeregistrationRequest(DataOutputStream rout) throws IOException{
+        DoneMessageFormat msg = new DoneMessageFormat(this.identifier, -1);
+        byte[] marshalledMsg = msg.getBytes();
+        rout.writeInt(DoneMessageFormat.type);
+        rout.writeInt(marshalledMsg.length);
+        rout.write(marshalledMsg);
+        rout.flush();
+}
+
     public void run() {
         Socket regSocket;
         try {
@@ -38,45 +82,11 @@ public class MessagerNode extends Thread{
             DataOutputStream rout = new DataOutputStream(regSocket.getOutputStream());
             DataInputStream rin = new DataInputStream(regSocket.getInputStream());
 
-            //Send Register Request
-            RegisterMessageFormat registrationRequest = new RegisterMessageFormat(this.identifier, regSocket.getLocalPort());
-            byte[] marshalledMsg = registrationRequest.getBytes();
-            rout.writeInt(RegisterMessageFormat.type);
-            rout.writeInt(marshalledMsg.length);
-            rout.write(marshalledMsg);
-            rout.flush();
+            sendRegisterRequest(rout, regSocket.getLocalPort());
             
-            //Receive Task Initiate
-            int messageType = rin.readInt();
-            int messageSize = rin.readInt();
-            byte[] taskMsg = new byte[messageSize];
-            rin.readFully(taskMsg, 0, messageSize);
+            receiveTaskInitiate(rin);
             
-            TaskInitiateFormat taskMsgFormat = new TaskInitiateFormat(taskMsg);
-            taskMsgFormat.printContents();
-
-            // //Send Messages
-            // Random random = new Random();
-            // for (int i = 0; i < this.numOfMessagesToSend; i++) {
-            //     long payload = random.nextLong();
-            //     PayloadMessageFormat msg = new PayloadMessageFormat(i, i, payload, -1, this.identifier, this.hostPort, this.hostIp);
-            //     marshalledMsg = msg.getBytes();
-            //     rout.writeInt(PayloadMessageFormat.type);
-            //     rout.writeInt(marshalledMsg.length);
-            //     rout.write(marshalledMsg);
-            //     rout.flush();
-
-            //     this.totalSentMessages++;
-            //     this.totalSentPayload += payload;
-            // }
-
-            // //Send DeRegistration
-            // DoneMessageFormat msg = new DoneMessageFormat(this.identifier, -1);
-            // marshalledMsg = msg.getBytes();
-            // rout.writeInt(DoneMessageFormat.type);
-            // rout.writeInt(marshalledMsg.length);
-            // rout.write(marshalledMsg);
-            // rout.flush();
+            sendPayload(rout, regSocket.getLocalPort());
 
             rout.close();
             regSocket.close();

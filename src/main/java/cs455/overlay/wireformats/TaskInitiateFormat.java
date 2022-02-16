@@ -53,6 +53,6 @@ public class TaskInitiateFormat {
     }
 
     public void printContents(){
-        System.out.println("Task initiated with " + this.hostName + " number of messages " + this.numberOfMessages);
+        System.out.println("Task initiated from" + this.hostName + " number of messages " + this.numberOfMessages);
     }
 }
