@@ -56,6 +56,9 @@ public class Main {
                     Integer numberOfMessages = input.nextInt();
                     System.out.println("Starting to send messages. Count: " + numberOfMessages);
                     registry.setNumberOfMessagesToSend(numberOfMessages);
+                    for(RegistryNodeThread node : registry.getNodesList()){
+                        node.notifyRegNodeThread();
+                    }
                 }
                 else if(command.equals("exit-overlay")) {
                 	if(setupComplete)

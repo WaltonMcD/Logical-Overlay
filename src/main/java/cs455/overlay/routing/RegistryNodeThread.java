@@ -10,6 +10,7 @@ import java.net.Socket;
 import cs455.overlay.Main;
 import cs455.overlay.protocols.Message;
 import cs455.overlay.wireformats.RegisterMessageFormat;
+import cs455.overlay.wireformats.TaskInitiateFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
 
 public class RegistryNodeThread extends Thread {
@@ -45,34 +46,32 @@ public class RegistryNodeThread extends Thread {
             RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(msg);
             marshalledMsg.printContents();
 
-            while(Main.setupComplete == false){
-                if(Main.setupComplete == true){
-                    break;
-                }
-            }
-                    
+            this.waitRegNodeThread();
+               
             //Send Task initiate
-            messageType = 1;
-            nodeOut.writeInt(messageType);
-            nodeOut.writeInt(registry.getNumberOfMessagesToSend());
+            TaskInitiateFormat taskInitiate = new TaskInitiateFormat(this.ip, registry.getNumberOfMessagesToSend());
+            byte[] marshalledMessage = taskInitiate.getBytes();
+            nodeOut.writeInt(TaskInitiateFormat.type);
+            nodeOut.writeInt(marshalledMessage.length);
+            nodeOut.write(marshalledMessage);
             nodeOut.flush();
 
 
-            // Receive Payload
-            messageType = this.nodeIn.readInt();
-            messageSize = this.nodeIn.readInt();
-            byte[] payloadMsg = new byte[messageSize];
-            nodeIn.readFully(payloadMsg, 0, messageSize);
+            // // Receive Payload
+            // messageType = this.nodeIn.readInt();
+            // messageSize = this.nodeIn.readInt();
+            // byte[] payloadMsg = new byte[messageSize];
+            // nodeIn.readFully(payloadMsg, 0, messageSize);
 
-            PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(msg);
-            payloadMsgFormat.printContents();
+            // PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(msg);
+            // payloadMsgFormat.printContents();
 
-            this.registry.updatePayloadTotal(payloadMsgFormat.payload);
+            // this.registry.updatePayloadTotal(payloadMsgFormat.payload);
             
 
-            // Deregister
-            byte[] b = new byte[messageSize];
-            nodeIn.readFully(b, 0, messageSize);
+            // // Deregister
+            // byte[] b = new byte[messageSize];
+            // nodeIn.readFully(b, 0, messageSize);
             
 
           
@@ -80,10 +79,18 @@ public class RegistryNodeThread extends Thread {
         nodeIn.close();
         nodeSocket.close();
         }
-        catch(IOException ioe){
+        catch(IOException | InterruptedException ioe){
             System.out.println("Node: ");
             ioe.printStackTrace();
         }
+    }
+
+    public synchronized void waitRegNodeThread() throws InterruptedException{
+        this.wait();
+    }
+
+    public synchronized void notifyRegNodeThread(){
+        this.notify();
     }
 
     public String getIp() {
