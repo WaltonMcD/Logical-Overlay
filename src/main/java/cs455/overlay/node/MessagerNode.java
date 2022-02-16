@@ -60,8 +60,9 @@ public class MessagerNode extends Thread{
         rout.writeInt(marshalledMsg.length);
         rout.write(marshalledMsg);
         rout.flush();
-}
-
+    }
+    
+    @Override
     public void run() {
         Socket regSocket;
         try {
@@ -81,12 +82,9 @@ public class MessagerNode extends Thread{
             System.out.printf("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
 
         } 
-        catch (UnknownHostException e) {
-            e.printStackTrace();
-        } 
         catch (IOException e) {
             e.printStackTrace();
-        }
+        } 
 
     }
 }

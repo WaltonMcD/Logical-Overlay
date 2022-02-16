@@ -78,10 +78,8 @@ public class Main {
                 }
                 
                 thread.interrupt();
-            } catch (UnknownHostException un) {
+            } catch (IOException un) {
                 System.out.println("Error Node: " + un.getMessage());
-            } catch (IOException e) {
-                System.out.println("Error Node: " + e.getMessage());
             }
         }
     }
