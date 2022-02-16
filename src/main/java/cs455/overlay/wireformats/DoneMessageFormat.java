@@ -25,11 +25,11 @@ public class DoneMessageFormat {
         int hostNameLength = din.readInt();
         byte[] hostNameBytes = new byte[hostNameLength];
         din.readFully(hostNameBytes);
-        String hn = new String(hostNameBytes);
-        int p = din.readInt();
+        String inHostname = new String(hostNameBytes);
+        int inPort = din.readInt();
         byteArrayInputStream.close();
         din.close();
-        this.hostname = hn; this.port = p;
+        this.hostname = inHostname; this.port = inPort;
     }
 
     public byte[] getBytes() throws IOException {
@@ -52,6 +52,6 @@ public class DoneMessageFormat {
     }
 
     public void printContents() {
-        System.out.printf("Node %s %d has completed sending\n", this.hostname, this.port);
+        System.out.println("Node: "+ this.hostname +":" + this.port + " Deregistration Request");
     }
 }
