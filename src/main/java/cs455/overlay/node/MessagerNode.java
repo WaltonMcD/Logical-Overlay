@@ -22,28 +22,16 @@ public class MessagerNode extends Thread{
     private long totalSentMessages;
     private long totalSentPayload;
 
-    public MessagerNode(String hostIp, int hostPort, String identifier, int numberOfMessages) throws IOException {
+    public MessagerNode(String hostIp, int hostPort, String identifier) throws IOException {
         this.hostIp = hostIp;
         this.hostPort = hostPort;
         this.identifier = identifier;
-        this.numOfMessagesToSend = numberOfMessages;
     }
 
-    public void ReceiveTaskInitiate(DataInputStream rin){
-        try {
-            int messageType = rin.readInt();
-            int numberOfMessages = rin.readInt();
-            System.out.println(messageType+" "+numberOfMessages);
-        } catch (IOException e) {
-            try{
-                Thread.sleep(1000);
-            }
-            catch(InterruptedException ie){
-                ie.printStackTrace();
-            }
-        }
-        
-        
+    public void ReceiveTaskInitiate(DataInputStream rin) throws IOException{
+        int messageType = rin.readInt();
+        int numberOfMessages = rin.readInt();
+        setNumOfMessagesToSend(numberOfMessages);
     }
 
     public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
@@ -99,12 +87,16 @@ public class MessagerNode extends Thread{
             rout.close();
             regSocket.close();
 
-            System.out.printf("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
+            System.out.println("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
 
         } 
         catch (IOException e) {
             e.printStackTrace();
         } 
 
+    }
+
+    public void setNumOfMessagesToSend(int numOfMessagesToSend) {
+        this.numOfMessagesToSend = numOfMessagesToSend;
     }
 }

@@ -73,6 +73,8 @@ public class RegistryNodeThread extends Thread {
                 if(messageType == 0){
                     readRegistrationRequest(messageSize);
 
+                    //waitRegistryNodeThread();
+
                     sendTaskInitiate();
                 }
                 else if(messageType == 2){
@@ -91,5 +93,18 @@ public class RegistryNodeThread extends Thread {
             System.out.println("Node: ");
             ioe.printStackTrace();
         } 
+    }
+
+    public synchronized void waitRegistryNodeThread(){
+        try {
+            this.wait();
+        } 
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void notifyRegistryNodeThread(){
+        this.notify();
     }
 }
