@@ -1,11 +1,12 @@
 package cs455.overlay.node;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
+
 import java.util.Random;
 
 import cs455.overlay.wireformats.DoneMessageFormat;
@@ -26,6 +27,23 @@ public class MessagerNode extends Thread{
         this.hostPort = hostPort;
         this.identifier = identifier;
         this.numOfMessagesToSend = numberOfMessages;
+    }
+
+    public void ReceiveTaskInitiate(DataInputStream rin){
+        try {
+            int messageType = rin.readInt();
+            int numberOfMessages = rin.readInt();
+            System.out.println(messageType+" "+numberOfMessages);
+        } catch (IOException e) {
+            try{
+                Thread.sleep(1000);
+            }
+            catch(InterruptedException ie){
+                ie.printStackTrace();
+            }
+        }
+        
+        
     }
 
     public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
@@ -67,10 +85,12 @@ public class MessagerNode extends Thread{
         Socket regSocket;
         try {
             regSocket = new Socket(this.hostIp, this.hostPort);
-            DataOutputStream rout = new DataOutputStream(regSocket.getOutputStream());
+            DataOutputStream rout = new DataOutputStream(new BufferedOutputStream(regSocket.getOutputStream()));
             DataInputStream rin = new DataInputStream(new BufferedInputStream(regSocket.getInputStream()));
 
             sendRegisterRequest(rout, regSocket.getLocalPort());
+
+            ReceiveTaskInitiate(rin);
             
             sendPayload(rout, regSocket.getLocalPort());
 

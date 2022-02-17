@@ -28,7 +28,10 @@ public class RegistryNodeThread extends Thread {
         this.nodeIn = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
     }
 
-    public void sendTaskInitiate(){
+    public void sendTaskInitiate() throws IOException{
+        nodeOut.writeInt(1);
+        nodeOut.writeInt(registry.getNumberOfMessagesToSend());
+        nodeOut.flush();
         
     }
 
@@ -69,6 +72,8 @@ public class RegistryNodeThread extends Thread {
 
                 if(messageType == 0){
                     readRegistrationRequest(messageSize);
+
+                    sendTaskInitiate();
                 }
                 else if(messageType == 2){
                     readPayload(messageSize);
