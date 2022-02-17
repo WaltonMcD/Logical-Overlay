@@ -5,6 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import cs455.overlay.wireformats.ConnDirectiveFormat;
+import cs455.overlay.wireformats.DoneMessageFormat;
+import cs455.overlay.wireformats.RegResponseFormat;
+import cs455.overlay.wireformats.RegisterMessageFormat;
+import cs455.overlay.wireformats.TaskCompleteFormat;
+import cs455.overlay.wireformats.TaskInitiateFormat;
+
 public class Message {
 	private Integer messageType;
 	private String  ipAddress;
@@ -45,8 +52,7 @@ public class Message {
 	}
 
 	// Connection Directive : Type = 3
-	public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort,
-			String backNodeIp) {
+	public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, String backNodeIp) {
 		this.messageType = messageType;
 		this.frontNodePort = frontNodePort;
 		this.frontNodeIp = frontNodeIp;
@@ -94,59 +100,70 @@ public class Message {
 	}
 
 	// Connection Directive helper, needed identifier for array storage : Type = 9
-	public Message(Integer messageType, Integer identifier, Integer frontNodePort, String frontNodeIp,
-			Integer backNodePort, String backNodeIp) {
+	public Message(String frontNodeIp, Integer messageType, Integer identifier, Integer frontNodePort) {
 		this.messageType = messageType;
 		this.identifier = identifier;
 		this.frontNodePort = frontNodePort;
 		this.frontNodeIp = frontNodeIp;
-		this.backNodePort = backNodePort;
-		this.backNodeIp = backNodeIp;
 	}
 
-	public synchronized String packMessage(DataOutputStream outputStream) {
+	public String packMessage(DataOutputStream outputStream) {
 		try {
-			outputStream.writeInt(this.messageType);
-
+			
 			switch (this.messageType) {
 
 			case 0:
-				outputStream.writeUTF(this.ipAddress);
-				outputStream.writeInt(this.port);
+				RegisterMessageFormat registrationRequest = new RegisterMessageFormat(this.ipAddress, port);
+				byte[] marshalledRegMsg = registrationRequest.getBytes();
+				outputStream.writeInt(registrationRequest.type);
+				outputStream.writeInt(marshalledRegMsg.length);
+				outputStream.write(marshalledRegMsg);
 				break;
 
 			case 1:
-				outputStream.writeUTF(this.ipAddress);
-				outputStream.writeInt(this.port);
+				DoneMessageFormat dereg = new DoneMessageFormat(this.ipAddress, this.port);
+				byte[] marshalledDereg = dereg.getBytes();
+				outputStream.writeInt(dereg.type);
+				outputStream.writeInt(marshalledDereg.length);
+				outputStream.write(marshalledDereg);
 				break;
 
 			case 2:
-				outputStream.writeInt(this.statusCode);
-				outputStream.writeInt(this.identifier);
-				outputStream.writeUTF(this.additionalInfo);
+				RegResponseFormat regResponse = new RegResponseFormat(this.statusCode, this.identifier, this.additionalInfo);
+				byte[] marshalledRegRes = regResponse.getBytes();
+				outputStream.writeInt(regResponse.type);
+				outputStream.writeInt(marshalledRegRes.length);
+				outputStream.write(marshalledRegRes);
 				break;
 
 			case 3:
-				outputStream.writeInt(this.frontNodePort);
-				outputStream.writeUTF(this.frontNodeIp);
-				outputStream.writeInt(this.backNodePort);
-				outputStream.writeUTF(this.backNodeIp);
+				ConnDirectiveFormat connDir = new ConnDirectiveFormat(this.frontNodeIp, this.frontNodePort);
+				byte[] marshalledConnDirMsg = connDir.getBytes();
+				outputStream.writeInt(connDir.type);
+				outputStream.writeInt(marshalledConnDirMsg.length);
+				outputStream.write(marshalledConnDirMsg);
 				break;
 
 			case 4:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeInt(this.messagesToSend);
+				TaskInitiateFormat taskInitiate = new TaskInitiateFormat(this.messagesToSend);
+				byte[] marshalledTask = taskInitiate.getBytes();
+				outputStream.writeInt(taskInitiate.type);
+				outputStream.writeInt(marshalledTask.length);
+				outputStream.write(marshalledTask);
 				break;
 
 			case 5:
+				outputStream.writeInt(this.messageType);
 				outputStream.writeInt(this.startNodeId);
 				outputStream.writeInt(this.payload);
 				break;
 
 			case 6:
-				outputStream.writeInt(this.identifier);
-				outputStream.writeUTF(this.ipAddress);
-				outputStream.writeInt(this.port);
+				TaskCompleteFormat taskComplete = new TaskCompleteFormat(this.identifier, this.ipAddress, this.port);
+				byte[] marshTask = taskComplete.getBytes();
+				outputStream.writeInt(taskComplete.type);
+				outputStream.writeInt(marshTask.length);
+				outputStream.write(marshTask);
 				break;
 
 			case 7:
@@ -154,6 +171,7 @@ public class Message {
 				break;
 
 			case 8:
+				outputStream.writeInt(this.messageType);
 				outputStream.writeUTF(this.ipAddress);
 				outputStream.writeInt(this.port);
 				outputStream.writeInt(this.numMessagesSent);
@@ -163,6 +181,7 @@ public class Message {
 				break;
 
 			case 9:
+				outputStream.writeInt(this.messageType);
 				outputStream.writeInt(this.identifier);
 				outputStream.writeInt(this.frontNodePort);
 				outputStream.writeUTF(this.frontNodeIp);
@@ -181,76 +200,82 @@ public class Message {
 		return null;
 	}
 
-	public synchronized ArrayList<Object> unpackMessage(DataInputStream inputStream) {
-		ArrayList<Object> messageContents = new ArrayList<Object>();
+	public void unpackMessage(DataInputStream inputStream) {
 		
 		try {
+			int messageSize;
 			this.messageType = inputStream.readInt();
-			messageContents.add(messageType);
 
 			switch (this.messageType) {
 			case 0:
-				this.ipAddress = inputStream.readUTF();
-				this.port = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] regRequest = new byte[messageSize];
+				inputStream.readFully(regRequest);
 
-				messageContents.add(ipAddress);
-				messageContents.add(port);
+				RegisterMessageFormat registrationRequest = new RegisterMessageFormat(regRequest);
+				this.ipAddress = registrationRequest.hostName;
+				this.port = registrationRequest.portNumber;
+				registrationRequest.printContents();
 				break;
 
 			case 1:
-				this.ipAddress = inputStream.readUTF();
-				this.port = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] dereg = new byte[messageSize];
+				inputStream.readFully(dereg);
 
-				messageContents.add(ipAddress);
-				messageContents.add(port);
+				DoneMessageFormat deregistration = new DoneMessageFormat(dereg);
+				this.ipAddress = deregistration.hostname;
+				this.port = deregistration.port;
 				break;
 
 			case 2:
-				this.statusCode = inputStream.readInt();
-				this.identifier = inputStream.readInt();
-				this.additionalInfo = inputStream.readUTF();
+				messageSize = inputStream.readInt();
+				byte[] regResponse = new byte[messageSize];
+				inputStream.readFully(regResponse);
 
-				messageContents.add(statusCode);
-				messageContents.add(identifier);
-				messageContents.add(additionalInfo);
+				RegResponseFormat registerRes = new RegResponseFormat(regResponse);
+				this.statusCode = registerRes.statusCode;
+				this.identifier = registerRes.identifier;
+				this.additionalInfo = registerRes.additionalInfo;
+				registerRes.printContents();
 				break;
 
 			case 3:
-				this.frontNodePort = inputStream.readInt();
-				this.frontNodeIp = inputStream.readUTF();
-				this.backNodePort = inputStream.readInt();
-				this.backNodeIp = inputStream.readUTF();
-
-				messageContents.add(frontNodePort);
-				messageContents.add(frontNodeIp);
-				messageContents.add(backNodePort);
-				messageContents.add(backNodeIp);
+				messageSize = inputStream.readInt();
+				byte[] connDir = new byte[messageSize];
+				inputStream.readFully(connDir);
+				
+				ConnDirectiveFormat connDirective = new ConnDirectiveFormat(connDir);
+				this.frontNodePort = connDirective.portNumber;
+				this.frontNodeIp = connDirective.hostName;
+				connDirective.printContents();
 				break;
 
 			case 4:
-				this.messageType = inputStream.readInt();
-				this.messagesToSend = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] taskInitiate = new byte[messageSize];
+				inputStream.readFully(taskInitiate);
 
-				messageContents.add(messageType);
-				messageContents.add(messagesToSend);
+				TaskInitiateFormat task = new TaskInitiateFormat(taskInitiate);
+				this.messagesToSend = task.messagesToSend;
+				task.printContents();
 				break;
 
 			case 5:
 				this.startNodeId = inputStream.readInt();
 				this.payload = inputStream.readInt();
-
-				messageContents.add(startNodeId);
-				messageContents.add(payload);
 				break;
 
 			case 6:
-				this.identifier = inputStream.readInt();
-				this.ipAddress = inputStream.readUTF();
-				this.port = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] taskComplete = new byte[messageSize];
+				inputStream.readFully(taskComplete);
 
-				messageContents.add(identifier);
-				messageContents.add(ipAddress);
-				messageContents.add(port);
+				TaskCompleteFormat taskComp = new TaskCompleteFormat(taskComplete);
+				this.identifier = taskComp.identifier;
+				this.ipAddress = taskComp.ip;
+				this.port = taskComp.port;
+				taskComp.printContents();
 				break;
 
 			case 7:
@@ -264,13 +289,6 @@ public class Message {
 				this.numMessagesReceived = inputStream.readInt();
 				this.sumOfSentMessages = inputStream.readInt();
 				this.sumOfReceivedMessages = inputStream.readInt();
-
-				messageContents.add(ipAddress);
-				messageContents.add(port);
-				messageContents.add(numMessagesSent);
-				messageContents.add(numMessagesReceived);
-				messageContents.add(sumOfSentMessages);
-				messageContents.add(sumOfReceivedMessages);
 				break;
 
 			case 9:
@@ -279,22 +297,15 @@ public class Message {
 				this.frontNodeIp = inputStream.readUTF();
 				this.backNodePort = inputStream.readInt();
 				this.backNodeIp = inputStream.readUTF();
-
-				messageContents.add(identifier);
-				messageContents.add(frontNodePort);
-				messageContents.add(frontNodeIp);
-				messageContents.add(backNodePort);
-				messageContents.add(backNodeIp);
 				break;
 
 			}
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
-		return messageContents;
 	}
 
-	public synchronized String getType() {
+	public  String getType() {
 		switch (this.messageType) {
 		case 0:
 			return "Registration_Request";
@@ -320,139 +331,139 @@ public class Message {
 		return null;
 	}
 
-	public synchronized Integer getMessageType() {
+	public  Integer getMessageType() {
 		return messageType;
 	}
 
-	public synchronized void setMessageType(Integer messageType) {
+	public  void setMessageType(Integer messageType) {
 		this.messageType = messageType;
 	}
 
-	public synchronized String getIpAddress() {
+	public  String getIpAddress() {
 		return ipAddress;
 	}
 
-	public synchronized void setIpAddress(String ipAddress) {
+	public  void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 
-	public synchronized Integer getPort() {
+	public  Integer getPort() {
 		return port;
 	}
 
-	public synchronized void setPort(Integer port) {
+	public  void setPort(Integer port) {
 		this.port = port;
 	}
 
-	public synchronized Integer getStatusCode() {
+	public  Integer getStatusCode() {
 		return statusCode;
 	}
 
-	public synchronized void setStatusCode(Integer statusCode) {
+	public  void setStatusCode(Integer statusCode) {
 		this.statusCode = statusCode;
 	}
 
-	public synchronized String getAdditionalInfo() {
+	public  String getAdditionalInfo() {
 		return additionalInfo;
 	}
 
-	public synchronized void setAdditionalInfo(String additionalInfo) {
+	public  void setAdditionalInfo(String additionalInfo) {
 		this.additionalInfo = additionalInfo;
 	}
 
-	public synchronized Integer getIdentifier() {
+	public  Integer getIdentifier() {
 		return identifier;
 	}
 
-	public synchronized void setIdentifier(Integer identifier) {
+	public  void setIdentifier(Integer identifier) {
 		this.identifier = identifier;
 	}
 
-	public synchronized Integer getFrontNodePort() {
+	public  Integer getFrontNodePort() {
 		return frontNodePort;
 	}
 
-	public synchronized void setFrontNodePort(Integer frontNodePort) {
+	public  void setFrontNodePort(Integer frontNodePort) {
 		this.frontNodePort = frontNodePort;
 	}
 
-	public synchronized String getFrontNodeIp() {
+	public  String getFrontNodeIp() {
 		return frontNodeIp;
 	}
 
-	public synchronized void setFrontNodeIp(String frontNodeIp) {
+	public  void setFrontNodeIp(String frontNodeIp) {
 		this.frontNodeIp = frontNodeIp;
 	}
 
-	public synchronized Integer getBackNodePort() {
+	public  Integer getBackNodePort() {
 		return backNodePort;
 	}
 
-	public synchronized void setBackNodePort(Integer backNodePort) {
+	public  void setBackNodePort(Integer backNodePort) {
 		this.backNodePort = backNodePort;
 	}
 
-	public synchronized String getBackNodeIp() {
+	public  String getBackNodeIp() {
 		return backNodeIp;
 	}
 
-	public synchronized void setBackNodeIp(String backNodeIp) {
+	public  void setBackNodeIp(String backNodeIp) {
 		this.backNodeIp = backNodeIp;
 	}
 
-	public synchronized Integer getPayload() {
+	public  Integer getPayload() {
 		return payload;
 	}
 
-	public synchronized void setPayload(Integer payload) {
+	public  void setPayload(Integer payload) {
 		this.payload = payload;
 	}
 
-	public synchronized Integer getStartNodeId() {
+	public  Integer getStartNodeId() {
 		return startNodeId;
 	}
 
-	public synchronized void setStartNodeId(Integer startNodeId) {
+	public  void setStartNodeId(Integer startNodeId) {
 		this.startNodeId = startNodeId;
 	}
 
-	public synchronized Integer getMessagesToSend() {
+	public  Integer getMessagesToSend() {
 		return messagesToSend;
 	}
 
-	public synchronized void setMessagesToSend(Integer messagesToSend) {
+	public  void setMessagesToSend(Integer messagesToSend) {
 		this.messagesToSend = messagesToSend;
 	}
 
-	public synchronized Integer getNumMessagesSent() {
+	public  Integer getNumMessagesSent() {
 		return numMessagesSent;
 	}
 
-	public synchronized void setNumMessagesSent(Integer numMessagesSent) {
+	public  void setNumMessagesSent(Integer numMessagesSent) {
 		this.numMessagesSent = numMessagesSent;
 	}
 
-	public synchronized Integer getNumMessagesReceived() {
+	public  Integer getNumMessagesReceived() {
 		return numMessagesReceived;
 	}
 
-	public synchronized void setNumMessagesReceived(Integer numMessagesReceived) {
+	public  void setNumMessagesReceived(Integer numMessagesReceived) {
 		this.numMessagesReceived = numMessagesReceived;
 	}
 
-	public synchronized Integer getSumOfSentMessages() {
+	public  Integer getSumOfSentMessages() {
 		return sumOfSentMessages;
 	}
 
-	public synchronized void setSumOfSentMessages(Integer sumOfSentMessages) {
+	public  void setSumOfSentMessages(Integer sumOfSentMessages) {
 		this.sumOfSentMessages = sumOfSentMessages;
 	}
 
-	public synchronized Integer getSumOfReceivedMessages() {
+	public  Integer getSumOfReceivedMessages() {
 		return sumOfReceivedMessages;
 	}
 
-	public synchronized void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
+	public  void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
 		this.sumOfReceivedMessages = sumOfReceivedMessages;
 	}
 	

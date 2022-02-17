@@ -58,60 +58,16 @@ public class Node implements Runnable {
             //Send Register Request
             Integer messageType = 0;
             Message registrationRequestMsg = new Message(messageType, ip, port);
-            
-            if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-1...");
-                serverOutputStream.close();
-                serverInputStream.close();
-                socketToServer.close();
-                return;
-            }
-            
             registrationRequestMsg.packMessage(serverOutputStream);
 
             //Receive Register Response
             Message registrationResponseMsg = new Message();
-            
-            if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-2...");
-                serverOutputStream.close();
-                serverInputStream.close();
-                socketToServer.close();
-                return;
-            }
-            
             registrationResponseMsg.unpackMessage(serverInputStream);
             this.identifier = registrationResponseMsg.getIdentifier();
-
-            System.out.println(registrationResponseMsg.getType() + " Received From Node: " + this.identifier + " Status Code: " + 
-            				   registrationResponseMsg.getStatusCode() + "\nAdditional Info: " + 
-            				   registrationResponseMsg.getAdditionalInfo());
-            
-            
             
             //Receive Connection Directive
             Message recvConnDirMsg = new Message();
-            
-            if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-3...");
-                serverOutputStream.close();
-                serverInputStream.close();
-                socketToServer.close();
-                return;
-            }
-            
             recvConnDirMsg.unpackMessage(serverInputStream);
-            
-            if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-4...");
-                serverOutputStream.close();
-                serverInputStream.close();
-                socketToServer.close();
-                return;
-            }
-          
-            System.out.println("Connection Directive Front: " + recvConnDirMsg.getFrontNodePort() + " " + recvConnDirMsg.getFrontNodeIp() + 
-            				   " Back: " + recvConnDirMsg.getBackNodePort() + " " + recvConnDirMsg.getBackNodeIp());
 
             Integer nodeServerPort = Registry.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
@@ -127,26 +83,11 @@ public class Node implements Runnable {
             Thread backNodeReaderThread = new Thread(backNodeReader);
             backNodeReaderThread.start();
             
-            
-            if (Thread.currentThread().isInterrupted()) {
-                System.out.println(Thread.currentThread().getName() + " detected interruption, exiting Node 1-5...");
-                backNodeReaderThread.interrupt();
-                frontNodeThread.interrupt();
-                serverOutputStream.close();
-                serverInputStream.close();
-                backSocket.close();
-                nodeServer.close();
-                socketToServer.close();
-                return;
-            }
-            
             //Receive Task Initiate
             //The read call will block until start sequence is initiated.
             Message taskInitiateMsg = new Message();
             taskInitiateMsg.unpackMessage(serverInputStream);
             NodeThread.numberOfMessages = taskInitiateMsg.getMessagesToSend();
-
-            System.out.println("Received Task Initiate Messages to send: " + taskInitiateMsg.getMessagesToSend());
 
             //Notify worker threads to start message passing.
             frontNode.notifyNodeSender();

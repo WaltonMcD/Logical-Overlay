@@ -8,17 +8,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class RegisterMessageFormat {
-    public final int type = 0;
+public class ConnDirectiveFormat {
+    public final int type = 3;
 	public String hostName;
 	public int portNumber;
 
-    public RegisterMessageFormat(String hostName, int portNumber){
+    public ConnDirectiveFormat(String hostName, int portNumber){
         this.hostName = hostName;
         this.portNumber = portNumber;
     }
 
-    public RegisterMessageFormat(byte[] marshalledBytes) throws IOException {
+    public ConnDirectiveFormat(byte[] marshalledBytes) throws IOException {
         ByteArrayInputStream baInputStream = new ByteArrayInputStream(marshalledBytes);
         DataInputStream din = new DataInputStream(new BufferedInputStream(baInputStream));
         
@@ -53,6 +53,6 @@ public class RegisterMessageFormat {
     }
 
     public void printContents(){
-        System.out.println("\nConnection Created with " + this.hostName + " on port " + this.portNumber);
+        System.out.println("\nConnection Directive Node To Connect: " + this.hostName + " on port " + this.portNumber);
     }
 }

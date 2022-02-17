@@ -9,7 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class DoneMessageFormat {
-    public static final int type = 3;
+    public final int type = 3;
     public String hostname;
     public int port;
 
@@ -35,7 +35,6 @@ public class DoneMessageFormat {
     public byte[] getBytes() throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dout = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
-
 
         byte[] hostnameBytes = this.hostname.getBytes();
         int hostnameLength = hostnameBytes.length;

@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.Random;
 
-import cs455.overlay.Registry;
 import cs455.overlay.protocols.Message;
 
 // Handles front node socket / message sending and receiving
@@ -50,24 +49,10 @@ public class NodeThread {
                 System.out.println("Connected to node: " + frontSocket.getInetAddress());
 
                 DataOutputStream frontOutputStream = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
-                
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting NodeThread frontSocket 1-1...");
-                    frontOutputStream.close();
-                    frontSocket.close();
-                    return;
-                }
-
+   
                 //Waiting for task initiate.
                 waitNodeSender();
-                
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting NodeThread frontSocket 1-2...");
-                    frontOutputStream.close();
-                    frontSocket.close();
-                    return;
-                }
-
+        
                 int total = 0;
                 for(int i = 0; i < numberOfMessages; i++){
                     Message dataTrafficMsg = new Message(5, port, getRandomNumberUsingNextInt());
@@ -113,28 +98,19 @@ public class NodeThread {
         public void run(){
             try{
                 DataInputStream backInputStream = new DataInputStream(new BufferedInputStream(backSocket.getInputStream()));
-                
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting BackNodeReader...");
-                    backInputStream.close();
-                    backSocket.close();
-                    return;
-                }
 
                 //Waiting for task initiate.
                 waitNodeReader();
 
                 Integer total = 0;
                 Integer messagesReceived = 0;
-                while(messagesReceived < numberOfMessages * Registry.numOfConnections){
+                for(int i = 0; i < numberOfMessages; i++){
                 	Message dataTraffic = new Message();
                     dataTraffic.unpackMessage(backInputStream);
                     total += dataTraffic.getPayload();
                     System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
                     messagesReceived++;
-                    
                 }
-                
                 System.out.println("Received a total payload: " + total);
                 node.numMessagesReceived = messagesReceived;
                 node.payloadReceivedTotal = total;

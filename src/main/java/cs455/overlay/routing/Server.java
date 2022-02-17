@@ -85,7 +85,7 @@ public class Server {
                             String frontIp = Registry.nodesList.get((i + 1) % numOfConnections).ip;
                             Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).identifier;
                             String backIp = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).ip;
-                            Message connDirective = new Message(messageType, identifier, frontPort, frontIp, backPort, backIp);
+                            Message connDirective = new Message(frontIp, messageType, identifier, frontPort);
                             directives.add(connDirective);
                             
                         }
@@ -131,22 +131,13 @@ public class Server {
             try{
                 DataInputStream inputStream = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
                 DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(nodeSocket.getOutputStream()));
-                
-                if (Thread.currentThread().isInterrupted()) {
-                    System.out.println(Thread.currentThread().getName() + " detected interruption, exiting...");
-                    inputStream.close();
-                    outputStream.close();
-                    nodeSocket.close();
-                    return;
-                }
+            
 
                 // Receive Registration Request
 				Message registrationRequestMsg = new Message();
-				ArrayList<Object> msgs = registrationRequestMsg.unpackMessage(inputStream);
+				registrationRequestMsg.unpackMessage(inputStream);
 				Registry.nodesList.add(new Node(registrationRequestMsg.getIpAddress(), registrationRequestMsg.getPort(), identifier));
 				server.notifyServer();
-   
-				System.out.println("\n" + registrationRequestMsg.getType() + " From Host: " + registrationRequestMsg.getIpAddress() + "  Port: " + registrationRequestMsg.getPort());
 
 				// Send Registration Response
 				Message registrationResponseMsg = new Message(2, 200, identifier, "\'Welcome\'");
@@ -180,16 +171,15 @@ public class Server {
 				//Receive Task Complete
 				Message taskCompleteMsg = new Message();
 				taskCompleteMsg.unpackMessage(inputStream);
-				System.out.println("Received Task Complete From Node: " + taskCompleteMsg.getIdentifier() + " @ " + taskCompleteMsg.getIpAddress());
                 Registry.completedTasks.add(taskCompleteMsg);
 
                 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                // try {
+                //     Thread.sleep(1000);
+                // } catch (InterruptedException e) {
+                //     // TODO Auto-generated catch block
+                //     e.printStackTrace();
+                // }
                 
 
 				//Send Traffic Summary Request.

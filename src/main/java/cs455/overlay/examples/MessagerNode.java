@@ -37,7 +37,7 @@ public class MessagerNode extends Thread{
     public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
         RegisterMessageFormat registrationRequest = new RegisterMessageFormat(this.identifier, port);
         byte[] marshalledMsg = registrationRequest.getBytes();
-        rout.writeInt(RegisterMessageFormat.type);
+        rout.writeInt(registrationRequest.type);
         rout.writeInt(marshalledMsg.length);
         rout.write(marshalledMsg);
         rout.flush();
@@ -62,7 +62,7 @@ public class MessagerNode extends Thread{
     public void sendDeregistrationRequest(DataOutputStream rout, int fromPort) throws IOException{
         DoneMessageFormat msg = new DoneMessageFormat(this.identifier, fromPort);
         byte[] marshalledMsg = msg.getBytes();
-        rout.writeInt(DoneMessageFormat.type);
+        rout.writeInt(msg.type);
         rout.writeInt(marshalledMsg.length);
         rout.write(marshalledMsg);
         rout.flush();
