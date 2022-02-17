@@ -1,4 +1,4 @@
-package cs455.overlay;
+package cs455.overlay.examples;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -6,9 +6,9 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Scanner;
 
-import cs455.overlay.node.MessagerNode;
-import cs455.overlay.routing.NewRegistry;
-import cs455.overlay.routing.RegistryNodeThread;
+import cs455.overlay.examples.MessagerNode;
+import cs455.overlay.examples.NewRegistry;
+import cs455.overlay.examples.RegistryNodeThread;
 
 
 public class Main {
