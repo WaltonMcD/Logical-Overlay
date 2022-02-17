@@ -84,7 +84,6 @@ public class Node implements Runnable {
             backNodeReaderThread.start();
             
             //Receive Task Initiate
-            //The read call will block until start sequence is initiated.
             Message taskInitiateMsg = new Message();
             taskInitiateMsg.unpackMessage(serverInputStream);
             NodeThread.numberOfMessages = taskInitiateMsg.getMessagesToSend();
@@ -113,7 +112,6 @@ public class Node implements Runnable {
             //Send Traffic Summary
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
             trafficSummary.packMessage(serverOutputStream);
-
 
             serverOutputStream.close();
             serverInputStream.close();
