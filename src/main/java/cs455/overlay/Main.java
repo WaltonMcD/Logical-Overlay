@@ -31,7 +31,10 @@ public class Main {
 
                 if(command.equals("setup-overlay")){
                 	if(!setupComplete) {
+                        System.out.print("Number of Messages to Send: ");
+                        int numberOfMessages = input.nextInt();
 	                    registry = new NewRegistry(serverPort, numberOfConnections);
+                        registry.setNumberOfMessagesToSend(numberOfMessages);
                         new Thread(registry).start();
 	                    setupComplete = true;
                 	} else {
@@ -44,18 +47,15 @@ public class Main {
                         System.out.println("Node: " + node.ip + " is connected from Port: " + node.port);
                     }
                 }
-                else if(command.equals("start") && setupComplete == true){
-                    Integer numberOfMessages = input.nextInt();
-                    System.out.println("Starting to send messages. Count: " + numberOfMessages);
-                    registry.setNumberOfMessagesToSend(numberOfMessages);
+                else if(command.equals("exit-overlay")){
+                    System.out.println("Closing All Connections... ");
+                    System.exit(0);
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
                     System.out.println("Note: To start or list-messaging-nodes you must setup-overlay first.");
                 }
             }
-            System.out.println("Closing All Connections... ");
-            System.exit(0);
         }
         else if(args[1].equals("node")){
             Scanner input = new Scanner(System.in);
@@ -66,10 +66,9 @@ public class Main {
            
             Random random = new Random();
             String identifier = InetAddress.getLocalHost().getHostName();
-            int numberOfMessages = Integer.parseInt(args[4]);
 
             try {
-                MessagerNode node = new MessagerNode(regHost, regPort, identifier, numberOfMessages);
+                MessagerNode node = new MessagerNode(regHost, regPort, identifier);
                 Thread thread = new Thread(node);
                 thread.start();
 

@@ -1,11 +1,12 @@
 package cs455.overlay.node;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
+
 import java.util.Random;
 
 import cs455.overlay.wireformats.DoneMessageFormat;
@@ -21,11 +22,16 @@ public class MessagerNode extends Thread{
     private long totalSentMessages;
     private long totalSentPayload;
 
-    public MessagerNode(String hostIp, int hostPort, String identifier, int numberOfMessages) throws IOException {
+    public MessagerNode(String hostIp, int hostPort, String identifier) throws IOException {
         this.hostIp = hostIp;
         this.hostPort = hostPort;
         this.identifier = identifier;
-        this.numOfMessagesToSend = numberOfMessages;
+    }
+
+    public void ReceiveTaskInitiate(DataInputStream rin) throws IOException{
+        int messageType = rin.readInt();
+        int numberOfMessages = rin.readInt();
+        setNumOfMessagesToSend(numberOfMessages);
     }
 
     public void sendRegisterRequest(DataOutputStream rout, int port) throws IOException{
@@ -67,10 +73,12 @@ public class MessagerNode extends Thread{
         Socket regSocket;
         try {
             regSocket = new Socket(this.hostIp, this.hostPort);
-            DataOutputStream rout = new DataOutputStream(regSocket.getOutputStream());
+            DataOutputStream rout = new DataOutputStream(new BufferedOutputStream(regSocket.getOutputStream()));
             DataInputStream rin = new DataInputStream(new BufferedInputStream(regSocket.getInputStream()));
 
             sendRegisterRequest(rout, regSocket.getLocalPort());
+
+            ReceiveTaskInitiate(rin);
             
             sendPayload(rout, regSocket.getLocalPort());
 
@@ -79,12 +87,16 @@ public class MessagerNode extends Thread{
             rout.close();
             regSocket.close();
 
-            System.out.printf("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
+            System.out.println("Node: "+ this.identifier +" sent "+ this.totalSentMessages +" messages, summing to: "+ this.totalSentPayload);
 
         } 
         catch (IOException e) {
             e.printStackTrace();
         } 
 
+    }
+
+    public void setNumOfMessagesToSend(int numOfMessagesToSend) {
+        this.numOfMessagesToSend = numOfMessagesToSend;
     }
 }

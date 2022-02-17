@@ -52,6 +52,6 @@ public class DoneMessageFormat {
     }
 
     public void printContents() {
-        System.out.println("Node: "+ this.hostname +":" + this.port + " Deregistration Request");
+        System.out.println("Node: "+ this.hostname +" on port" + this.port + " Deregistration Request");
     }
 }

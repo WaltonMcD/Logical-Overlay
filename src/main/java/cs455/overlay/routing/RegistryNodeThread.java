@@ -28,42 +28,60 @@ public class RegistryNodeThread extends Thread {
         this.nodeIn = new DataInputStream(new BufferedInputStream(nodeSocket.getInputStream()));
     }
 
-    public void sendTaskInitiate(){
+    public void sendTaskInitiate() throws IOException{
+        nodeOut.writeInt(1);
+        nodeOut.writeInt(registry.getNumberOfMessagesToSend());
+        nodeOut.flush();
         
+    }
+
+    public void readRegistrationRequest(int messageSize) throws IOException{
+        byte[] reqMsg = new byte[messageSize];
+        nodeIn.readFully(reqMsg, 0, messageSize);
+
+        RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(reqMsg);
+        marshalledMsg.printContents();
+    }
+
+    public void readPayload(int messageSize) throws IOException{
+        byte[] payloadMsg = new byte[messageSize];
+        nodeIn.readFully(payloadMsg, 0, messageSize);
+
+        PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(payloadMsg);
+        this.registry.updatePayloadTotal(payloadMsgFormat.payload);
+        payloadMsgFormat.printContents();
+    }
+
+    public void readDeregistrationRequest(int messageSize) throws IOException{
+        byte[] deReq = new byte[messageSize];
+        nodeIn.readFully(deReq, 0, messageSize);
+
+        DoneMessageFormat deregistrationReq = new DoneMessageFormat(deReq);
+        deregistrationReq.printContents();
     }
 
     @Override
     public void run(){
         try {
-            int messageType = 0;
-            int messageSize = 0;
+            int messageType = -1;
+            int messageSize = -1;
 
             while(messageType != 3){
                 messageType = this.nodeIn.readInt();
                 messageSize = this.nodeIn.readInt();
 
                 if(messageType == 0){
-                    byte[] reqMsg = new byte[messageSize];
-                    nodeIn.readFully(reqMsg, 0, messageSize);
+                    readRegistrationRequest(messageSize);
 
-                    RegisterMessageFormat marshalledMsg = new RegisterMessageFormat(reqMsg);
-                    marshalledMsg.printContents();
+                    //waitRegistryNodeThread();
 
+                    sendTaskInitiate();
                 }
                 else if(messageType == 2){
-                    byte[] payloadMsg = new byte[messageSize];
-                    nodeIn.readFully(payloadMsg, 0, messageSize);
-
-                    PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(payloadMsg);
-                    this.registry.updatePayloadTotal(payloadMsgFormat.payload);
-                    payloadMsgFormat.printContents();
+                    readPayload(messageSize);
                 }
                 else if(messageType == 3){
-                    byte[] deReq = new byte[messageSize];
-                    nodeIn.readFully(deReq, 0, messageSize);
-
-                    DoneMessageFormat deregistrationReq = new DoneMessageFormat(deReq);
-                    deregistrationReq.printContents();
+                    readDeregistrationRequest(messageSize);
                 }
             }
             
@@ -75,5 +93,18 @@ public class RegistryNodeThread extends Thread {
             System.out.println("Node: ");
             ioe.printStackTrace();
         } 
+    }
+
+    public synchronized void waitRegistryNodeThread(){
+        try {
+            this.wait();
+        } 
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void notifyRegistryNodeThread(){
+        this.notify();
     }
 }
