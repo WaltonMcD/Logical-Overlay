@@ -6,6 +6,6 @@ sourceCompatibility = 1.8
 
 jar {
     manifest {
-        attributes 'Main-Class': 'cs455.overlay.Main'
+        attributes 'Main-Class': 'cs455.overlay.Registry'
     }
 }
