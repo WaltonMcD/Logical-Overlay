@@ -5,12 +5,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.print.attribute.standard.MediaSize.Other;
+import javax.security.auth.callback.TextInputCallback;
+
 import cs455.overlay.wireformats.ConnDirectiveFormat;
 import cs455.overlay.wireformats.DoneMessageFormat;
 import cs455.overlay.wireformats.RegResponseFormat;
 import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.TaskCompleteFormat;
 import cs455.overlay.wireformats.TaskInitiateFormat;
+import cs455.overlay.wireformats.TrafficSumRequestFormat;
 
 public class Message {
 	private Integer messageType;
@@ -82,9 +86,9 @@ public class Message {
 	}
 
 	// Pull Traffic Summary : Type = 7
-	public Message(Integer messageType) {
+	public Message(Integer messageType, String hostname) {
 		this.messageType = messageType;
-
+		this.ipAddress = hostname;
 	}
 
 	// Traffic Summary : Type = 8
@@ -167,7 +171,11 @@ public class Message {
 				break;
 
 			case 7:
-				outputStream.writeInt(this.messageType);
+				TrafficSumRequestFormat trafficSum = new TrafficSumRequestFormat(this.ipAddress);
+				byte[] marshalledTraffic = trafficSum.getBytes();
+				outputStream.writeInt(trafficSum.type);
+				outputStream.writeInt(marshalledTraffic.length);
+				outputStream.write(marshalledTraffic);
 				break;
 
 			case 8:
@@ -279,7 +287,13 @@ public class Message {
 				break;
 
 			case 7:
-				this.messageType = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] trafficReq = new byte[messageSize];
+				inputStream.readFully(trafficReq);
+
+				TrafficSumRequestFormat traffic = new TrafficSumRequestFormat(trafficReq);
+				this.ipAddress = traffic.hostname;
+				traffic.printContents();
 				break;
 				
 			case 8:

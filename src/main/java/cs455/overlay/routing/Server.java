@@ -184,7 +184,7 @@ public class Server {
 
 				//Send Traffic Summary Request.
 				Integer trafficSummReqType = 7;
-				Message trafficSummReqMsg = new Message(trafficSummReqType);
+				Message trafficSummReqMsg = new Message(trafficSummReqType, this.nodeSocket.getLocalAddress().getHostName());
 				trafficSummReqMsg.packMessage(outputStream);
 
                 //Receive Traffic Summary
