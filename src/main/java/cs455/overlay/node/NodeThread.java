@@ -59,17 +59,15 @@ public class NodeThread {
                 //Waiting for task initiate.
                 waitNodeSender();
         
-                int total = 0;
                 int totalMessages = 0;
                 for(int i = 0; i < numberOfMessages; i++){
                     long payload = getRandomNumberUsingNextLong();
                     Message dataTrafficMsg = new Message(5,i,i,payload,this.port, this.ip, this.toPort, this.toHost);
                     dataTrafficMsg.packMessage(out);
-                    total += payload;
+                    node.updateSentPayloadTotal(payload);
                     totalMessages++;
                 }
                 node.numMessagesSent = totalMessages;
-                node.payloadSentTotal = total;
 
             }
             catch(UnknownHostException un){
@@ -119,7 +117,7 @@ public class NodeThread {
                     Message traffic = new Message();
                     traffic.unpackMessage(nodeIn);
                     payloads.add(traffic);
-                    node.updatePayloadTotal(traffic.getPayload());
+                    node.updateReceivedPayloadTotal(traffic.getPayload());
                     messagesReceived++;
                     total += traffic.getPayload();
                 }

@@ -124,8 +124,12 @@ public class Node implements Runnable {
         }
     }
 
-    public synchronized void updatePayloadTotal(long payload){
+    public synchronized void updateReceivedPayloadTotal(long payload){
         this.payloadReceivedTotal += payload;
+    }
+
+    public synchronized void updateSentPayloadTotal(long payload){
+        this.payloadSentTotal += payload;
     }
     
 }

@@ -174,12 +174,12 @@ public class Server {
                 Registry.completedTasks.add(taskCompleteMsg);
 
                 
-                // try {
-                //     Thread.sleep(1000);
-                // } catch (InterruptedException e) {
-                //     // TODO Auto-generated catch block
-                //     e.printStackTrace();
-                // }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 
 
 				//Send Traffic Summary Request.
