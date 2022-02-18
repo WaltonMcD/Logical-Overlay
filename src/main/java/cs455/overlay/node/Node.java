@@ -117,6 +117,9 @@ public class Node implements Runnable {
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
             trafficSummary.packMessage(serverOutputStream);
 
+            Message deregistration = new Message(1, this.ip, this.port);
+            deregistration.packMessage(serverOutputStream);
+
             serverOutputStream.close();
             serverInputStream.close();
             

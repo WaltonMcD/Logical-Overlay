@@ -190,6 +190,9 @@ public class Server {
                 trafficSummary.unpackMessage(inputStream);
                 Registry.trafficSummaryMessages.add(trafficSummary);
 
+                Message deregistration = new Message();
+                deregistration.unpackMessage(inputStream);
+
                 Registry.startSequenceCompletion();
                 
                 

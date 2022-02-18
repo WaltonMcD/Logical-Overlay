@@ -3,13 +3,6 @@ package cs455.overlay.protocols;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.security.PrivateKey;
-import java.util.ArrayList;
-
-import javax.print.attribute.standard.MediaSize.Other;
-import javax.security.auth.callback.TextInputCallback;
-
-import cs455.overlay.node.Node;
 import cs455.overlay.wireformats.ConnDirectiveFormat;
 import cs455.overlay.wireformats.DoneMessageFormat;
 import cs455.overlay.wireformats.PayloadMessageFormat;
@@ -239,6 +232,7 @@ public class Message {
 				DoneMessageFormat deregistration = new DoneMessageFormat(dereg);
 				this.ipAddress = deregistration.hostname;
 				this.port = deregistration.port;
+				deregistration.printContents();
 				break;
 
 			case 2:
