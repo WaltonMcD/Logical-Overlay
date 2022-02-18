@@ -97,7 +97,7 @@ public class RegistryThread extends Thread{
             Message deregistration = new Message();
             deregistration.unpackMessage(inputStream);
             
-            registry.startSequenceCompletion();
+            this.startSequenceCompletion();
             
             inputStream.close();
             outputStream.close();
@@ -110,5 +110,11 @@ public class RegistryThread extends Thread{
 
     public void setNumberOfMessages(Integer number) {
         this.numberOfMessages = number;
+    }
+
+    public synchronized void startSequenceCompletion(){
+        if(registry.trafficSummaryMessages.size() == this.numOfConnections){
+            registry.notifyRegistry();
+        }
     }
 }

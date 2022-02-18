@@ -23,6 +23,11 @@ public class Registry extends Thread {
     public int numOfMessagesToSend;
     public boolean complete;
     public boolean done;
+    public Integer totalMessagesSent = 0;
+    public Integer totalMessagesReceived = 0;
+    public long totalPayloadSent = 0;
+    public long totalPayloadReceived = 0;
+    public int totalMessages = 0;
 
     public Registry(int port, int numConnections){
         try{
@@ -57,7 +62,7 @@ public class Registry extends Thread {
                 // Once all nodes are connected this will assign nodes to connect to.
                 if(this.nodesList.size() == this.numConnections){
                     // Uses arraylist to assign a ring structure if first node is i = 0 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 9
-                    // next rendition i = 1 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 0
+                    // next rendition i = 1 : front = i + 1 mod 10 = 2 : back = i + 9 mod 10 = 0
                     for(int i = 0; i < this.numConnections; i++){
                         Integer messageType = 9;
                         Integer identifier = this.nodesList.get(i).identifier;
@@ -80,6 +85,20 @@ public class Registry extends Thread {
             for (RegistryThread thread: this.nodeThreads){
                 thread.join();
             }
+
+            this.waitRegistry();
+
+            for(Message msg : trafficSummaryMessages){
+                totalMessagesSent += msg.getNumMessagesSent();
+                totalMessagesReceived += msg.getNumMessagesReceived();
+                totalPayloadSent += msg.getSumOfSentMessages();
+                totalPayloadReceived += msg.getSumOfReceivedMessages();
+                totalMessages += msg.getNumMessagesSent() + msg.getNumMessagesReceived();
+            }
+            System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
+                            " Received a total of " + totalMessages + " Messages" +
+                            " Total sent payload " + totalPayloadSent +
+                            " Total received payload " + totalPayloadReceived);
         }
         catch (IOException | InterruptedException ioe) {
             System.out.print(ioe.getMessage());
@@ -98,29 +117,6 @@ public class Registry extends Thread {
         this.numOfMessagesToSend = number;
         for(RegistryThread thread: this.nodeThreads){
             thread.setNumberOfMessages(number);
-        }
-    }
-
-    public void startSequenceCompletion(){
-        if(trafficSummaryMessages.size() == getNumConnections() && !done){
-            Integer totalMessagesSent = 0;
-            Integer totalMessagesReceived = 0;
-            long totalPayloadSent = 0;
-            long totalPayloadReceived = 0;
-            int totalMessages = 0;
-
-            for(Message msg : trafficSummaryMessages){
-                totalMessagesSent += msg.getNumMessagesSent();
-                totalMessagesReceived += msg.getNumMessagesReceived();
-                totalPayloadSent += msg.getSumOfSentMessages();
-                totalPayloadReceived += msg.getSumOfReceivedMessages();
-                totalMessages += msg.getNumMessagesSent() + msg.getNumMessagesReceived();
-            }
-            System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
-                            " Received a total of " + totalMessages + " Messages" +
-                            " Total sent payload " + totalPayloadSent +
-                            " Total received payload " + totalPayloadReceived);
-            done = true;
         }
     }
 

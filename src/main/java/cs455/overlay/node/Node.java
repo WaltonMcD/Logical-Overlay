@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import cs455.overlay.Main;
 import cs455.overlay.node.NodeThread.BackNodeReader;
@@ -91,7 +92,8 @@ public class Node implements Runnable {
             //Receive Task Initiate
             Message taskInitiateMsg = new Message();
             taskInitiateMsg.unpackMessage(serverInputStream);
-            NodeThread.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            frontNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            backNodeReader.numberOfMessages = taskInitiateMsg.getMessagesToSend();
 
             //Notify worker threads to start message passing.
             frontNode.notifyNodeSender();

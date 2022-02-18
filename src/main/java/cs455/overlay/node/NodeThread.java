@@ -10,9 +10,9 @@ import cs455.overlay.wireformats.PayloadMessageFormat;
 
 // Handles front node socket / message sending and receiving
 public class NodeThread {
-    public static Integer numberOfMessages = 0;
     
     public static class FrontNodeSender implements Runnable {
+        public Integer numberOfMessages = 0;
         public String ip;
         public Integer port;
         public Integer serverPort;
@@ -80,6 +80,7 @@ public class NodeThread {
     }
 
     public static class BackNodeReader implements Runnable {
+        public Integer numberOfMessages = 0;
         public Socket backSocket;
         public Node node;
 
