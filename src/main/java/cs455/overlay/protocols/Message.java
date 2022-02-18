@@ -15,6 +15,7 @@ import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.TaskCompleteFormat;
 import cs455.overlay.wireformats.TaskInitiateFormat;
 import cs455.overlay.wireformats.TrafficSumRequestFormat;
+import cs455.overlay.wireformats.TrafficSummaryFormat;
 
 public class Message {
 	private Integer messageType;
@@ -32,8 +33,8 @@ public class Message {
 	private Integer messagesToSend;
 	private Integer numMessagesSent;
 	private Integer numMessagesReceived;
-	private Integer sumOfSentMessages;
-	private Integer sumOfReceivedMessages;
+	private long sumOfSentMessages;
+	private long sumOfReceivedMessages;
 
 	// Default constructor for when you're receiving a message and don't know the
 	// message type yet
@@ -93,7 +94,7 @@ public class Message {
 
 	// Traffic Summary : Type = 8
 	public Message(Integer messageType, String ipAddress, Integer port, Integer numMessagesSent,
-			Integer sumOfSentMessages, Integer numMessagesReceived, Integer sumOfReceivedMessages) {
+			long sumOfSentMessages, Integer numMessagesReceived, long sumOfReceivedMessages) {
 		this.messageType = messageType;
 		this.ipAddress = ipAddress;
 		this.port = port;
@@ -179,13 +180,11 @@ public class Message {
 				break;
 
 			case 8:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeUTF(this.ipAddress);
-				outputStream.writeInt(this.port);
-				outputStream.writeInt(this.numMessagesSent);
-				outputStream.writeInt(this.numMessagesReceived);
-				outputStream.writeInt(this.sumOfSentMessages);
-				outputStream.writeInt(this.sumOfReceivedMessages);
+				TrafficSummaryFormat traffic = new TrafficSummaryFormat(this.ipAddress, this.port, this.numMessagesSent, this.numMessagesReceived, this.sumOfSentMessages, this.sumOfReceivedMessages);
+				byte[] marshalledSum = traffic.getBytes();
+				outputStream.writeInt(traffic.type);
+				outputStream.writeInt(marshalledSum.length);
+				outputStream.write(marshalledSum);
 				break;
 
 			case 9:
@@ -297,12 +296,17 @@ public class Message {
 				break;
 				
 			case 8:
-				this.ipAddress = inputStream.readUTF();
-				this.port = inputStream.readInt();
-				this.numMessagesSent = inputStream.readInt();
-				this.numMessagesReceived = inputStream.readInt();
-				this.sumOfSentMessages = inputStream.readInt();
-				this.sumOfReceivedMessages = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] trafficSum = new byte[messageSize];
+				inputStream.readFully(trafficSum);
+
+				TrafficSummaryFormat trafficSummary = new TrafficSummaryFormat(trafficSum);
+				this.ipAddress = trafficSummary.ip;
+				this.port = trafficSummary.port;
+				this.numMessagesSent = trafficSummary.numMessagesSent;
+				this.numMessagesReceived = trafficSummary.numMessagesReceived;
+				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
+				trafficSummary.printContents();
 				break;
 
 			case 9:
@@ -465,7 +469,7 @@ public class Message {
 		this.numMessagesReceived = numMessagesReceived;
 	}
 
-	public  Integer getSumOfSentMessages() {
+	public  long getSumOfSentMessages() {
 		return sumOfSentMessages;
 	}
 
@@ -473,7 +477,7 @@ public class Message {
 		this.sumOfSentMessages = sumOfSentMessages;
 	}
 
-	public  Integer getSumOfReceivedMessages() {
+	public  long getSumOfReceivedMessages() {
 		return sumOfReceivedMessages;
 	}
 
