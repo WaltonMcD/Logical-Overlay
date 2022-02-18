@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import cs455.overlay.Main;
 import cs455.overlay.node.NodeThread.BackNodeReader;
@@ -99,7 +98,10 @@ public class Node implements Runnable {
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
-            waitNode(); //Wait for message sending to complete.
+            //Wait for thread completion
+            frontNodeThread.join();
+            backNodeReaderThread.join();
+            nodeServer.close(); 
 
             // Send Task Complete to registry
             Message taskCompleteMsg = new Message(6,identifier, ip, port);
@@ -124,9 +126,10 @@ public class Node implements Runnable {
 
             serverOutputStream.close();
             serverInputStream.close();
+            this.socketToServer.close();
             
         } 
-        catch (IOException ioe) {
+        catch (IOException | InterruptedException ioe) {
             System.out.println(ioe.getMessage());
         }
 

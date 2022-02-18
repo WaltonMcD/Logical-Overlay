@@ -69,6 +69,6 @@ public class TrafficSummaryFormat {
     }
 
     public void printContents(){
-        System.out.println("\nTraffic Summary Received from " + this.ip + " on port " + this.port);
+        System.out.println("Traffic Summary Received from " + this.ip + " on port " + this.port);
     }
 }
