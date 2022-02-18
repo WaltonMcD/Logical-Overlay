@@ -109,7 +109,6 @@ public class Node implements Runnable {
 
             while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
                 if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
-
                     break;
                 }
             }
@@ -126,14 +125,6 @@ public class Node implements Runnable {
             System.out.println(ioe.getMessage());
         }
 
-    }
-
-    public synchronized void updateSentPayload(long payload){
-        this.payloadSentTotal += payload;
-    }
-
-    public synchronized void updateReceivedPayload(long payload){
-        this.payloadReceivedTotal = payload;
     }
 
     public synchronized void updateReceivedPayloadTotal(long payload){

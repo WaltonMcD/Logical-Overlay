@@ -54,6 +54,7 @@ public class TrafficSummaryFormat {
 		int ipLength = ipBytes.length;
 		dout.writeInt(ipLength);
 		dout.write(ipBytes);
+        dout.writeInt(this.port);
         dout.writeInt(this.numMessagesReceived);
         dout.writeInt(this.numMessagesSent);
         dout.writeLong(this.sumOfReceivedMessages);

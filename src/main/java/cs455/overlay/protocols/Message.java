@@ -195,6 +195,8 @@ public class Message {
 				break;
 
 			case 8:
+				System.out.println(8 + " " +ipAddress+ " " + port+ " " + numMessagesSent+ " " +sumOfSentMessages+ " " + numMessagesReceived+ " " + sumOfReceivedMessages);
+
 				TrafficSummaryFormat traffic = new TrafficSummaryFormat(this.ipAddress, this.port, this.numMessagesSent, this.numMessagesReceived, this.sumOfSentMessages, this.sumOfReceivedMessages);
 				byte[] marshalledSum = traffic.getBytes();
 				outputStream.writeInt(traffic.type);
@@ -325,6 +327,8 @@ public class Message {
 				this.numMessagesSent = trafficSummary.numMessagesSent;
 				this.numMessagesReceived = trafficSummary.numMessagesReceived;
 				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
+				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
+				System.out.println(this.ipAddress+ this.port +  this.numMessagesSent+ this.numMessagesReceived+ this.sumOfSentMessages+ this.sumOfReceivedMessages);
 				trafficSummary.printContents();
 				break;
 
@@ -492,7 +496,7 @@ public class Message {
 		return sumOfSentMessages;
 	}
 
-	public  void setSumOfSentMessages(Integer sumOfSentMessages) {
+	public  void setSumOfSentMessages(long sumOfSentMessages) {
 		this.sumOfSentMessages = sumOfSentMessages;
 	}
 
@@ -500,7 +504,7 @@ public class Message {
 		return sumOfReceivedMessages;
 	}
 
-	public  void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
+	public  void setSumOfReceivedMessages(long sumOfReceivedMessages) {
 		this.sumOfReceivedMessages = sumOfReceivedMessages;
 	}
 	

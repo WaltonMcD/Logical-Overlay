@@ -190,8 +190,8 @@ public class Server {
                 //Receive Traffic Summary
                 Message trafficSummary = new Message();
                 trafficSummary.unpackMessage(inputStream);
-                System.out.println(trafficSummary.getType() + " From: " + trafficSummary.getIpAddress());
                 Registry.trafficSummaryMessages.add(trafficSummary);
+                System.out.println("Traffic Summary from Node: " + trafficSummary.getIpAddress() + " sent " + trafficSummary.getNumMessagesSent());
 
                 Registry.startSequenceCompletion();
                 
