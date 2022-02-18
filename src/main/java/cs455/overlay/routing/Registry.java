@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import cs455.overlay.routing.Registry;
-import cs455.overlay.Main;
 import cs455.overlay.node.Node;
 import cs455.overlay.protocols.Message;
 

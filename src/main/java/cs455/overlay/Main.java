@@ -3,7 +3,6 @@ package cs455.overlay;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import cs455.overlay.node.Node;
@@ -58,6 +57,7 @@ public class Main extends Thread{
                 }
                 else if(command.equals("exit-overlay")) {
                 	if(setupComplete)
+                        input.close();
                 		overlayThread.interrupt();
                         System.out.println("Closing All Connections... ");
                         System.exit(1);
@@ -84,7 +84,8 @@ public class Main extends Thread{
                 while(!command.equals("exit-overlay")){
                     command = input.next();
                 }
-                node.notifyAll();
+                
+                input.close();
                 thread.interrupt();
                 sock.close();
             } catch (UnknownHostException un) {

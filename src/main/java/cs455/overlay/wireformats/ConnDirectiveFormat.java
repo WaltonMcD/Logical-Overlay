@@ -71,6 +71,6 @@ public class ConnDirectiveFormat {
     }
 
     public void printContents(){
-        System.out.println("\nConnection Directive Node To Connect: " + this.hostName + " on port " + this.portNumber);
+        System.out.println("Connection Directive Node To Connect: " + this.hostName + " on port " + this.portNumber);
     }
 }
