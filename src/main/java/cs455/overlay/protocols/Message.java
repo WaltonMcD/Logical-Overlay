@@ -202,15 +202,6 @@ public class Message {
 				outputStream.writeLong(this.sumOfReceivedMessages);
 				break;
 
-			case 9:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeInt(this.identifier);
-				outputStream.writeInt(this.frontNodePort);
-				outputStream.writeUTF(this.frontNodeIp);
-				outputStream.writeInt(this.backNodePort);
-				outputStream.writeUTF(this.backNodeIp);
-				break;
-
 			}
 
 			outputStream.flush();
