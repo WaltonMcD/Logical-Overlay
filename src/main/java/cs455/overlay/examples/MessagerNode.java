@@ -49,7 +49,7 @@ public class MessagerNode extends Thread{
             long payload = random.nextLong();
             PayloadMessageFormat msg = new PayloadMessageFormat(i, i, payload, fromPort, this.identifier, this.hostPort, this.hostIp);
             byte[] marshalledMsg = msg.getBytes();
-            rout.writeInt(PayloadMessageFormat.type);
+            rout.writeInt(msg.type);
             rout.writeInt(marshalledMsg.length);
             rout.write(marshalledMsg);
             rout.flush();

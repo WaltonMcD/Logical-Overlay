@@ -9,7 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PayloadMessageFormat {
-    public static final int type = 2;
+    public final int type = 5;
     public int hops;
     public int toPort, fromPort;
     public int numberOfMessage;
@@ -80,6 +80,6 @@ public class PayloadMessageFormat {
     }
 
     public void printContents(){
-        System.out.println( this.fromHostname + " message: " + this.numberOfMessage + " payload: " + this.payload);
+        System.out.println( this.toHostname + " message: " + this.numberOfMessage + " payload: " + this.payload);
     }
 }

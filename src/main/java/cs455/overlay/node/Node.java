@@ -21,8 +21,8 @@ public class Node implements Runnable {
     public String  ip;
     public Integer numMessagesSent;
     public Integer numMessagesReceived;
-    public Integer payloadReceivedTotal;
-    public Integer payloadSentTotal;
+    public long payloadReceivedTotal;
+    public long payloadSentTotal;
     
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -35,6 +35,8 @@ public class Node implements Runnable {
         InetAddress ipAddress = socketToServer.getLocalAddress();
         this.ip = ipAddress.getHostName();
         this.port = socketToServer.getLocalPort();
+        this.payloadReceivedTotal = 0;
+        this.payloadSentTotal = 0;
     }
 
     public synchronized void waitNode(){
@@ -73,7 +75,7 @@ public class Node implements Runnable {
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             //Spawns a thread to connect to front nodes server socket
-            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this);
+            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp());
             Thread frontNodeThread = new Thread(frontNode);
             frontNodeThread.start();
             
@@ -103,8 +105,8 @@ public class Node implements Runnable {
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
             System.out.println(trafficSummaryReqMsg.getType());
 
-            while(numMessagesSent == null || payloadSentTotal ==  null || numMessagesReceived == null || payloadReceivedTotal == null){
-                if(numMessagesSent != null && payloadSentTotal !=  null && numMessagesReceived != null && payloadReceivedTotal != null){
+            while(numMessagesSent == null || payloadSentTotal ==  0 || numMessagesReceived == null || payloadReceivedTotal == 0){
+                if(numMessagesSent != null && payloadSentTotal !=  0 && numMessagesReceived != null && payloadReceivedTotal != 0){
                     break;
                 }
             }
@@ -120,6 +122,14 @@ public class Node implements Runnable {
         catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }
+    }
+
+    public synchronized void updateReceivedPayloadTotal(long payload){
+        this.payloadReceivedTotal += payload;
+    }
+
+    public synchronized void updateSentPayloadTotal(long payload){
+        this.payloadSentTotal += payload;
     }
     
 }

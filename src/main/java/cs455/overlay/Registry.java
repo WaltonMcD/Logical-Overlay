@@ -23,16 +23,18 @@ public class Registry extends Thread{
         if(trafficSummaryMessages.size() == numOfConnections){
             Integer totalMessagesSent = 0;
             Integer totalMessagesReceived = 0;
-            Integer totalPayloadSent = 0;
-            Integer totalPayloadReceived = 0;
+            long totalPayloadSent = 0;
+            long totalPayloadReceived = 0;
+            int totalMessages = 0;
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
+                totalMessages += msg.getNumMessagesSent() + msg.getNumMessagesReceived();
             }
             System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
-                            " Received a total of " + totalMessagesReceived + " Messages" +
+                            " Received a total of " + totalMessages + " Messages" +
                             " Total sent payload " + totalPayloadSent +
                             " Total received payload " + totalPayloadReceived);
         }
