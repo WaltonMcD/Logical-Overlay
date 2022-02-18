@@ -2,25 +2,31 @@ package cs455.overlay.node;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 import cs455.overlay.protocols.Message;
+import cs455.overlay.wireformats.PayloadMessageFormat;
 
 // Handles front node socket / message sending and receiving
 public class NodeThread {
     public static Integer numberOfMessages = 0;
     
     public static class FrontNodeSender implements Runnable {
-        public String frontIp;
+        public String ip;
         public Integer port;
         public Integer serverPort;
         public Node node;
+        public int toPort;
+        public String toHost;
 
-        public FrontNodeSender(String ip, Integer port, Integer serverPort, Node node){
-            this.frontIp = ip;
+        public FrontNodeSender(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost){
+            this.ip = ip;
             this.port = port;
             this.serverPort = serverPort;
             this.node = node;
+            this.toPort = toPort;
+            this.toHost = toHost;
         }
 
         public synchronized void waitNodeSender(){
@@ -35,9 +41,9 @@ public class NodeThread {
             notify();
         }
 
-        public Integer getRandomNumberUsingNextInt() {
+        public long getRandomNumberUsingNextLong() {
             Random random = new Random();
-            int num = random.nextInt();
+            long num = random.nextLong();
             return num;
         }
 
@@ -45,23 +51,23 @@ public class NodeThread {
         public void run(){
             try{
             	
-                Socket frontSocket = new Socket(frontIp, serverPort);
+                Socket frontSocket = new Socket(ip, serverPort);
                 System.out.println("Connected to node: " + frontSocket.getInetAddress());
 
-                DataOutputStream frontOutputStream = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
+                DataOutputStream out = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
    
                 //Waiting for task initiate.
                 waitNodeSender();
         
-                int total = 0;
+                int totalMessages = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                    Message dataTrafficMsg = new Message(5, port, getRandomNumberUsingNextInt());
-                    dataTrafficMsg.packMessage(frontOutputStream);
-                    total += dataTrafficMsg.getPayload();
-                    System.out.println("Sending traffic to Node: " + dataTrafficMsg.getStartNodeId() + " Payload: " + dataTrafficMsg.getPayload());
+                    long payload = getRandomNumberUsingNextLong();
+                    Message dataTrafficMsg = new Message(5,i,i,payload,this.port, this.ip, this.toPort, this.toHost);
+                    dataTrafficMsg.packMessage(out);
+                    node.updateSentPayloadTotal(payload);
+                    totalMessages++;
                 }
-                node.numMessagesSent = numberOfMessages;
-                node.payloadSentTotal = total;
+                node.numMessagesSent = totalMessages;
 
             }
             catch(UnknownHostException un){
@@ -97,28 +103,29 @@ public class NodeThread {
         @Override
         public void run(){
             try{
-                DataInputStream backInputStream = new DataInputStream(new BufferedInputStream(backSocket.getInputStream()));
+                DataInputStream nodeIn = new DataInputStream(new BufferedInputStream(backSocket.getInputStream()));
+                DataOutputStream nodeOut = new DataOutputStream(new BufferedOutputStream(backSocket.getOutputStream()));
 
                 //Waiting for task initiate.
                 waitNodeReader();
 
-                Integer total = 0;
+                long total = 0;
                 Integer messagesReceived = 0;
                 for(int i = 0; i < numberOfMessages; i++){
-                	Message dataTraffic = new Message();
-                    dataTraffic.unpackMessage(backInputStream);
-                    total += dataTraffic.getPayload();
-                    System.out.println("Receiving data traffic from Node: " + dataTraffic.getStartNodeId());
+                    Message traffic = new Message();
+                    traffic.unpackMessage(nodeIn);
+                    node.updateReceivedPayloadTotal(traffic.getPayload());
                     messagesReceived++;
+                    total += traffic.getPayload();
                 }
-                System.out.println("Received a total payload: " + total);
                 node.numMessagesReceived = messagesReceived;
                 node.payloadReceivedTotal = total;
+                node.notifyNode();
             }
             catch (IOException ioe) {
                 System.out.println(ioe.getMessage());
             }
-            node.notifyNode();
+            
         }
     }
 }

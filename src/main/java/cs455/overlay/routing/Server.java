@@ -85,7 +85,7 @@ public class Server {
                             String frontIp = Registry.nodesList.get((i + 1) % numOfConnections).ip;
                             Integer backPort = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).identifier;
                             String backIp = Registry.nodesList.get((i + numOfConnections-1) % numOfConnections).ip;
-                            Message connDirective = new Message(frontIp, messageType, identifier, frontPort);
+                            Message connDirective = new Message(frontIp, messageType, identifier, frontPort, backIp, backPort);
                             directives.add(connDirective);
                             
                         }

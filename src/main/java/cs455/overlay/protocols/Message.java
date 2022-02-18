@@ -3,13 +3,16 @@ package cs455.overlay.protocols;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 
 import javax.print.attribute.standard.MediaSize.Other;
 import javax.security.auth.callback.TextInputCallback;
 
+import cs455.overlay.node.Node;
 import cs455.overlay.wireformats.ConnDirectiveFormat;
 import cs455.overlay.wireformats.DoneMessageFormat;
+import cs455.overlay.wireformats.PayloadMessageFormat;
 import cs455.overlay.wireformats.RegResponseFormat;
 import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.TaskCompleteFormat;
@@ -28,13 +31,16 @@ public class Message {
 	private String  frontNodeIp;
 	private Integer backNodePort;
 	private String  backNodeIp;
-	private Integer payload;
+	private long payload;
 	private Integer startNodeId;
 	private Integer messagesToSend;
 	private Integer numMessagesSent;
 	private Integer numMessagesReceived;
 	private long sumOfSentMessages;
 	private long sumOfReceivedMessages;
+	private int hops;
+	private int messageNumber;
+
 
 	// Default constructor for when you're receiving a message and don't know the
 	// message type yet
@@ -72,10 +78,15 @@ public class Message {
 	}
 
 	// Data Traffic : Type = 5
-	public Message(Integer messageType, Integer startNodeId, Integer payload) {
+	public Message(int messageType, int hops, int numberOfMessage, long payload, int fromPort, String fromHost, int toPort, String toHost) {
 		this.messageType = messageType;
-		this.startNodeId = startNodeId;
+		this.frontNodeIp = fromHost;
+		this.frontNodePort = fromPort;
+		this.backNodeIp = toHost;
+		this.backNodePort = toPort;
 		this.payload = payload;
+		this.messageNumber = numberOfMessage;
+		this.hops = hops;
 	}
 
 	// Task Complete : Type = 6
@@ -105,11 +116,13 @@ public class Message {
 	}
 
 	// Connection Directive helper, needed identifier for array storage : Type = 9
-	public Message(String frontNodeIp, Integer messageType, Integer identifier, Integer frontNodePort) {
+	public Message(String frontNodeIp, Integer messageType, Integer identifier, Integer frontNodePort, String backNodeIp, int backNodePort) {
 		this.messageType = messageType;
 		this.identifier = identifier;
 		this.frontNodePort = frontNodePort;
 		this.frontNodeIp = frontNodeIp;
+		this.backNodeIp = backNodeIp;
+		this.backNodePort = backNodePort;
 	}
 
 	public String packMessage(DataOutputStream outputStream) {
@@ -142,7 +155,7 @@ public class Message {
 				break;
 
 			case 3:
-				ConnDirectiveFormat connDir = new ConnDirectiveFormat(this.frontNodeIp, this.frontNodePort);
+				ConnDirectiveFormat connDir = new ConnDirectiveFormat(this.frontNodeIp, this.frontNodePort, this.backNodeIp, this.backNodePort);
 				byte[] marshalledConnDirMsg = connDir.getBytes();
 				outputStream.writeInt(connDir.type);
 				outputStream.writeInt(marshalledConnDirMsg.length);
@@ -158,9 +171,11 @@ public class Message {
 				break;
 
 			case 5:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeInt(this.startNodeId);
-				outputStream.writeInt(this.payload);
+				PayloadMessageFormat newPayload = new PayloadMessageFormat(this.hops, this.messageNumber, this.payload, this.frontNodePort, this.frontNodeIp, this.backNodePort, this.backNodeIp);
+				byte[] marshalledPayload = newPayload.getBytes();
+				outputStream.writeInt(newPayload.type);
+				outputStream.writeInt(marshalledPayload.length);
+				outputStream.write(marshalledPayload);
 				break;
 
 			case 6:
@@ -185,15 +200,6 @@ public class Message {
 				outputStream.writeInt(traffic.type);
 				outputStream.writeInt(marshalledSum.length);
 				outputStream.write(marshalledSum);
-				break;
-
-			case 9:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeInt(this.identifier);
-				outputStream.writeInt(this.frontNodePort);
-				outputStream.writeUTF(this.frontNodeIp);
-				outputStream.writeInt(this.backNodePort);
-				outputStream.writeUTF(this.backNodeIp);
 				break;
 
 			}
@@ -255,6 +261,8 @@ public class Message {
 				ConnDirectiveFormat connDirective = new ConnDirectiveFormat(connDir);
 				this.frontNodePort = connDirective.portNumber;
 				this.frontNodeIp = connDirective.hostName;
+				this.backNodeIp = connDirective.toHost;
+				this.backNodePort = connDirective.toPort;
 				connDirective.printContents();
 				break;
 
@@ -269,8 +277,19 @@ public class Message {
 				break;
 
 			case 5:
-				this.startNodeId = inputStream.readInt();
-				this.payload = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] payloadMsg = new byte[messageSize];
+				inputStream.readFully(payloadMsg, 0, messageSize);
+
+				PayloadMessageFormat payloadMsgFormat = new PayloadMessageFormat(payloadMsg);
+				this.frontNodeIp = payloadMsgFormat.fromHostname;
+				this.frontNodePort = payloadMsgFormat.fromPort;
+				this.backNodeIp = payloadMsgFormat.toHostname;
+				this.backNodePort = payloadMsgFormat.toPort;
+				this.payload = payloadMsgFormat.payload;
+				this.messageNumber = payloadMsgFormat.numberOfMessage;
+				this.hops = payloadMsgFormat.hops;
+				payloadMsgFormat.printContents();
 				break;
 
 			case 6:
@@ -429,7 +448,7 @@ public class Message {
 		this.backNodeIp = backNodeIp;
 	}
 
-	public  Integer getPayload() {
+	public  long getPayload() {
 		return payload;
 	}
 

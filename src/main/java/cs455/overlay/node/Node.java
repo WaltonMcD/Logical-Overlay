@@ -23,6 +23,7 @@ public class Node implements Runnable {
     public Integer numMessagesReceived;
     public long payloadReceivedTotal = 0;
     public long payloadSentTotal = 0;
+
     
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -35,6 +36,8 @@ public class Node implements Runnable {
         InetAddress ipAddress = socketToServer.getLocalAddress();
         this.ip = ipAddress.getHostName();
         this.port = socketToServer.getLocalPort();
+        this.payloadReceivedTotal = 0;
+        this.payloadSentTotal = 0;
     }
 
     public synchronized void waitNode(){
@@ -73,7 +76,7 @@ public class Node implements Runnable {
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             //Spawns a thread to connect to front nodes server socket
-            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this);
+            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp());
             Thread frontNodeThread = new Thread(frontNode);
             frontNodeThread.start();
             
@@ -106,6 +109,7 @@ public class Node implements Runnable {
 
             while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
                 if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
+
                     break;
                 }
             }
@@ -130,6 +134,14 @@ public class Node implements Runnable {
 
     public synchronized void updateReceivedPayload(long payload){
         this.payloadReceivedTotal = payload;
+    }
+
+    public synchronized void updateReceivedPayloadTotal(long payload){
+        this.payloadReceivedTotal += payload;
+    }
+
+    public synchronized void updateSentPayloadTotal(long payload){
+        this.payloadSentTotal += payload;
     }
     
 }
