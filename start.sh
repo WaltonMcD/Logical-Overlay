@@ -6,7 +6,7 @@ NODE_DELAY='sleep 10;'     # editable. How long you have to setup-overlay before
 JAR_FILE="Homework-1/build/libs/Homework-1.jar"
 SERVER=''
 PORT='64004'
-REGISTRY_SCRIPT='java -jar '"$JAR_FILE"' cs455.overlay.Registry server '"$PORT"' '"$MAX_CONN"''
+REGISTRY_SCRIPT='java -jar '"$JAR_FILE"' cs455.overlay.Main server '"$PORT"' '"$MAX_CONN"''
 NODE_SCRIPT=''
 
 COMMAND='gnome-terminal'
@@ -14,7 +14,8 @@ counter=0
 
 for i in `cat machines.txt`
 do
-    if [ $counter -eq $MAX_CONN ]; then
+    # Add 1 to not count the server as a connection.
+    if [ $counter -eq $(($MAX_CONN+1)) ]; then
         break
     fi
 
