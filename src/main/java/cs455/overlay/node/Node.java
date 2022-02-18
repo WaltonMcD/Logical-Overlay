@@ -99,7 +99,9 @@ public class Node implements Runnable {
             frontNode.notifyNodeSender();
             backNodeReader.notifyNodeReader();
 
-            waitNode(); //Wait for message sending to complete.
+            //Wait for thread completion
+            frontNodeThread.join();
+            backNodeReaderThread.join(); 
 
             // Send Task Complete to registry
             Message taskCompleteMsg = new Message(6,identifier, ip, port);
@@ -126,7 +128,7 @@ public class Node implements Runnable {
             serverInputStream.close();
             
         } 
-        catch (IOException ioe) {
+        catch (IOException | InterruptedException ioe) {
             System.out.println(ioe.getMessage());
         }
 

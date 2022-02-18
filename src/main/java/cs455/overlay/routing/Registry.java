@@ -16,6 +16,7 @@ public class Registry extends Thread {
     public ArrayList<Message> completedTasks = new ArrayList<Message>();
 
     public ArrayList<RegistryThread> nodeThreads = new ArrayList<RegistryThread>();
+    public ArrayList<Thread> threads = new ArrayList<Thread>();
     public ArrayList<Node> nodesList = new ArrayList<Node>();
 
     private ServerSocket serverSocket;
@@ -56,7 +57,9 @@ public class Registry extends Thread {
 
                 RegistryThread nodeSock = new RegistryThread(incomingConnectionSocket, this, numConnections);
                 this.nodeThreads.add(nodeSock);
-                new Thread(nodeSock).start();
+                Thread thread = new Thread(nodeSock);
+                threads.add(thread);
+                thread.start();
                 waitRegistry(); //We need to wait for the node to register before doing checks
 
                 // Once all nodes are connected this will assign nodes to connect to.
@@ -82,11 +85,9 @@ public class Registry extends Thread {
                 this.complete = this.nodeThreads.size() == this.numConnections;
             }
 
-            for (RegistryThread thread: this.nodeThreads){
+            for (Thread thread: this.threads){
                 thread.join();
             }
-
-            this.waitRegistry();
 
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();

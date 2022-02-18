@@ -84,7 +84,7 @@ public class Main extends Thread{
                 while(!command.equals("exit-overlay")){
                     command = input.next();
                 }
-                
+                node.notifyAll();
                 thread.interrupt();
                 sock.close();
             } catch (UnknownHostException un) {

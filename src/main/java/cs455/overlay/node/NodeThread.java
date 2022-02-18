@@ -121,7 +121,6 @@ public class NodeThread {
                 }
                 node.numMessagesReceived = messagesReceived;
                 node.payloadReceivedTotal = total;
-                node.notifyNode();
             }
             catch (IOException ioe) {
                 System.out.println(ioe.getMessage());
