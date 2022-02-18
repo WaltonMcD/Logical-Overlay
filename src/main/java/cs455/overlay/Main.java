@@ -26,9 +26,9 @@ public class Main extends Thread{
             numOfConnections = Integer.parseInt(args[3]);
 
             while(!command.equals("exit-overlay")){
-
+            
                 System.out.print("Enter a command: ");
-                command = input.next();
+                command = input.nextLine().trim();
 
                 if(command.equals("setup-overlay")){
                 	if(!setupComplete) {
@@ -41,26 +41,40 @@ public class Main extends Thread{
                 		continue;
                 	}
                 }
-                else if(command.equals("list-messaging-nodes") && setupComplete == true){
+                else if(command.equals("list-messaging-nodes") && setupComplete){
                     for(Node node : registry.nodesList){
                         System.out.println("Node #" + node.identifier + " is connected from Host: " + node.ip + " Port: " + node.port);
                     }
                 }
-                else if(command.equals("start") && setupComplete == true){
-                    Integer numberOfMessages = input.nextInt();
-                    System.out.println("Starting to send messages. Count: " + numberOfMessages);
-                    registry.setNumberOfMessages(numberOfMessages);
+                else if(command.equals("list-messaging-nodes") && !setupComplete){
+                	System.out.println("Please setup the overlay first.");
+            		continue;
+                }
+                else if(command.substring(0, 5).equals("start") && setupComplete){
+                	String[] startCommandIntArr = command.split(" ", 2);
+                	if(startCommandIntArr[1].matches("0|[1-9]\\d*") && startCommandIntArr.length == 2) {
+                		Integer numberOfMessages = Integer.parseInt(startCommandIntArr[1]);
+                        System.out.println("Starting to send messages. Count: " + numberOfMessages);
+                        registry.setNumberOfMessages(numberOfMessages);
 
-                    for(RegistryThread node: registry.nodeThreads){
-                        node.notifyRegThread();
-                    }
+                        for(RegistryThread node: registry.nodeThreads){
+                            node.notifyRegThread();
+                        }
+                	}
+                	else {
+                		System.out.println(startCommandIntArr[1] + " is an invalid number");
+                	}
+                }
+                else if(command.substring(0, 5).equals("start") && !setupComplete){
+                	System.out.println("Please setup the overlay first.");
+            		continue;
                 }
                 else if(command.equals("exit-overlay")) {
                 	if(setupComplete)
                         input.close();
                 		overlayThread.interrupt();
-                        System.out.println("Closing All Connections... ");
-                        System.exit(1);
+                    System.out.println("Closing All Connections... ");
+                    System.exit(1);
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
