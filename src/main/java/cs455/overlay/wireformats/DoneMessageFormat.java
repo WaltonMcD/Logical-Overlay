@@ -9,7 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class DoneMessageFormat {
-    public final int type = 3;
+    public final int type = 1;
     public String hostname;
     public int port;
 

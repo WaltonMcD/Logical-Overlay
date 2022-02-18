@@ -173,14 +173,12 @@ public class Server {
 				taskCompleteMsg.unpackMessage(inputStream);
                 Registry.completedTasks.add(taskCompleteMsg);
 
-                
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                
 
 				//Send Traffic Summary Request.
 				Integer trafficSummReqType = 7;
@@ -190,7 +188,6 @@ public class Server {
                 //Receive Traffic Summary
                 Message trafficSummary = new Message();
                 trafficSummary.unpackMessage(inputStream);
-                System.out.println(trafficSummary.getType() + " From: " + trafficSummary.getIpAddress());
                 Registry.trafficSummaryMessages.add(trafficSummary);
 
                 Registry.startSequenceCompletion();

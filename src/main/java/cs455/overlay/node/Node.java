@@ -21,8 +21,9 @@ public class Node implements Runnable {
     public String  ip;
     public Integer numMessagesSent;
     public Integer numMessagesReceived;
-    public long payloadReceivedTotal;
-    public long payloadSentTotal;
+    public long payloadReceivedTotal = 0;
+    public long payloadSentTotal = 0;
+
     
     public Node(String ipAddress, Integer port, Integer identifier){
         this.ip = ipAddress;
@@ -81,6 +82,8 @@ public class Node implements Runnable {
             
             //Accepts back nodes connection.
             Socket backSocket = nodeServer.accept();
+
+            //Handle back node socket.
             BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
             Thread backNodeReaderThread = new Thread(backNodeReader);
             backNodeReaderThread.start();
@@ -103,10 +106,9 @@ public class Node implements Runnable {
             //Receive Traffic Summary Request.
             Message trafficSummaryReqMsg = new Message();
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
-            System.out.println(trafficSummaryReqMsg.getType());
 
-            while(numMessagesSent == null || payloadSentTotal ==  0 || numMessagesReceived == null || payloadReceivedTotal == 0){
-                if(numMessagesSent != null && payloadSentTotal !=  0 && numMessagesReceived != null && payloadReceivedTotal != 0){
+            while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
+                if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
                     break;
                 }
             }
@@ -122,6 +124,7 @@ public class Node implements Runnable {
         catch (IOException ioe) {
             System.out.println(ioe.getMessage());
         }
+
     }
 
     public synchronized void updateReceivedPayloadTotal(long payload){

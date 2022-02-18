@@ -18,6 +18,7 @@ import cs455.overlay.wireformats.RegisterMessageFormat;
 import cs455.overlay.wireformats.TaskCompleteFormat;
 import cs455.overlay.wireformats.TaskInitiateFormat;
 import cs455.overlay.wireformats.TrafficSumRequestFormat;
+import cs455.overlay.wireformats.TrafficSummaryFormat;
 
 public class Message {
 	private Integer messageType;
@@ -39,6 +40,7 @@ public class Message {
 	private long sumOfReceivedMessages;
 	private int hops;
 	private int messageNumber;
+
 
 	// Default constructor for when you're receiving a message and don't know the
 	// message type yet
@@ -193,13 +195,11 @@ public class Message {
 				break;
 
 			case 8:
-				outputStream.writeInt(this.messageType);
-				outputStream.writeUTF(this.ipAddress);
-				outputStream.writeInt(this.port);
-				outputStream.writeInt(this.numMessagesSent);
-				outputStream.writeInt(this.numMessagesReceived);
-				outputStream.writeLong(this.sumOfSentMessages);
-				outputStream.writeLong(this.sumOfReceivedMessages);
+				TrafficSummaryFormat traffic = new TrafficSummaryFormat(this.ipAddress, this.port, this.numMessagesSent, this.numMessagesReceived, this.sumOfSentMessages, this.sumOfReceivedMessages);
+				byte[] marshalledSum = traffic.getBytes();
+				outputStream.writeInt(traffic.type);
+				outputStream.writeInt(marshalledSum.length);
+				outputStream.write(marshalledSum);
 				break;
 
 			}
@@ -315,12 +315,18 @@ public class Message {
 				break;
 				
 			case 8:
-				this.ipAddress = inputStream.readUTF();
-				this.port = inputStream.readInt();
-				this.numMessagesSent = inputStream.readInt();
-				this.numMessagesReceived = inputStream.readInt();
-				this.sumOfSentMessages = inputStream.readInt();
-				this.sumOfReceivedMessages = inputStream.readInt();
+				messageSize = inputStream.readInt();
+				byte[] trafficSum = new byte[messageSize];
+				inputStream.readFully(trafficSum);
+
+				TrafficSummaryFormat trafficSummary = new TrafficSummaryFormat(trafficSum);
+				this.ipAddress = trafficSummary.ip;
+				this.port = trafficSummary.port;
+				this.numMessagesSent = trafficSummary.numMessagesSent;
+				this.numMessagesReceived = trafficSummary.numMessagesReceived;
+				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
+				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
+				trafficSummary.printContents();
 				break;
 
 			case 9:
@@ -335,32 +341,6 @@ public class Message {
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
-	}
-
-	public  String getType() {
-		switch (this.messageType) {
-		case 0:
-			return "Registration_Request";
-		case 1:
-			return "Deregistration_Request";
-		case 2:
-			return "Registration_Response";
-		case 3:
-			return "Connection_Directive";
-		case 4:
-			return "Task_Initiate";
-		case 5:
-			return "Data_Traffic";
-		case 6:
-			return "Task_Complete";
-		case 7:
-			return "Pull_Traffic_Summary";
-		case 8:
-			return "Traffic_Summary";
-		case 9:
-			return "Connection_Directive_Helper";
-		}
-		return null;
 	}
 
 	public  Integer getMessageType() {
@@ -487,7 +467,7 @@ public class Message {
 		return sumOfSentMessages;
 	}
 
-	public  void setSumOfSentMessages(Integer sumOfSentMessages) {
+	public  void setSumOfSentMessages(long sumOfSentMessages) {
 		this.sumOfSentMessages = sumOfSentMessages;
 	}
 
@@ -495,7 +475,7 @@ public class Message {
 		return sumOfReceivedMessages;
 	}
 
-	public  void setSumOfReceivedMessages(Integer sumOfReceivedMessages) {
+	public  void setSumOfReceivedMessages(long sumOfReceivedMessages) {
 		this.sumOfReceivedMessages = sumOfReceivedMessages;
 	}
 	

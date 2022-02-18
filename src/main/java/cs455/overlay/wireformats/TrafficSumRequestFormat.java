@@ -49,6 +49,6 @@ public class TrafficSumRequestFormat {
     }
 
     public void printContents(){
-        System.out.println("\n Received Traffic Summary Request From:  " + this.hostname);
+        System.out.println("\nReceived Traffic Summary Request From: " + this.hostname);
     }
 }

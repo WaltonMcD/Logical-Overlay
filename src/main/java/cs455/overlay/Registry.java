@@ -26,6 +26,7 @@ public class Registry extends Thread{
             long totalPayloadSent = 0;
             long totalPayloadReceived = 0;
             int totalMessages = 0;
+
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();
