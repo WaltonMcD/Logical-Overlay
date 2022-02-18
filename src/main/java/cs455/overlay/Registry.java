@@ -23,8 +23,8 @@ public class Registry extends Thread{
         if(trafficSummaryMessages.size() == numOfConnections){
             Integer totalMessagesSent = 0;
             Integer totalMessagesReceived = 0;
-            Integer totalPayloadSent = 0;
-            Integer totalPayloadReceived = 0;
+            long totalPayloadSent = 0;
+            long totalPayloadReceived = 0;
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();

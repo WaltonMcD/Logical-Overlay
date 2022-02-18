@@ -9,7 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class PayloadMessageFormat {
-    public static final int type = 2;
+    public final int type = 5;
     public int hops;
     public int toPort, fromPort;
     public int numberOfMessage;
