@@ -20,7 +20,6 @@ public class Server {
     private ServerSocket serverSocket = null;
     public static Integer numOfConnections; 
     private static Integer numberOfMessages;
-    private static boolean startFlag = false;
 
     public Server(Integer port, Integer numOfConnections){
         try{
@@ -188,12 +187,12 @@ public class Server {
                 //Receive Traffic Summary
                 Message trafficSummary = new Message();
                 trafficSummary.unpackMessage(inputStream);
-                Registry.trafficSummaryMessages.add(trafficSummary);
+                // Registry.trafficSummaryMessages.add(trafficSummary);
 
-                Message deregistration = new Message();
-                deregistration.unpackMessage(inputStream);
+                // Message deregistration = new Message();
+                // deregistration.unpackMessage(inputStream);
 
-                Registry.startSequenceCompletion();
+                // Registry.startSequenceCompletion();
                 
                 
                 inputStream.close();
