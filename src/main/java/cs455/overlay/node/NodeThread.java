@@ -82,12 +82,10 @@ public class NodeThread {
     public static class BackNodeReader implements Runnable {
         public Socket backSocket;
         public Node node;
-        public ArrayList<Message> payloads;
 
         public BackNodeReader(Socket backSocket, Node node){
             this.backSocket = backSocket;
             this.node = node;
-            this.payloads = new ArrayList<Message>();
         }
 
         public synchronized void waitNodeReader(){
@@ -116,7 +114,6 @@ public class NodeThread {
                 for(int i = 0; i < numberOfMessages; i++){
                     Message traffic = new Message();
                     traffic.unpackMessage(nodeIn);
-                    payloads.add(traffic);
                     node.updateReceivedPayloadTotal(traffic.getPayload());
                     messagesReceived++;
                     total += traffic.getPayload();
