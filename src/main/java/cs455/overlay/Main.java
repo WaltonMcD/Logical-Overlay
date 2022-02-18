@@ -7,23 +7,18 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import cs455.overlay.node.Node;
-import cs455.overlay.protocols.Message;
-import cs455.overlay.routing.NewRegistry;
+import cs455.overlay.routing.Registry;
 import cs455.overlay.routing.RegistryThread;
 
-public class Registry extends Thread{
-    
-    public static ArrayList<Message> completedTasks = new ArrayList<Message>();
-    public static ArrayList<Node> nodesList = null;
+public class Main extends Thread{
     public static Integer serverPort = 0;
     public static Integer numOfConnections = 0;
 
     public static void main(String[] args) {
-        nodesList = new ArrayList<Node>();
 
         if(args[1].equals("server")){
             Scanner input = new Scanner(System.in);
-            NewRegistry registry = null;
+            Registry registry = null;
             Boolean setupComplete = false;
             String command = "";
             serverPort = Integer.parseInt(args[2]);
@@ -38,7 +33,7 @@ public class Registry extends Thread{
 
                 if(command.equals("setup-overlay")){
                 	if(!setupComplete) {
-	                    registry = new NewRegistry(serverPort, numOfConnections);
+	                    registry = new Registry(serverPort, numOfConnections);
 	                    overlayThread = new Thread(registry);
 	                    overlayThread.start();
 	                    setupComplete = true;
@@ -48,7 +43,7 @@ public class Registry extends Thread{
                 	}
                 }
                 else if(command.equals("list-messaging-nodes") && setupComplete == true){
-                    for(Node node : nodesList){
+                    for(Node node : registry.nodesList){
                         System.out.println("Node #" + node.identifier + " is connected from Host: " + node.ip + " Port: " + node.port);
                     }
                 }
@@ -64,14 +59,14 @@ public class Registry extends Thread{
                 else if(command.equals("exit-overlay")) {
                 	if(setupComplete)
                 		overlayThread.interrupt();
+                        System.out.println("Closing All Connections... ");
+                        System.exit(1);
                 }
                 else {
                     System.out.println("Error: Commands consist of 'setup-overlay', 'list-messaging-nodes', and 'start {NUMBER_OF_MESSAGES}'");
                     System.out.println("Note: To start or list-messaging-nodes you must setup-overlay first.");
                 }
             }
-            System.out.println("Closing All Connections... ");
-            System.exit(0);
         }
         else if(args[1].equals("node")){
             Scanner input = new Scanner(System.in);

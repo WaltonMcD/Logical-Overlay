@@ -5,23 +5,31 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import cs455.overlay.routing.NewRegistry;
-import cs455.overlay.Registry;
+import cs455.overlay.routing.Registry;
+import cs455.overlay.Main;
+import cs455.overlay.node.Node;
 import cs455.overlay.protocols.Message;
 
-public class NewRegistry extends Thread {
+public class Registry extends Thread {
     public ArrayList<Message> directives = new ArrayList<Message>();
-    public ArrayList<RegistryThread> nodeThreads = new ArrayList<RegistryThread>();
     public ArrayList<Message> trafficSummaryMessages = new ArrayList<Message>();
+    public ArrayList<Message> completedTasks = new ArrayList<Message>();
+
+    public ArrayList<RegistryThread> nodeThreads = new ArrayList<RegistryThread>();
+    public ArrayList<Node> nodesList = new ArrayList<Node>();
 
     private ServerSocket serverSocket;
     public int numConnections;
     public int numOfMessagesToSend;
+    public boolean complete;
+    public boolean done;
 
-    public NewRegistry(int port, int numConnections){
+    public Registry(int port, int numConnections){
         try{
             serverSocket = new ServerSocket(port);
             this.numConnections = numConnections;
+            this.complete = false;
+            this.done = false;
         }
         catch(IOException ioe){
             ioe.printStackTrace();
@@ -31,7 +39,7 @@ public class NewRegistry extends Thread {
     @Override
     public void run() {
         try {
-            while(true) {
+            while(!complete) {
                 Socket incomingConnectionSocket = this.serverSocket.accept();
                 if (Thread.currentThread().isInterrupted()) {
                     System.out.println(Thread.currentThread().getName() + " detected interruption, exiting...");
@@ -47,16 +55,16 @@ public class NewRegistry extends Thread {
                 waitRegistry(); //We need to wait for the node to register before doing checks
 
                 // Once all nodes are connected this will assign nodes to connect to.
-                if(Registry.nodesList.size() == this.numConnections){
+                if(this.nodesList.size() == this.numConnections){
                     // Uses arraylist to assign a ring structure if first node is i = 0 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 9
                     // next rendition i = 1 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 0
                     for(int i = 0; i < this.numConnections; i++){
                         Integer messageType = 9;
-                        Integer identifier = Registry.nodesList.get(i).identifier;
-                        Integer frontPort = Registry.nodesList.get((i + 1) % this.numConnections).identifier;
-                        String frontIp = Registry.nodesList.get((i + 1) % this.numConnections).ip;
-                        Integer backPort = Registry.nodesList.get((i + this.numConnections-1) % this.numConnections).identifier;
-                        String backIp = Registry.nodesList.get((i + this.numConnections-1) % this.numConnections).ip;
+                        Integer identifier = this.nodesList.get(i).identifier;
+                        Integer frontPort = this.nodesList.get((i + 1) % this.numConnections).identifier;
+                        String frontIp = this.nodesList.get((i + 1) % this.numConnections).ip;
+                        Integer backPort = this.nodesList.get((i + this.numConnections-1) % this.numConnections).identifier;
+                        String backIp = this.nodesList.get((i + this.numConnections-1) % this.numConnections).ip;
                         Message connDirective = new Message(frontIp, messageType, identifier, frontPort, backIp, backPort);
                         directives.add(connDirective);
                         
@@ -64,7 +72,13 @@ public class NewRegistry extends Thread {
                     for(RegistryThread node: nodeThreads){
                         node.notifyRegThread();
                     }
-                }   
+                }
+                
+                this.complete = this.nodeThreads.size() == this.numConnections;
+            }
+
+            for (RegistryThread thread: this.nodeThreads){
+                thread.join();
             }
         }
         catch (IOException | InterruptedException ioe) {
@@ -87,8 +101,7 @@ public class NewRegistry extends Thread {
         }
     }
 
-    public synchronized void startSequenceCompletion(){
-        boolean done = false;
+    public void startSequenceCompletion(){
         if(trafficSummaryMessages.size() == getNumConnections() && !done){
             Integer totalMessagesSent = 0;
             Integer totalMessagesReceived = 0;

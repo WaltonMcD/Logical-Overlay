@@ -7,18 +7,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import cs455.overlay.Registry;
 import cs455.overlay.node.Node;
 import cs455.overlay.protocols.Message;
 
 public class RegistryThread extends Thread{
     public Socket nodeSocket;
     public Integer identifier;
-    public NewRegistry registry;
+    public Registry registry;
     public int numOfConnections;
     public Integer numberOfMessages;
 
-    public RegistryThread(Socket nodeSocket, NewRegistry registry, int numOfConnections) {
+    public RegistryThread(Socket nodeSocket, Registry registry, int numOfConnections) {
         this.nodeSocket = nodeSocket;
         this.identifier = nodeSocket.getPort();
         this.registry = registry;
@@ -47,7 +46,7 @@ public class RegistryThread extends Thread{
             // Receive Registration Request
             Message registrationRequestMsg = new Message();
             registrationRequestMsg.unpackMessage(inputStream);
-            Registry.nodesList.add(new Node(registrationRequestMsg.getIpAddress(), registrationRequestMsg.getPort(), identifier));
+            registry.nodesList.add(new Node(registrationRequestMsg.getIpAddress(), registrationRequestMsg.getPort(), identifier));
             registry.notifyRegistry();
 
             // Send Registration Response
@@ -55,7 +54,7 @@ public class RegistryThread extends Thread{
             registrationResponseMsg.packMessage(outputStream);
 
             // Send Connection Directive
-            if(Server.directives.size() != numOfConnections){
+            if(registry.directives.size() != numOfConnections){
                 waitRegThread();
             }
 
@@ -83,14 +82,7 @@ public class RegistryThread extends Thread{
             //Receive Task Complete
             Message taskCompleteMsg = new Message();
             taskCompleteMsg.unpackMessage(inputStream);
-            Registry.completedTasks.add(taskCompleteMsg);
-
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            registry.completedTasks.add(taskCompleteMsg);
 
             //Send Traffic Summary Request.
             Integer trafficSummReqType = 7;
@@ -104,9 +96,8 @@ public class RegistryThread extends Thread{
 
             Message deregistration = new Message();
             deregistration.unpackMessage(inputStream);
-
-            registry.startSequenceCompletion();
             
+            registry.startSequenceCompletion();
             
             inputStream.close();
             outputStream.close();

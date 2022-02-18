@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import cs455.overlay.Registry;
+import cs455.overlay.Main;
 import cs455.overlay.node.NodeThread.BackNodeReader;
 import cs455.overlay.node.NodeThread.FrontNodeSender;
 import cs455.overlay.protocols.Message;
@@ -72,7 +72,7 @@ public class Node implements Runnable {
             Message recvConnDirMsg = new Message();
             recvConnDirMsg.unpackMessage(serverInputStream);
 
-            Integer nodeServerPort = Registry.serverPort + 1;
+            Integer nodeServerPort = Main.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
 
             //Spawns a thread to connect to front nodes server socket
