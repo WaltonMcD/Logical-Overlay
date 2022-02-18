@@ -195,8 +195,6 @@ public class Message {
 				break;
 
 			case 8:
-				System.out.println(8 + " " +ipAddress+ " " + port+ " " + numMessagesSent+ " " +sumOfSentMessages+ " " + numMessagesReceived+ " " + sumOfReceivedMessages);
-
 				TrafficSummaryFormat traffic = new TrafficSummaryFormat(this.ipAddress, this.port, this.numMessagesSent, this.numMessagesReceived, this.sumOfSentMessages, this.sumOfReceivedMessages);
 				byte[] marshalledSum = traffic.getBytes();
 				outputStream.writeInt(traffic.type);
@@ -328,7 +326,6 @@ public class Message {
 				this.numMessagesReceived = trafficSummary.numMessagesReceived;
 				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
 				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
-				System.out.println(this.ipAddress+ this.port +  this.numMessagesSent+ this.numMessagesReceived+ this.sumOfSentMessages+ this.sumOfReceivedMessages);
 				trafficSummary.printContents();
 				break;
 
@@ -344,32 +341,6 @@ public class Message {
 		} catch (IOException e) {
 			//e.printStackTrace();
 		}
-	}
-
-	public  String getType() {
-		switch (this.messageType) {
-		case 0:
-			return "Registration_Request";
-		case 1:
-			return "Deregistration_Request";
-		case 2:
-			return "Registration_Response";
-		case 3:
-			return "Connection_Directive";
-		case 4:
-			return "Task_Initiate";
-		case 5:
-			return "Data_Traffic";
-		case 6:
-			return "Task_Complete";
-		case 7:
-			return "Pull_Traffic_Summary";
-		case 8:
-			return "Traffic_Summary";
-		case 9:
-			return "Connection_Directive_Helper";
-		}
-		return null;
 	}
 
 	public  Integer getMessageType() {
