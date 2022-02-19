@@ -70,9 +70,9 @@ public class Main extends Thread{
             		continue;
                 }
                 else if(command.equals("exit-overlay")) {
-                	if(setupComplete)
-                        input.close();
+                	if(setupComplete) {
                 		overlayThread.interrupt();
+                	}
                     System.out.println("Closing All Connections... ");
                     System.exit(1);
                 }
