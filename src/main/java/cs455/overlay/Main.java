@@ -74,6 +74,7 @@ public class Main extends Thread{
                 		overlayThread.interrupt();
                 	}
                     System.out.println("Closing All Connections... ");
+                    input.close();
                     System.exit(1);
                 }
                 else {
