@@ -93,10 +93,9 @@ public class Registry extends Thread {
                 totalMessagesReceived += msg.getNumMessagesReceived();
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
-                totalMessages += msg.getNumMessagesSent() + msg.getNumMessagesReceived();
             }
             System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
-                            " Received a total of " + totalMessages + " Messages" +
+                            " Received a total of " + totalMessagesReceived + " Messages" +
                             " Total sent payload " + totalPayloadSent +
                             " Total received payload " + totalPayloadReceived);
         }

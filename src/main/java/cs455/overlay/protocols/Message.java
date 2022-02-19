@@ -33,6 +33,7 @@ public class Message {
 	private long sumOfReceivedMessages;
 	private int hops;
 	private int messageNumber;
+	private int numConnections;
 
 
 	// Default constructor for when you're receiving a message and don't know the
@@ -56,12 +57,13 @@ public class Message {
 	}
 
 	// Connection Directive : Type = 3
-	public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, String backNodeIp) {
+	public Message(Integer messageType, Integer frontNodePort, String frontNodeIp, Integer backNodePort, String backNodeIp, int numConnections) {
 		this.messageType = messageType;
 		this.frontNodePort = frontNodePort;
 		this.frontNodeIp = frontNodeIp;
 		this.backNodeIp = backNodeIp;
 		this.backNodePort = backNodePort;
+		this.numConnections = numConnections;
 	}
 
 	// Task Initiate : Type = 4
@@ -148,7 +150,7 @@ public class Message {
 				break;
 
 			case 3:
-				ConnDirectiveFormat connDir = new ConnDirectiveFormat(this.frontNodeIp, this.frontNodePort, this.backNodeIp, this.backNodePort);
+				ConnDirectiveFormat connDir = new ConnDirectiveFormat(this.frontNodeIp, this.frontNodePort, this.backNodeIp, this.backNodePort, this.numConnections);
 				byte[] marshalledConnDirMsg = connDir.getBytes();
 				outputStream.writeInt(connDir.type);
 				outputStream.writeInt(marshalledConnDirMsg.length);
@@ -257,6 +259,7 @@ public class Message {
 				this.frontNodeIp = connDirective.hostName;
 				this.backNodeIp = connDirective.toHost;
 				this.backNodePort = connDirective.toPort;
+				this.numConnections = connDirective.numConnections;
 				connDirective.printContents();
 				break;
 
@@ -471,6 +474,10 @@ public class Message {
 
 	public  void setSumOfReceivedMessages(long sumOfReceivedMessages) {
 		this.sumOfReceivedMessages = sumOfReceivedMessages;
+	}
+
+	public int getNumConnections() {
+		return numConnections;
 	}
 	
 	
