@@ -28,7 +28,7 @@ public class Main extends Thread{
             while(!command.equals("exit-overlay")){
             
                 System.out.print("Enter a command: ");
-                command = input.nextLine().trim();
+                command = input.nextLine().trim().toLowerCase();
 
                 if(command.equals("setup-overlay")){
                 	if(!setupComplete) {
