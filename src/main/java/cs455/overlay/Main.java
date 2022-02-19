@@ -52,7 +52,7 @@ public class Main extends Thread{
                 }
                 else if(command.substring(0, 5).equals("start") && setupComplete){
                 	String[] startCommandIntArr = command.split(" ", 2);
-                	if(startCommandIntArr[1].matches("0|[1-9]\\d*") && startCommandIntArr.length == 2) {
+                	if(startCommandIntArr[1].matches("0|[1-9]\\d*")) {
                 		Integer numberOfMessages = Integer.parseInt(startCommandIntArr[1]);
                         System.out.println("Starting to send messages. Count: " + numberOfMessages);
                         registry.setNumberOfMessages(numberOfMessages);
