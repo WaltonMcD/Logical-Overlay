@@ -71,9 +71,10 @@ public class Node implements Runnable {
             //Receive Connection Directive
             Message recvConnDirMsg = new Message();
             recvConnDirMsg.unpackMessage(serverInputStream);
-
+            
+            //Create front node's server socket
             Integer nodeServerPort = Main.serverPort + 1;
-            ServerSocket nodeServer = new ServerSocket((nodeServerPort), 1);
+            ServerSocket nodeServer = new ServerSocket(nodeServerPort, 1);
 
             //Spawns a thread to connect to front nodes server socket
             FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp());
@@ -124,6 +125,7 @@ public class Node implements Runnable {
             Message deregistration = new Message(1, this.ip, this.port);
             deregistration.packMessage(serverOutputStream);
 
+            nodeServer.close();
             serverOutputStream.close();
             serverInputStream.close();
             this.socketToServer.close();
