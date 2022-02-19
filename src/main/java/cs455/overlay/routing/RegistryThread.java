@@ -62,7 +62,7 @@ public class RegistryThread extends Thread{
             for(int i = 0; i < registry.directives.size(); i++){
                 if(registry.directives.get(i).getIdentifier().equals(this.identifier)){
                     connectionDirectiveMsg = new Message(3, registry.directives.get(i).getFrontNodePort(), registry.directives.get(i).getFrontNodeIp(), 
-                                                            registry.directives.get(i).getBackNodePort(), registry.directives.get(i).getBackNodeIp());
+                                                            registry.directives.get(i).getBackNodePort(), registry.directives.get(i).getBackNodeIp(), this.numOfConnections);
                     connectionDirectiveMsg.packMessage(outputStream);
                 }
             }

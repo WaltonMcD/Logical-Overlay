@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import cs455.overlay.protocols.Message;
@@ -16,6 +17,8 @@ import cs455.overlay.protocols.Message;
 public class NodeThread {
     
     public static class FrontNodeSender implements Runnable {
+        public ArrayList<Message> payloads = new ArrayList<Message>();
+
         public Integer numberOfMessages = 0;
         public String ip;
         public Integer port;

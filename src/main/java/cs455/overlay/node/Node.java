@@ -77,31 +77,24 @@ public class Node implements Runnable {
             ServerSocket nodeServer = new ServerSocket(nodeServerPort, 1);
 
             //Spawns a thread to connect to front nodes server socket
-            FrontNodeSender frontNode = new FrontNodeSender(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp());
-            Thread frontNodeThread = new Thread(frontNode);
-            frontNodeThread.start();
+            NodeThreader node = new NodeThreader(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections());
+            Thread nodeThread = new Thread(node);
+            nodeThread.start();
             
             //Accepts back nodes connection.
             Socket backSocket = nodeServer.accept();
-
-            //Handle back node socket.
-            BackNodeReader backNodeReader = new BackNodeReader(backSocket, this);
-            Thread backNodeReaderThread = new Thread(backNodeReader);
-            backNodeReaderThread.start();
+            node.setBackSocket(backSocket);
             
             //Receive Task Initiate
             Message taskInitiateMsg = new Message();
             taskInitiateMsg.unpackMessage(serverInputStream);
-            frontNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
-            backNodeReader.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
 
             //Notify worker threads to start message passing.
-            frontNode.notifyNodeSender();
-            backNodeReader.notifyNodeReader();
+            node.notifyNodeThreader();
 
             //Wait for thread completion
-            frontNodeThread.join();
-            backNodeReaderThread.join();
+            nodeThread.join();
             nodeServer.close(); 
 
             // Send Task Complete to registry

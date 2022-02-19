@@ -14,12 +14,14 @@ public class ConnDirectiveFormat {
 	public int portNumber;
     public String toHost;
     public int toPort;
+    public int numConnections;
 
-    public ConnDirectiveFormat(String hostName, int portNumber, String toHost, int toPort){
+    public ConnDirectiveFormat(String hostName, int portNumber, String toHost, int toPort, int numConnections){
         this.hostName = hostName;
         this.portNumber = portNumber;
         this.toHost = toHost;
         this.toPort = toPort;
+        this.numConnections = numConnections;
     }
 
     public ConnDirectiveFormat(byte[] marshalledBytes) throws IOException {
@@ -39,6 +41,7 @@ public class ConnDirectiveFormat {
 
         this.toHost = new String(toHostNameBytes);
         this.toPort = din.readInt();
+        this.numConnections = din.readInt();
 
         baInputStream.close();
         din.close();
@@ -61,6 +64,7 @@ public class ConnDirectiveFormat {
         dout.writeInt(toHostNameLength);
 		dout.write(toHostNameBytes);
 		dout.writeInt(this.toPort);
+        dout.writeInt(this.numConnections);
 		dout.flush();
 
 		marshalledBytes = baOutputStream.toByteArray();
