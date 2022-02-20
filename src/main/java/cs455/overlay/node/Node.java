@@ -10,8 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import cs455.overlay.Main;
-import cs455.overlay.node.NodeThread.BackNodeReader;
-import cs455.overlay.node.NodeThread.FrontNodeSender;
 import cs455.overlay.protocols.Message;
 
 public class Node implements Runnable {

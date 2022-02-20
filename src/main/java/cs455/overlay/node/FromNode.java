@@ -57,7 +57,7 @@ public class FromNode extends Thread{
                 }
                 else if(payloads.size() == numberOfMessages){
                     toNode.relayMessages(payloads);
-                    Thread.sleep(200);
+                    Thread.sleep(25);
                 }
                 if(msg.getMessageType() == 1){
                     if(!msg.getIpAddress().equals(node.ip)){
