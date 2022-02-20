@@ -45,34 +45,36 @@ public class FromNode extends Thread{
             
             Integer messagesReceived = 0;
             boolean done = false;
-            while(!done){
+            
+                while(!done){
 
-                Message msg = new Message();
-                msg.unpackMessage(nodeIn);
-                
-                if(msg.getMessageType() == 5){
-                    node.updateReceivedPayloadTotal(msg.getPayload());
-                    payloads.add(msg);
-                    messagesReceived++;
-                }
-                else if(payloads.size() == numberOfMessages){
-                    toNode.relayMessages(payloads);
-                    Thread.sleep(25);
-                }
-                if(msg.getMessageType() == 1){
-                    if(!msg.getIpAddress().equals(node.ip)){
-                        toNode.forwardDereg(msg);
-                    }
-                    else{
-                        done = true;
-                        break;
-                    }
+                    Message msg = new Message();
+                    msg.unpackMessage(nodeIn);
                     
+                    if(msg.getMessageType() == 5){
+                        node.updateReceivedPayloadTotal(msg.getPayload());
+                        payloads.add(msg);
+                        messagesReceived++;
+                    }
+                    else if(payloads.size() == numberOfMessages){
+                        toNode.relayMessages(payloads);
+                        Thread.sleep(25);
+                    }
+                    if(msg.getMessageType() == 1){
+                        payloads = new ArrayList<Message>();
+                        if(!msg.getIpAddress().equals(node.ip)){
+                            toNode.forwardDereg(msg);
+                        }
+                        else{
+                            done = true;
+                            break;
+                        }
+                        
+                    }
                 }
-                
+                node.numMessagesReceived = messagesReceived;
             }
-            node.numMessagesReceived = messagesReceived;
-        }
+            
         catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

@@ -47,7 +47,6 @@ public class ToNode extends Thread{
             Message dataTrafficMsg = payloads.get(i);
             dataTrafficMsg.packMessage(this.toOut);
         }
-        payloads = new ArrayList<Message>();
     }
 
     public void forwardDereg(Message dereg){
@@ -76,6 +75,9 @@ public class ToNode extends Thread{
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }
+        catch(NegativeArraySizeException na){
+            na.getMessage();
         }
 
     }

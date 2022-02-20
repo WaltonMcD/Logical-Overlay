@@ -89,6 +89,8 @@ public class RegistryThread extends Thread{
             Message trafficSummReqMsg = new Message(trafficSummReqType, this.nodeSocket.getLocalAddress().getHostName());
             trafficSummReqMsg.packMessage(outputStream);
 
+            Thread.sleep(200);
+
             //Receive Traffic Summary
             Message trafficSummary = new Message();
             trafficSummary.unpackMessage(inputStream);
@@ -101,7 +103,7 @@ public class RegistryThread extends Thread{
             outputStream.close();
             nodeSocket.close();
         }
-        catch(IOException ioe){
+        catch(IOException | InterruptedException ioe){
             System.out.println(ioe.getMessage());
         }
     }
