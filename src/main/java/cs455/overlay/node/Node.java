@@ -77,23 +77,28 @@ public class Node implements Runnable {
             ServerSocket nodeServer = new ServerSocket(nodeServerPort, 1);
 
             //Spawns a thread to connect to front nodes server socket
-            NodeThreader node = new NodeThreader(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections());
+            ToNode node = new ToNode(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections());
             Thread nodeThread = new Thread(node);
             nodeThread.start();
             
             //Accepts back nodes connection.
-            Socket backSocket = nodeServer.accept();
-            node.setBackSocket(backSocket);
+            Socket fromSocket = nodeServer.accept();
+            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip);
+            Thread fromThread = new Thread(fromNode);
+            fromThread.start();
             
             //Receive Task Initiate
             Message taskInitiateMsg = new Message();
             taskInitiateMsg.unpackMessage(serverInputStream);
             node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            fromNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
 
             //Notify worker threads to start message passing.
-            node.notifyNodeThreader();
-
+            fromNode.notifyFromNode();
+            node.notifyToNode();
+            
             //Wait for thread completion
+            fromThread.join();
             nodeThread.join();
             nodeServer.close(); 
 
