@@ -479,6 +479,10 @@ public class Message {
 	public int getNumConnections() {
 		return numConnections;
 	}
+
+	public int getMessageNumber() {
+		return messageNumber;
+	}
 	
 	
 

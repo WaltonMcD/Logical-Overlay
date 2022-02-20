@@ -47,6 +47,7 @@ public class NodeThreader extends Thread {
             System.out.println("Connected to node: " + frontSocket.getInetAddress());
 
             DataOutputStream toOut = new DataOutputStream( new BufferedOutputStream(frontSocket.getOutputStream()));
+            ArrayList<Message> payloads = new ArrayList<Message>();
 
             //Waiting for task initiate.
             waitNodeThreader();
@@ -62,7 +63,7 @@ public class NodeThreader extends Thread {
             node.numMessagesSent = totalMessages;
 
             DataInputStream nodeIn = new DataInputStream(new BufferedInputStream(this.backSocket.getInputStream()));
-            ArrayList<Message> payloads = new ArrayList<Message>();
+            
 
             Integer messagesReceived = 0;
             for(int z = 0; z < this.numConnections; z++ ){
@@ -72,6 +73,9 @@ public class NodeThreader extends Thread {
                     payloads.add(traffic);
                     node.updateReceivedPayloadTotal(traffic.getPayload());
                     messagesReceived++;
+                }
+                if(numberOfMessages * numConnections == messagesReceived){
+                    break;
                 }
                 for(int i = 0; i < payloads.size(); i++){
                     Message dataTrafficMsg = payloads.get(i);
