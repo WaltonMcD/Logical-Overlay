@@ -23,7 +23,7 @@ public class ToNode extends Thread{
     public Socket toSocket;
     public DataOutputStream toOut;
 
-    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException{
+    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
         this.port = port;
         this.serverPort = serverPort;
@@ -31,6 +31,7 @@ public class ToNode extends Thread{
         this.toPort = toPort;
         this.toHost = toHost;
         this.numConnections = numConnections;
+        Thread.sleep(50);
         this.toSocket = new Socket(ip, serverPort);
         System.out.println("Connected to node: " + toSocket.getInetAddress());
     }
@@ -46,6 +47,7 @@ public class ToNode extends Thread{
             Message dataTrafficMsg = payloads.get(i);
             dataTrafficMsg.packMessage(this.toOut);
         }
+        payloads = new ArrayList<Message>();
     }
 
     public void forwardDereg(Message dereg){

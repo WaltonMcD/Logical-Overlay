@@ -52,14 +52,12 @@ public class FromNode extends Thread{
                 
                 if(msg.getMessageType() == 5){
                     node.updateReceivedPayloadTotal(msg.getPayload());
-                    msg.packMessage(toOut);
                     payloads.add(msg);
                     messagesReceived++;
                 }
                 else if(payloads.size() == numberOfMessages){
                     toNode.relayMessages(payloads);
-                    payloads = new ArrayList<Message>();
-                    Thread.sleep(10);
+                    Thread.sleep(200);
                 }
                 if(msg.getMessageType() == 1){
                     if(!msg.getIpAddress().equals(node.ip)){
