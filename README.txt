@@ -22,10 +22,10 @@ You will be prompted to enter a command for the registry. The commands are as fo
 
 
 Node:
-java -jar Homework-1.jar cs455.overlay.Main node [Registry Hostname] [Registry Port]
+java -jar build/libs/Homework-1.jar cs455.overlay.Main node [Registry Hostname] [Registry Port]
 
 Node Example:
-java -jar Homework-1.jar cs455.overlay.Main node austin.cs.colostate.edu 46001
+java -jar build/libs/Homework-1.jar cs455.overlay.Main node austin.cs.colostate.edu 46001
 
 
 File Manifest:
