@@ -91,6 +91,8 @@ public class Node implements Runnable {
             node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
             fromNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
 
+            node.setFromNode(fromNode);
+
             //Notify worker threads to start message passing.
             fromNode.notifyFromNode();
             node.notifyToNode();
@@ -107,12 +109,6 @@ public class Node implements Runnable {
             //Receive Traffic Summary Request.
             Message trafficSummaryReqMsg = new Message();
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
-
-            while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
-                if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
-                    break;
-                }
-            }
 
             //Send Traffic Summary
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);

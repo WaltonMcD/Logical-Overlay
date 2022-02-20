@@ -50,6 +50,12 @@ public class FromNode extends Thread{
 
                     Message msg = new Message();
                     msg.unpackMessage(nodeIn);
+
+                    if(msg.getMessageType() == 1 && msg.getIpAddress().equals(node.ip)){
+                        done = true;
+                        break;   
+                    }
+                    
                     
                     if(msg.getMessageType() == 5){
                         node.updateReceivedPayloadTotal(msg.getPayload());
@@ -57,26 +63,26 @@ public class FromNode extends Thread{
                         messagesReceived++;
                     }
                     else if(payloads.size() == numberOfMessages){
-                        toNode.relayMessages(payloads);
-                        Thread.sleep(25);
+                        if(toNode.isAlive()){
+                            waitFromNode();
+                        }
+                        ArrayList<Message> buff = new ArrayList<Message>(payloads);
+                        payloads = new ArrayList<Message>();
+                        toNode.relayMessages(buff);
                     }
                     if(msg.getMessageType() == 1){
-                        payloads = new ArrayList<Message>();
-                        if(!msg.getIpAddress().equals(node.ip)){
-                            toNode.forwardDereg(msg);
-                        }
-                        else{
-                            done = true;
-                            break;
-                        }
-                        
+                        toNode.forwardDereg(msg);
                     }
+                    
                 }
                 node.numMessagesReceived = messagesReceived;
             }
             
         catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }
+        catch(NegativeArraySizeException na){
+            System.out.println(na.getMessage());
         }
     }
 

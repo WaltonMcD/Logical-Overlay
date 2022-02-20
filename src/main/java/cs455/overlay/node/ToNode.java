@@ -22,6 +22,7 @@ public class ToNode extends Thread{
 
     public Socket toSocket;
     public DataOutputStream toOut;
+    public FromNode fromNode;
 
     public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
@@ -70,14 +71,14 @@ public class ToNode extends Thread{
             }
             Message dereg = new Message(1, node.ip, node.port);
             dereg.packMessage(this.toOut);
+
+            fromNode.notifyFromNode();
+
             node.numMessagesSent = totalMessages;
             System.out.println("Sent: " + totalMessages);
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }
-        catch(NegativeArraySizeException na){
-            na.getMessage();
         }
 
     }
@@ -88,5 +89,9 @@ public class ToNode extends Thread{
 
     public synchronized void notifyToNode(){
         notify();
+    }
+
+    public void setFromNode(FromNode fromNode) {
+        this.fromNode = fromNode;
     }
 }

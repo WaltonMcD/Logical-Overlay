@@ -88,6 +88,13 @@ public class Registry extends Thread {
                 thread.join();
             }
 
+            long runningTotal = 0;
+            for(Message msg: trafficSummaryMessages){
+                runningTotal += msg.getSumOfReceivedMessages();
+                System.out.println("Traffic Summary Received from " + msg.getIpAddress() + " node sent " + msg.getNumMessagesSent() + " summing to " + msg.getSumOfSentMessages()
+                + ". Received " + msg.getNumMessagesReceived() + " messages summing to " + msg.getSumOfReceivedMessages() + ". Running total " +  runningTotal);
+            }
+
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();

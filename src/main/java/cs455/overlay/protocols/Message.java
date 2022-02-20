@@ -323,7 +323,6 @@ public class Message {
 				this.numMessagesReceived = trafficSummary.numMessagesReceived;
 				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
 				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
-				trafficSummary.printContents();
 				break;
 
 			case 9:
