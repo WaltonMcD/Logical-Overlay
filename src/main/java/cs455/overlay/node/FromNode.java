@@ -12,9 +12,6 @@ import cs455.overlay.protocols.Message;
 
 public class FromNode extends Thread{
     public Integer numberOfMessages = 0;
-    public String ip;
-    public Integer port;
-    public Integer serverPort;
     public Node node;
     public int toPort;
     public String toHost;
@@ -24,8 +21,9 @@ public class FromNode extends Thread{
     public Socket toSocket;
     public ArrayList<Message> payloads;
     public ToNode toNode;
+    public Buffer buffer;
 
-    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost){
+    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, Buffer buffer){
         this.node = node;
         this.fromSocket = fromSocket;
         this.toSocket = toNode.toSocket;
@@ -33,6 +31,7 @@ public class FromNode extends Thread{
         this.toNode = toNode;
         this.toHost = toHost;
         this.toPort = toPort;
+        this.buffer = buffer;
     }
 
     @Override
@@ -44,38 +43,24 @@ public class FromNode extends Thread{
             waitFromNode();
             
             Integer messagesReceived = 0;
-            boolean done = false;
-            while(!done){
-
+            
+            while(messagesReceived < 500000){
                 Message msg = new Message();
                 msg.unpackMessage(nodeIn);
-
                 
                 if(msg.getMessageType() == 5){
                     node.updateReceivedPayloadTotal(msg.getPayload());
-                    payloads.add(msg);
+                    buffer.insert(msg);
                     messagesReceived++;
-                }
-                else if(msg.getMessageType() == 1){
-                    if(!msg.getIpAddress().equals(node.ip)){
-                        payloads.add(msg);
-                    }
-                    else{
-                        done = true;
-                        break;
-                    }
                     
                 }
-                if(payloads.size() == numberOfMessages){                   
-                    for(int i = 0; i < payloads.size(); i++){
-                        Message dataTrafficMsg = payloads.get(i);
-                        dataTrafficMsg.packMessage(toNode.toOut);
-                    }
-                    payloads = new ArrayList<Message>();
+                if(buffer.isFull()){                   
+                    toNode.relayMessages();
                 }
-                
             }
             node.numMessagesReceived = messagesReceived;
+        
+            
         }
         catch (IOException | InterruptedException e) {
             e.printStackTrace();

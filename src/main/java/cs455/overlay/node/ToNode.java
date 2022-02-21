@@ -22,8 +22,11 @@ public class ToNode extends Thread{
 
     public Socket toSocket;
     public DataOutputStream toOut;
+    public FromNode fromNode;
+    public Buffer buffer;
+    public int count;
 
-    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException, InterruptedException{
+    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections, Buffer buffer) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
         this.port = port;
         this.serverPort = serverPort;
@@ -31,6 +34,7 @@ public class ToNode extends Thread{
         this.toPort = toPort;
         this.toHost = toHost;
         this.numConnections = numConnections;
+        this.buffer = buffer;
         Thread.sleep(50);
         this.toSocket = new Socket(ip, serverPort);
         System.out.println("Connected to node: " + toSocket.getInetAddress());
@@ -42,11 +46,15 @@ public class ToNode extends Thread{
         return num;
     }
 
-    public void relayMessages(ArrayList<Message> payloads){
-        for(int i = 0; i < payloads.size(); i++){
-            Message dataTrafficMsg = payloads.get(i);
-            dataTrafficMsg.packMessage(this.toOut);
+    public void relayMessages() throws InterruptedException{
+        
+        while(!buffer.isEmpty()){
+
+            Message payload = buffer.remove();
+            payload.packMessage(toOut);
+            count++;
         }
+        
     }
 
     public void forwardDereg(Message dereg){
@@ -63,15 +71,18 @@ public class ToNode extends Thread{
             int totalMessages = 0;
             for(int i = 0; i < numberOfMessages; i++){
                 long payload = getRandomNumberUsingNextLong();
-                Message dataTrafficMsg = new Message(5,i,i,payload,this.port, this.ip, this.toPort, this.toHost);
+                Message dataTrafficMsg = new Message(5, i, i, payload, node.port, node.ip, this.toPort, this.toHost);
                 dataTrafficMsg.packMessage(toOut);
                 node.updateSentPayloadTotal(payload);
                 totalMessages++;
             }
-            Message dereg = new Message(1, node.ip, node.port);
-            dereg.packMessage(this.toOut);
             node.numMessagesSent = totalMessages;
-            System.out.println("Sent: " + totalMessages);
+
+            while(fromNode.isAlive()){
+                if(!fromNode.isAlive()){
+                    break;
+                }
+            }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -85,5 +96,9 @@ public class ToNode extends Thread{
 
     public synchronized void notifyToNode(){
         notify();
+    }
+
+    public void setFromNode(FromNode fromNode) {
+        this.fromNode = fromNode;
     }
 }

@@ -74,14 +74,16 @@ public class Node implements Runnable {
             Integer nodeServerPort = Main.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket(nodeServerPort, 1);
 
+            Buffer buffer = new Buffer();
+
             //Spawns a thread to connect to front nodes server socket
-            ToNode node = new ToNode(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections());
+            ToNode node = new ToNode(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections(), buffer);
             Thread nodeThread = new Thread(node);
             nodeThread.start();
             
             //Accepts back nodes connection.
             Socket fromSocket = nodeServer.accept();
-            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip);
+            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, buffer);
             Thread fromThread = new Thread(fromNode);
             fromThread.start();
             
@@ -90,6 +92,7 @@ public class Node implements Runnable {
             taskInitiateMsg.unpackMessage(serverInputStream);
             node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
             fromNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            node.setFromNode(fromNode);
 
             //Notify worker threads to start message passing.
             fromNode.notifyFromNode();
