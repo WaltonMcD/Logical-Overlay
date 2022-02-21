@@ -49,25 +49,29 @@ public class FromNode extends Thread{
 
                 Message msg = new Message();
                 msg.unpackMessage(nodeIn);
+
                 
                 if(msg.getMessageType() == 5){
                     node.updateReceivedPayloadTotal(msg.getPayload());
                     payloads.add(msg);
                     messagesReceived++;
                 }
-                else if(payloads.size() == numberOfMessages){
-                    toNode.relayMessages(payloads);
-                    Thread.sleep(25);
-                }
-                if(msg.getMessageType() == 1){
+                else if(msg.getMessageType() == 1){
                     if(!msg.getIpAddress().equals(node.ip)){
-                        toNode.forwardDereg(msg);
+                        payloads.add(msg);
                     }
                     else{
                         done = true;
                         break;
                     }
                     
+                }
+                if(payloads.size() == numberOfMessages){                   
+                    for(int i = 0; i < payloads.size(); i++){
+                        Message dataTrafficMsg = payloads.get(i);
+                        dataTrafficMsg.packMessage(toNode.toOut);
+                    }
+                    payloads = new ArrayList<Message>();
                 }
                 
             }

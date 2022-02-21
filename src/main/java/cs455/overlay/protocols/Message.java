@@ -120,7 +120,7 @@ public class Message {
 		this.backNodePort = backNodePort;
 	}
 
-	public String packMessage(DataOutputStream outputStream) {
+	public synchronized String packMessage(DataOutputStream outputStream) {
 		try {
 			
 			switch (this.messageType) {
@@ -208,7 +208,7 @@ public class Message {
 		return null;
 	}
 
-	public void unpackMessage(DataInputStream inputStream) {
+	public synchronized void unpackMessage(DataInputStream inputStream) {
 		
 		try {
 			int messageSize;
