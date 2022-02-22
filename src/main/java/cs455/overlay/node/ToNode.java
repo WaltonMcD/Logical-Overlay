@@ -82,6 +82,7 @@ public class ToNode extends Thread{
                     Message dataTrafficMsg = payloads.get(i);
                     dataTrafficMsg.packMessage(toOut);
                 }
+                payloads = new ArrayList<Message>();
             }
             
                 

@@ -87,15 +87,20 @@ public class Registry extends Thread {
             for (Thread thread: this.threads){
                 thread.join();
             }
+
+            Thread.sleep(100);
+
             int count = 1;
+            for(Message msg : trafficSummaryMessages){
+                System.out.println("Node " + count + ": | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
+                count++;
+            }
+            
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
-                
-                System.out.println("Node " + count + ": | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
-                count++;
             }
             System.out.println("\n   Sum: |" + totalMessagesSent + " | " + totalMessagesReceived + " | " +  totalPayloadSent + " | " + totalPayloadReceived);
         }

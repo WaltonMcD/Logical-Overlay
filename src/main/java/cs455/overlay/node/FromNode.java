@@ -38,7 +38,6 @@ public class FromNode extends Thread{
     public void run(){
         try {
             DataInputStream nodeIn = new DataInputStream(new BufferedInputStream(this.fromSocket.getInputStream()));
-            DataOutputStream toOut = new DataOutputStream( new BufferedOutputStream(toSocket.getOutputStream()));
 
             waitFromNode();
             
@@ -59,7 +58,6 @@ public class FromNode extends Thread{
                 payloads = new ArrayList<Message>();
             }
             
-
             node.numMessagesReceived = messagesReceived;
             
         }

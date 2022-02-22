@@ -286,6 +286,7 @@ public class Message {
 				this.payload = payloadMsgFormat.payload;
 				this.messageNumber = payloadMsgFormat.numberOfMessage;
 				this.hops = payloadMsgFormat.hops;
+				payloadMsgFormat.printContents();
 				break;
 
 			case 6:

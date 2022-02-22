@@ -111,12 +111,6 @@ public class Node implements Runnable {
             Message trafficSummaryReqMsg = new Message();
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
 
-            while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
-                if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
-                    break;
-                }
-            }
-
             //Send Traffic Summary
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
             trafficSummary.packMessage(serverOutputStream);
