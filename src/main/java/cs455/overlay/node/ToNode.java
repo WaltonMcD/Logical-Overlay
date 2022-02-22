@@ -47,18 +47,14 @@ public class ToNode extends Thread{
     }
 
     public void relayMessages() throws InterruptedException{
-        
-        while(!buffer.isEmpty()){
-
-            Message payload = buffer.remove();
-            payload.packMessage(toOut);
-            count++;
+        synchronized(buffer){
+            while(!buffer.isEmpty()){
+                Message payload = buffer.remove();
+                payload.packMessage(toOut);
+    
+            }
         }
-        
-    }
 
-    public void forwardDereg(Message dereg){
-        dereg.packMessage(this.toOut);
     }
 
     @Override
@@ -77,12 +73,6 @@ public class ToNode extends Thread{
                 totalMessages++;
             }
             node.numMessagesSent = totalMessages;
-
-            while(fromNode.isAlive()){
-                if(!fromNode.isAlive()){
-                    break;
-                }
-            }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

@@ -7,10 +7,10 @@ import cs455.overlay.protocols.Message;
 
 public class Buffer{
 
-    final static int capacity = 2500;
+    final static int capacity = 5000;
     static int count = 0;
     
-    ArrayList<Message> items = new ArrayList<Message>(2500);
+    ArrayList<Message> items = new ArrayList<Message>(5000);
 
     public synchronized void insert(Message in)throws InterruptedException{
         items.add(in);
@@ -25,7 +25,7 @@ public class Buffer{
     }
 
     public synchronized boolean isFull(){
-        if(items.size() == 2500)
+        if(items.size() == 5000)
             return true;
         else 
             return false;

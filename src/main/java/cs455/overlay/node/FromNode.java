@@ -43,22 +43,25 @@ public class FromNode extends Thread{
             waitFromNode();
             
             Integer messagesReceived = 0;
-            
-            while(messagesReceived < 500000){
-                Message msg = new Message();
-                msg.unpackMessage(nodeIn);
-                
-                if(msg.getMessageType() == 5){
-                    node.updateReceivedPayloadTotal(msg.getPayload());
-                    buffer.insert(msg);
-                    messagesReceived++;
+            Message msg = new Message();
+            synchronized(msg){
+                while(messagesReceived < 500000){
                     
+                    msg.unpackMessage(nodeIn);
+                    
+                    if(msg.getMessageType() == 5){
+                        node.updateReceivedPayloadTotal(msg.getPayload());
+                        buffer.insert(msg);
+                        messagesReceived++;
+                        
+                    }
+                    if(buffer.isFull()){                   
+                        toNode.relayMessages();
+                    }
                 }
-                if(buffer.isFull()){                   
-                    toNode.relayMessages();
-                }
+                node.numMessagesReceived = messagesReceived;
             }
-            node.numMessagesReceived = messagesReceived;
+            
         
             
         }
