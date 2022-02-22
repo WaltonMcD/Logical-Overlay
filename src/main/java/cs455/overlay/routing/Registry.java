@@ -87,17 +87,17 @@ public class Registry extends Thread {
             for (Thread thread: this.threads){
                 thread.join();
             }
-
+            int count = 1;
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
                 totalMessagesReceived += msg.getNumMessagesReceived();
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
+                
+                System.out.println("Node " + count + ": | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
+                count++;
             }
-            System.out.println("Sent a total of " + totalMessagesSent + " Messages" +
-                            " Received a total of " + totalMessagesReceived + " Messages" +
-                            " Total sent payload " + totalPayloadSent +
-                            " Total received payload " + totalPayloadReceived);
+            System.out.println("\n   Sum: |" + totalMessagesSent + " | " + totalMessagesReceived + " | " +  totalPayloadSent + " | " + totalPayloadReceived);
         }
         catch (IOException | InterruptedException ioe) {
             System.out.print(ioe.getMessage());

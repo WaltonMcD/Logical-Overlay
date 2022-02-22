@@ -286,7 +286,6 @@ public class Message {
 				this.payload = payloadMsgFormat.payload;
 				this.messageNumber = payloadMsgFormat.numberOfMessage;
 				this.hops = payloadMsgFormat.hops;
-				payloadMsgFormat.printContents();
 				break;
 
 			case 6:
@@ -323,7 +322,6 @@ public class Message {
 				this.numMessagesReceived = trafficSummary.numMessagesReceived;
 				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
 				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
-				trafficSummary.printContents();
 				break;
 
 			case 9:

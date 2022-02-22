@@ -25,6 +25,7 @@ public class ToNode extends Thread{
     public FromNode fromNode;
     public Buffer buffer;
     public int count;
+    public ArrayList<Message> payloads = new ArrayList<Message>();
 
     public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections, Buffer buffer) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
@@ -46,15 +47,11 @@ public class ToNode extends Thread{
         return num;
     }
 
-    public void relayMessages() throws InterruptedException{
-        synchronized(buffer){
-            while(!buffer.isEmpty()){
-                Message payload = buffer.remove();
-                payload.packMessage(toOut);
-    
-            }
+    public void relayMessages(ArrayList<Message> payloads) throws InterruptedException{
+        for(int i = 0; i < payloads.size(); i++){
+            Message payload = payloads.get(i);
+            payload.packMessage(toOut);
         }
-
     }
 
     @Override
@@ -74,6 +71,22 @@ public class ToNode extends Thread{
             }
             node.numMessagesSent = totalMessages;
 
+            
+            for(int z = 0; z < 4; z++){
+                if(payloads.isEmpty()){
+                    waitToNode();
+                }
+                
+                System.out.println("Relay");
+                for(int i = 0; i < numberOfMessages; i++){
+                    Message dataTrafficMsg = payloads.get(i);
+                    dataTrafficMsg.packMessage(toOut);
+                }
+            }
+            
+                
+            
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -90,5 +103,9 @@ public class ToNode extends Thread{
 
     public void setFromNode(FromNode fromNode) {
         this.fromNode = fromNode;
+    }
+
+    public void setPayloads(ArrayList<Message> payloads) {
+        this.payloads = payloads;
     }
 }
