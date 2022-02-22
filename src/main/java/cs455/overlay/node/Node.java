@@ -83,7 +83,7 @@ public class Node implements Runnable {
             
             //Accepts back nodes connection.
             Socket fromSocket = nodeServer.accept();
-            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, buffer);
+            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, buffer, recvConnDirMsg.getNumConnections());
             Thread fromThread = new Thread(fromNode);
             fromThread.start();
             

@@ -72,7 +72,7 @@ public class ToNode extends Thread{
             node.numMessagesSent = totalMessages;
 
             
-            for(int z = 0; z < 4; z++){
+            for(int z = 0; z < numConnections-1; z++){
                 if(payloads.isEmpty()){
                     waitToNode();
                 }

@@ -23,7 +23,7 @@ public class FromNode extends Thread{
     public ToNode toNode;
     public Buffer buffer;
 
-    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, Buffer buffer){
+    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, Buffer buffer, int numConnections){
         this.node = node;
         this.fromSocket = fromSocket;
         this.toSocket = toNode.toSocket;
@@ -32,6 +32,7 @@ public class FromNode extends Thread{
         this.toHost = toHost;
         this.toPort = toPort;
         this.buffer = buffer;
+        this.numConnections = numConnections;
     }
 
     @Override
@@ -42,11 +43,12 @@ public class FromNode extends Thread{
             waitFromNode();
             
             Integer messagesReceived = 0;
-            for(int z = 0; z < 5; z++){
+            long payloadTotal = 0;
+            for(int z = 0; z < numConnections; z++){
                 for(int i = 0; i < numberOfMessages; i++){
                     Message msg = new Message();
                     msg.unpackMessage(nodeIn);
-                    node.updateReceivedPayloadTotal(msg.getPayload());
+                    payloadTotal += msg.getPayload();
                     payloads.add(msg);
                     messagesReceived++;
                 }
@@ -57,7 +59,7 @@ public class FromNode extends Thread{
                 toNode.notifyToNode();
                 payloads = new ArrayList<Message>();
             }
-            
+            node.payloadReceivedTotal = payloadTotal;
             node.numMessagesReceived = messagesReceived;
             
         }
