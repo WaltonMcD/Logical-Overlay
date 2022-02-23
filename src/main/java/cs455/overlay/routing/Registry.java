@@ -98,8 +98,10 @@ public class Registry extends Thread {
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
             }
+            int count = 0;
             for(Message msg: trafficSummaryMessages){
-                System.out.println("Node : | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
+                System.out.println("Node : " + count + " | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
+                count++;
             }
             System.out.println("\nSum : |" + totalMessagesSent + " | " + totalMessagesReceived + " | " +  totalPayloadSent + " | " + totalPayloadReceived);
             nodesList = new ArrayList<Node>();
