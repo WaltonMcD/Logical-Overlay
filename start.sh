@@ -5,7 +5,7 @@ USERNAME=$2    # editable
 NODE_DELAY='sleep 10;'     # editable. How long you have to setup-overlay before nodes attempt to connect to Registry.
 JAR_FILE="Homework-1/build/libs/Homework-1.jar"
 SERVER=''
-PORT='64004'
+PORT='22222'
 REGISTRY_SCRIPT='java -jar '"$JAR_FILE"' cs455.overlay.Main server '"$PORT"' '"$MAX_CONN"''
 NODE_SCRIPT=''
 

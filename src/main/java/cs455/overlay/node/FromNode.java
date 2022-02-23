@@ -12,9 +12,6 @@ import cs455.overlay.protocols.Message;
 
 public class FromNode extends Thread{
     public Integer numberOfMessages = 0;
-    public String ip;
-    public Integer port;
-    public Integer serverPort;
     public Node node;
     public int toPort;
     public String toHost;
@@ -25,7 +22,7 @@ public class FromNode extends Thread{
     public ArrayList<Message> payloads;
     public ToNode toNode;
 
-    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost){
+    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, int numConnections){
         this.node = node;
         this.fromSocket = fromSocket;
         this.toSocket = toNode.toSocket;
@@ -33,45 +30,36 @@ public class FromNode extends Thread{
         this.toNode = toNode;
         this.toHost = toHost;
         this.toPort = toPort;
+        this.numConnections = numConnections;
     }
 
     @Override
     public void run(){
         try {
             DataInputStream nodeIn = new DataInputStream(new BufferedInputStream(this.fromSocket.getInputStream()));
-            DataOutputStream toOut = new DataOutputStream( new BufferedOutputStream(toSocket.getOutputStream()));
 
             waitFromNode();
             
             Integer messagesReceived = 0;
-            boolean done = false;
-            while(!done){
-
-                Message msg = new Message();
-                msg.unpackMessage(nodeIn);
-                
-                if(msg.getMessageType() == 5){
-                    node.updateReceivedPayloadTotal(msg.getPayload());
+            long payloadTotal = 0;
+            for(int z = 0; z < numConnections; z++){
+                for(int i = 0; i < numberOfMessages; i++){
+                    Message msg = new Message();
+                    msg.unpackMessage(nodeIn);
+                    payloadTotal += msg.getPayload();
                     payloads.add(msg);
                     messagesReceived++;
                 }
-                else if(payloads.size() == numberOfMessages){
-                    toNode.relayMessages(payloads);
-                    Thread.sleep(25);
-                }
-                if(msg.getMessageType() == 1){
-                    if(!msg.getIpAddress().equals(node.ip)){
-                        toNode.forwardDereg(msg);
-                    }
-                    else{
-                        done = true;
-                        break;
-                    }
-                    
-                }
+                ArrayList<Message> clone = new ArrayList<Message>(payloads);
+                toNode.setPayloads(clone);
                 
+                
+                toNode.notifyToNode();
+                payloads = new ArrayList<Message>();
             }
+            node.payloadReceivedTotal = payloadTotal;
             node.numMessagesReceived = messagesReceived;
+            
         }
         catch (IOException | InterruptedException e) {
             e.printStackTrace();

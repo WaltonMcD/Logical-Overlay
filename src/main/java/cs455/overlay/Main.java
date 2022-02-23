@@ -25,9 +25,9 @@ public class Main extends Thread{
             
             numOfConnections = Integer.parseInt(args[3]);
 
+            System.out.print("\nEnter a command: ");
             while(!command.equals("exit-overlay")){
             
-                System.out.print("Enter a command: ");
                 command = input.nextLine().trim().toLowerCase();
 
                 if(command.equals("setup-overlay")){
@@ -38,6 +38,7 @@ public class Main extends Thread{
 	                    setupComplete = true;
                 	} else {
                 		System.out.println("Overlay is already setup.");
+                        System.out.print("\nEnter a command: ");
                 		continue;
                 	}
                 }
@@ -45,6 +46,7 @@ public class Main extends Thread{
                     for(Node node : registry.nodesList){
                         System.out.println("Node #" + node.identifier + " is connected from Host: " + node.ip + " Port: " + node.port);
                     }
+                    System.out.print("\nEnter a command: ");
                 }
                 else if(command.equals("list-messaging-nodes") && !setupComplete){
                 	System.out.println("Please setup the overlay first.");

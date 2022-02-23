@@ -22,6 +22,9 @@ public class ToNode extends Thread{
 
     public Socket toSocket;
     public DataOutputStream toOut;
+    public FromNode fromNode;
+    public int count;
+    public ArrayList<Message> payloads = new ArrayList<Message>();
 
     public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
@@ -42,16 +45,11 @@ public class ToNode extends Thread{
         return num;
     }
 
-    public void relayMessages(ArrayList<Message> payloads){
+    public void relayMessages(ArrayList<Message> payloads) throws InterruptedException{
         for(int i = 0; i < payloads.size(); i++){
-            Message dataTrafficMsg = payloads.get(i);
-            dataTrafficMsg.packMessage(this.toOut);
+            Message payload = payloads.get(i);
+            payload.packMessage(toOut);
         }
-        payloads = new ArrayList<Message>();
-    }
-
-    public void forwardDereg(Message dereg){
-        dereg.packMessage(this.toOut);
     }
 
     @Override
@@ -64,15 +62,29 @@ public class ToNode extends Thread{
             int totalMessages = 0;
             for(int i = 0; i < numberOfMessages; i++){
                 long payload = getRandomNumberUsingNextLong();
-                Message dataTrafficMsg = new Message(5,i,i,payload,this.port, this.ip, this.toPort, this.toHost);
+                Message dataTrafficMsg = new Message(5, i, i, payload, node.port, node.ip, this.toPort, this.toHost);
                 dataTrafficMsg.packMessage(toOut);
                 node.updateSentPayloadTotal(payload);
                 totalMessages++;
             }
-            Message dereg = new Message(1, node.ip, node.port);
-            dereg.packMessage(this.toOut);
             node.numMessagesSent = totalMessages;
-            System.out.println("Sent: " + totalMessages);
+
+            
+            for(int z = 0; z < numConnections-1; z++){
+                if(payloads.isEmpty()){
+                    waitToNode();
+                }
+                
+                System.out.println("Relay");
+                for(int i = 0; i < numberOfMessages; i++){
+                    Message dataTrafficMsg = payloads.get(i);
+                    dataTrafficMsg.packMessage(toOut);
+                }
+                payloads = new ArrayList<Message>();
+            }
+            
+                
+            
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -86,5 +98,13 @@ public class ToNode extends Thread{
 
     public synchronized void notifyToNode(){
         notify();
+    }
+
+    public void setFromNode(FromNode fromNode) {
+        this.fromNode = fromNode;
+    }
+
+    public synchronized void setPayloads(ArrayList<Message> payloads) {
+        this.payloads = payloads;
     }
 }

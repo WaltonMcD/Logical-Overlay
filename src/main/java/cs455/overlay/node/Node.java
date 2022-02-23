@@ -81,7 +81,7 @@ public class Node implements Runnable {
             
             //Accepts back nodes connection.
             Socket fromSocket = nodeServer.accept();
-            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip);
+            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, recvConnDirMsg.getNumConnections());
             Thread fromThread = new Thread(fromNode);
             fromThread.start();
             
@@ -90,6 +90,8 @@ public class Node implements Runnable {
             taskInitiateMsg.unpackMessage(serverInputStream);
             node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
             fromNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
+            node.setFromNode(fromNode);
+            // buffer.setNewCapacity(taskInitiateMsg.getMessagesToSend());
 
             //Notify worker threads to start message passing.
             fromNode.notifyFromNode();
@@ -107,12 +109,6 @@ public class Node implements Runnable {
             //Receive Traffic Summary Request.
             Message trafficSummaryReqMsg = new Message();
             trafficSummaryReqMsg.unpackMessage(serverInputStream);
-
-            while(numMessagesSent == null || payloadSentTotal == 0 || numMessagesReceived == null || payloadReceivedTotal == 0){
-                if(numMessagesSent != null && payloadSentTotal != 0 && numMessagesReceived != null && payloadReceivedTotal != 0){
-                    break;
-                }
-            }
 
             //Send Traffic Summary
             Message trafficSummary = new Message(8, ip, port, numMessagesSent, payloadSentTotal, numMessagesReceived, payloadReceivedTotal);
