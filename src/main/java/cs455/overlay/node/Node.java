@@ -74,16 +74,14 @@ public class Node implements Runnable {
             Integer nodeServerPort = Main.serverPort + 1;
             ServerSocket nodeServer = new ServerSocket(nodeServerPort, 1);
 
-            Buffer buffer = new Buffer();
-
             //Spawns a thread to connect to front nodes server socket
-            ToNode node = new ToNode(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections(), buffer);
+            ToNode node = new ToNode(recvConnDirMsg.getFrontNodeIp(), recvConnDirMsg.getFrontNodePort(), nodeServerPort, this, recvConnDirMsg.getBackNodePort(), recvConnDirMsg.getBackNodeIp(), recvConnDirMsg.getNumConnections());
             Thread nodeThread = new Thread(node);
             nodeThread.start();
             
             //Accepts back nodes connection.
             Socket fromSocket = nodeServer.accept();
-            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, buffer, recvConnDirMsg.getNumConnections());
+            FromNode fromNode = new FromNode(this, fromSocket, node, this.port, this.ip, recvConnDirMsg.getNumConnections());
             Thread fromThread = new Thread(fromNode);
             fromThread.start();
             

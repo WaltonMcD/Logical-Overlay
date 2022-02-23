@@ -23,11 +23,10 @@ public class ToNode extends Thread{
     public Socket toSocket;
     public DataOutputStream toOut;
     public FromNode fromNode;
-    public Buffer buffer;
     public int count;
     public ArrayList<Message> payloads = new ArrayList<Message>();
 
-    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections, Buffer buffer) throws UnknownHostException, IOException, InterruptedException{
+    public ToNode(String ip, Integer port, Integer serverPort, Node node, int toPort, String toHost, int numConnections) throws UnknownHostException, IOException, InterruptedException{
         this.ip = ip;
         this.port = port;
         this.serverPort = serverPort;
@@ -35,7 +34,6 @@ public class ToNode extends Thread{
         this.toPort = toPort;
         this.toHost = toHost;
         this.numConnections = numConnections;
-        this.buffer = buffer;
         Thread.sleep(50);
         this.toSocket = new Socket(ip, serverPort);
         System.out.println("Connected to node: " + toSocket.getInetAddress());

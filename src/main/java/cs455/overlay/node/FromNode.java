@@ -21,9 +21,8 @@ public class FromNode extends Thread{
     public Socket toSocket;
     public ArrayList<Message> payloads;
     public ToNode toNode;
-    public Buffer buffer;
 
-    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, Buffer buffer, int numConnections){
+    public FromNode(Node node, Socket fromSocket,ToNode toNode, int toPort, String toHost, int numConnections){
         this.node = node;
         this.fromSocket = fromSocket;
         this.toSocket = toNode.toSocket;
@@ -31,7 +30,6 @@ public class FromNode extends Thread{
         this.toNode = toNode;
         this.toHost = toHost;
         this.toPort = toPort;
-        this.buffer = buffer;
         this.numConnections = numConnections;
     }
 
