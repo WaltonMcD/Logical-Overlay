@@ -120,7 +120,7 @@ public class Message {
 		this.backNodePort = backNodePort;
 	}
 
-	public String packMessage(DataOutputStream outputStream) {
+	public synchronized String packMessage(DataOutputStream outputStream) {
 		try {
 			
 			switch (this.messageType) {
@@ -208,7 +208,7 @@ public class Message {
 		return null;
 	}
 
-	public void unpackMessage(DataInputStream inputStream) {
+	public synchronized void unpackMessage(DataInputStream inputStream) {
 		
 		try {
 			int messageSize;
@@ -234,7 +234,6 @@ public class Message {
 				DoneMessageFormat deregistration = new DoneMessageFormat(dereg);
 				this.ipAddress = deregistration.hostname;
 				this.port = deregistration.port;
-				deregistration.printContents();
 				break;
 
 			case 2:
@@ -323,7 +322,6 @@ public class Message {
 				this.numMessagesReceived = trafficSummary.numMessagesReceived;
 				this.sumOfReceivedMessages = trafficSummary.sumOfReceivedMessages;
 				this.sumOfSentMessages = trafficSummary.sumOfSentMessages;
-				trafficSummary.printContents();
 				break;
 
 			case 9:
