@@ -53,6 +53,6 @@ public class RegisterMessageFormat {
     }
 
     public void printContents(){
-        System.out.println("\nConnection Created with " + this.hostName + " on port " + this.portNumber);
+        System.out.println("Connection Created with " + this.hostName + " on port " + this.portNumber);
     }
 }

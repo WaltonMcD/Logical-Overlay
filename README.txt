@@ -2,17 +2,20 @@ Walton  McDonald - connor21@colostate.edu
 Spencer Howlett  - spencer.v.howlett@gmail.com
 Kevin   Conner   - kevcon@colostate.edu
 
-Java programs have been compiled on a CSU servern using Gradle.
+Java programs have been compiled on a CSU server using Gradle.
 The `gradle build` command can be used to compile a fresh build in the
 Homework-1 project directory.
 
 The Registry and Node programs can be started with the following commands.
 
-Registry:
-java -jar build/libs/Homework-1.jar cs455.overlay.Main server [Registry PORT] [n Connections]
+Execute:
+To use the executable we have provided a script `start.sh`.
+To run the script...
+`./start.sh [NUMBER_OF_NODES] [CSU_ename]`
+`example: ./start.sh 10 janeDoe`
 
-Registry Example:
-java -jar build/libs/Homework-1.jar cs455.overlay.Main server 46001 2
+-After running the script you will have 15 seconds to setup the overlay before nodes attempt to connect.
+-Highly recommend using ssh keys for using the script.
 
 You will be prompted to enter a command for the registry. The commands are as follows...
 `setup-overlay`              : This will start the server allowing nodes to connect.
@@ -20,6 +23,11 @@ You will be prompted to enter a command for the registry. The commands are as fo
 `start [NUMBER_OF_MESSAGES]` : this will start the client process of sending the specified amount of messages to its neighbor.
 `exit-overlay`               : Exits the program gracefully.
 
+Registry:
+java -jar build/libs/Homework-1.jar cs455.overlay.Main registry [Registry PORT] [n Connections]
+
+Registry Example:
+java -jar build/libs/Homework-1.jar cs455.overlay.Main registry 46001 2
 
 Node:
 java -jar build/libs/Homework-1.jar cs455.overlay.Main node [Registry Hostname] [Registry Port]
@@ -34,8 +42,8 @@ Homework-1/build.gradle
 
 Homework-1/src/main/java/cs455/overlay/Main.java
 Homework-1/src/main/java/cs455/overlay/node/Node.java
-Homework-1/src/main/java/cs455/overlay/node/NodeThread.java
-Homework-1/src/main/java/cs455/overlay/node/NodeThreader.java
+Homework-1/src/main/java/cs455/overlay/node/ToNode.java
+Homework-1/src/main/java/cs455/overlay/node/FromNode.java
 Homework-1/src/main/java/cs455/overlay/protocols/Message.java
 Homework-1/src/main/java/cs455/overlay/routing/Registry.java
 Homework-1/src/main/java/cs455/overlay/routing/RegistryThread.java
@@ -52,10 +60,8 @@ Homework-1/src/main/java/cs455/overlay/wireformats/TrafficSumRequestFormat.java
 Homework-1/build/libs/Homework-1.jar
 Homework-1/build/classes/java/main/cs455/overlay/Main.class
 Homework-1/build/classes/java/main/cs455/overlay/node/Node.class
-Homework-1/build/classes/java/main/cs455/overlay/node/NodeThread.class
-Homework-1/build/classes/java/main/cs455/overlay/node/NodeThread$BackNodeReader.class
-Homework-1/build/classes/java/main/cs455/overlay/node/NodeThread$FrontNodeSender.class
-Homework-1/build/classes/java/main/cs455/overlay/node/NodeThreader.class
+Homework-1/build/classes/java/main/cs455/overlay/node/ToNode.class
+Homework-1/build/classes/java/main/cs455/overlay/node/FromNode.class
 Homework-1/build/classes/java/main/cs455/overlay/protocols/Message.class
 Homework-1/build/classes/java/main/cs455/overlay/routing/Registry.class
 Homework-1/build/classes/java/main/cs455/overlay/routing/RegistryThread.class

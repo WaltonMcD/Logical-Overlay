@@ -93,6 +93,7 @@ public class Node implements Runnable {
             node.numberOfMessages = taskInitiateMsg.getMessagesToSend();
             fromNode.numberOfMessages = taskInitiateMsg.getMessagesToSend();
             node.setFromNode(fromNode);
+            // buffer.setNewCapacity(taskInitiateMsg.getMessagesToSend());
 
             //Notify worker threads to start message passing.
             fromNode.notifyFromNode();

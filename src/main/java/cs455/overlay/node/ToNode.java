@@ -106,7 +106,7 @@ public class ToNode extends Thread{
         this.fromNode = fromNode;
     }
 
-    public void setPayloads(ArrayList<Message> payloads) {
+    public synchronized void setPayloads(ArrayList<Message> payloads) {
         this.payloads = payloads;
     }
 }

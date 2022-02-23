@@ -7,8 +7,8 @@ import cs455.overlay.protocols.Message;
 
 public class Buffer{
 
-    final static int capacity = 5000;
     static int count = 0;
+    public int capacity = 5000;
     
     ArrayList<Message> items = new ArrayList<Message>(5000);
 
@@ -25,7 +25,7 @@ public class Buffer{
     }
 
     public synchronized boolean isFull(){
-        if(items.size() == 5000)
+        if(items.size() == this.capacity)
             return true;
         else 
             return false;
@@ -36,5 +36,10 @@ public class Buffer{
             return true;
         else
             return false;
+    }
+
+    public synchronized void setNewCapacity(int capacity){
+        this.items = new ArrayList<Message>(capacity);
+        this.capacity = capacity;
     }
 }

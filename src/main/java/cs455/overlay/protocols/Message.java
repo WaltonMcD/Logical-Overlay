@@ -234,7 +234,6 @@ public class Message {
 				DoneMessageFormat deregistration = new DoneMessageFormat(dereg);
 				this.ipAddress = deregistration.hostname;
 				this.port = deregistration.port;
-				deregistration.printContents();
 				break;
 
 			case 2:

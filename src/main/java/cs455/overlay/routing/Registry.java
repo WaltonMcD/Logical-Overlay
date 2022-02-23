@@ -63,6 +63,8 @@ public class Registry extends Thread {
 
                 // Once all nodes are connected this will assign nodes to connect to.
                 if(this.nodesList.size() == this.numConnections){
+                    System.out.println("All nodes connected... \n");
+                    System.out.print("Enter a command: ");
                     // Uses arraylist to assign a ring structure if first node is i = 0 : front = i + 1 mod 10 = 1 : back = i + 9 mod 10 = 9
                     // next rendition i = 1 : front = i + 1 mod 10 = 2 : back = i + 9 mod 10 = 0
                     for(int i = 0; i < this.numConnections; i++){
@@ -88,13 +90,7 @@ public class Registry extends Thread {
                 thread.join();
             }
 
-            Thread.sleep(100);
-
-            int count = 1;
-            for(Message msg : trafficSummaryMessages){
-                System.out.println("Node " + count + ": | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
-                count++;
-            }
+            Thread.sleep(2000);
             
             for(Message msg : trafficSummaryMessages){
                 totalMessagesSent += msg.getNumMessagesSent();
@@ -102,7 +98,12 @@ public class Registry extends Thread {
                 totalPayloadSent += msg.getSumOfSentMessages();
                 totalPayloadReceived += msg.getSumOfReceivedMessages();
             }
-            System.out.println("\n   Sum: |" + totalMessagesSent + " | " + totalMessagesReceived + " | " +  totalPayloadSent + " | " + totalPayloadReceived);
+            for(Message msg: trafficSummaryMessages){
+                System.out.println("Node : | " + msg.getNumMessagesSent() + " | " + msg.getNumMessagesReceived() + " | " + msg.getSumOfSentMessages() + " | " + msg.getSumOfReceivedMessages());
+            }
+            System.out.println("\nSum : |" + totalMessagesSent + " | " + totalMessagesReceived + " | " +  totalPayloadSent + " | " + totalPayloadReceived);
+            nodesList = new ArrayList<Node>();
+            System.out.print("\nEnter a command: ");
         }
         catch (IOException | InterruptedException ioe) {
             System.out.print(ioe.getMessage());
