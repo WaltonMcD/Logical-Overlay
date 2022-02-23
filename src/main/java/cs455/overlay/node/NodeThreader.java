@@ -85,6 +85,7 @@ public class NodeThreader extends Thread {
             }
             
             node.numMessagesReceived = messagesReceived;
+            frontSocket.close();
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
